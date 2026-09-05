@@ -1,0 +1,15 @@
+{% extends "erp/auth/base_auth.html" %}
+{% block auth_content %}
+<span class="auth-kicker">Sign in</span>
+<h2>Welcome back</h2>
+<p>Enter your registered email. We will send a secure OTP to continue.</p>
+<form class="auth-form" method="post">
+  {% csrf_token %}
+  <div class="field"><label for="{{ form.email.id_for_label }}">Email address</label>{{ form.email }}{{ form.email.errors }}</div>
+  <button class="auth-submit" type="submit">Send OTP</button>
+</form>
+<div class="auth-links">
+  <a href="{% url 'accounts:forgot_password' %}">Forgot password?</a>
+  <span>New user? <a href="{% url 'accounts:signup' %}">Create account</a></span>
+</div>
+{% endblock %}

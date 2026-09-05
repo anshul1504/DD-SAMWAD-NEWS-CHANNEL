@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container contact-page">
+  <div>
+    <span>Contact</span>
+    <h1>न्यूजरूम से संपर्क करें</h1>
+    <p>समाचार, विज्ञापन, शिकायत या सुझाव के लिए अपना संदेश भेजें।</p>
+  </div>
+  <form method="post" class="premium-form">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="btn-primary">Send Message</button>
+  </form>
+</section>
+{% endblock %}

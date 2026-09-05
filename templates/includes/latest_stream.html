@@ -1,0 +1,10 @@
+<div class="latest-stream">
+  {% for article in articles %}
+    <a href="{{ article.get_absolute_url }}" class="latest-item">
+      <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"h:i A" }}</time>
+      <span>{{ article.title }}</span>
+    </a>
+  {% empty %}
+    <div class="empty-state compact">ताजा खबरें उपलब्ध नहीं हैं।</div>
+  {% endfor %}
+</div>

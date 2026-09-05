@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="video-studio video-page">
+  <div class="dds-container">
+    {% include "includes/section_header.html" with title=page_title eyebrow="Watch" %}
+    <div class="video-layout">
+      {% for video in page_obj %}
+        <a href="{{ video.get_absolute_url }}" class="video-card {% if forloop.first %}video-lead{% endif %}">
+          <span class="play-icon">▶</span>
+          {% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>वीडियो</strong></div>{% endif %}
+          <div><small>{{ video.category|default:"वीडियो" }}</small><h3>{{ video.title }}</h3></div>
+        </a>
+      {% empty %}<div class="empty-state dark">वीडियो उपलब्ध नहीं हैं।</div>{% endfor %}
+    </div>
+    {% include "includes/pagination.html" %}
+  </div>
+</section>
+{% endblock %}

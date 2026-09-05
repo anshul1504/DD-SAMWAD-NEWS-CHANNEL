@@ -1,0 +1,7 @@
+<div class="module-heading">
+  <div>
+    {% if eyebrow %}<span>{{ eyebrow }}</span>{% endif %}
+    <h2>{{ title }}</h2>
+  </div>
+  {% if href %}<a href="{{ href }}">{{ link_text|default:"और पढ़ें" }} →</a>{% endif %}
+</div>

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  .home-page{background:linear-gradient(180deg,#f7f9fc 0%,#ffffff 42%,#f6f8fb 100%);padding:.75rem 0 2.4rem}
+  .home-page a:focus-visible{outline:3px solid rgba(227,30,40,.28);outline-offset:3px}
+  .home-stack{display:grid;gap:1.05rem}
+  .eyebrow{display:block;color:var(--dds-red);font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+  .section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:.72rem}
+  .section-title h2{margin:0;color:#101828;font-size:1.45rem;line-height:1.1}
+  .section-title a{color:var(--dds-red);font-weight:900;font-size:.86rem}
+
+  .story-lane{display:grid;grid-template-columns:150px minmax(0,1fr);gap:1rem;align-items:stretch}
+  .story-lane-title{background:#071024;color:#fff;border-radius:8px;padding:.85rem;display:flex;flex-direction:column;justify-content:space-between;min-height:122px}
+  .story-lane-title strong{font-size:1.15rem;line-height:1.15}
+  .story-carousel{position:relative;min-width:0}
+  .story-carousel:before,.story-carousel:after{content:"";position:absolute;top:0;bottom:.2rem;z-index:3;width:46px;pointer-events:none}
+  .story-carousel:before{left:0;background:linear-gradient(90deg,#f7f9fc,rgba(247,249,252,0))}
+  .story-carousel:after{right:0;background:linear-gradient(270deg,#f7f9fc,rgba(247,249,252,0))}
+  .story-lane-scroll{display:flex;gap:1rem;overflow-x:auto;overflow-y:hidden;padding:.05rem 2.65rem .2rem;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab;user-select:none}
+  .story-lane-scroll.is-dragging{cursor:grabbing;scroll-snap-type:none}
+  .story-lane-scroll.is-dragging .story-slat{pointer-events:none}
+  .story-lane-scroll::-webkit-scrollbar{display:none}
+  .story-carousel-btn{position:absolute;top:50%;z-index:4;width:38px;height:38px;border:1px solid rgba(8,43,104,.16);border-radius:8px;background:#fff;color:var(--dds-logo-navy);display:grid;place-items:center;box-shadow:0 12px 28px rgba(15,23,42,.14);transform:translateY(-50%);transition:transform .18s ease,background .18s ease,color .18s ease,box-shadow .18s ease}
+  .story-carousel-btn:hover{background:var(--dds-logo-navy);color:#fff;box-shadow:0 16px 34px rgba(8,43,104,.22)}
+  .story-carousel-btn:active{transform:translateY(-50%) scale(.96)}
+  .story-carousel-btn.prev{left:.45rem}
+  .story-carousel-btn.next{right:.45rem}
+  .story-carousel-btn i{font-size:1rem;line-height:1}
+  .story-carousel-btn.is-disabled{opacity:.38;pointer-events:none}
+  .story-carousel:not(.is-scrollable) .story-carousel-btn{display:none}
+  .story-slat{min-width:96px;width:96px;color:#101828;scroll-snap-align:start;text-align:center;display:grid;justify-items:center;gap:.46rem;transition:transform .2s ease}
+  .story-slat:hover{transform:translateY(-3px)}
+  .story-ring{width:82px;height:82px;border-radius:50%;padding:3px;background:linear-gradient(145deg,#e31e28,#f59e0b 45%,#082b68);box-shadow:0 12px 26px rgba(15,23,42,.13);position:relative}
+  .story-ring:after{content:"";position:absolute;inset:-3px;border-radius:inherit;border:1px solid rgba(227,30,40,.28);opacity:.75}
+  .story-ring img{width:100%;height:100%;border-radius:inherit;object-fit:cover;border:3px solid #fff;display:block;transition:transform .45s ease}
+  .story-slat:hover .story-ring img{transform:scale(1.06)}
+  .story-slat strong{width:100%;color:#101828;font-size:.78rem;line-height:1.18;font-weight:900;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .story-slat.is-viewed .story-ring{background:#cfd7e5;box-shadow:none}
+  .story-slat.is-viewed .story-ring:after{border-color:#d9e0eb;opacity:1}
+  .story-slat.is-viewed strong{color:#667085}
+
+  .hero-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(310px,.55fr);gap:1rem;align-items:stretch}
+  .hero-main{min-height:520px;border-radius:8px;overflow:hidden;position:relative;background:#071024;color:#fff;box-shadow:0 30px 70px rgba(7,16,36,.22);transform-style:preserve-3d}
+  .hero-main img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;transform:scale(1.015);transition:transform .8s ease}
+  .hero-main:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,16,36,.92),rgba(7,16,36,.5) 48%,rgba(7,16,36,.08))}
+  .hero-main:hover img{transform:scale(1.06)}
+  .hero-copy{position:relative;z-index:1;max-width:720px;padding:2rem;min-height:520px;display:flex;flex-direction:column;justify-content:flex-end}
+  .live-pill{width:max-content;display:inline-flex;align-items:center;gap:.4rem;background:var(--dds-red);color:#fff;border-radius:6px;padding:.35rem .65rem;font-size:.78rem;font-weight:900}
+  .hero-copy h1{margin:.85rem 0 .65rem;font-size:3rem;line-height:1.04;letter-spacing:0}
+  .hero-copy h1 a{color:#fff}
+  .hero-copy p{max-width:620px;color:#d7e0ee;font-size:1.03rem;line-height:1.55;margin:0 0 .9rem}
+  .hero-copy time{color:#bdc8da;font-size:.84rem;font-weight:800}
+  .hero-side{display:grid;gap:.85rem}
+  .live-desk{border-radius:8px;padding:1rem;background:linear-gradient(135deg,#08224f,#0b3474);color:#fff;box-shadow:0 20px 46px rgba(11,52,116,.18)}
+  .live-desk h2{margin:.15rem 0 .8rem;font-size:1.45rem}
+  .live-list{display:grid;gap:.6rem}
+  .live-list a{display:grid;gap:.18rem;color:#fff;background:rgba(255,255,255,.1);border-radius:6px;padding:.68rem .75rem}
+  .live-list span{font-size:.7rem;font-weight:900;opacity:.82}
+  .quick-access{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.72rem}
+  .quick-access a{min-height:96px;border-radius:8px;background:#fff;padding:.85rem;box-shadow:0 14px 34px rgba(15,23,42,.08);color:#101828;transition:transform .22s ease,box-shadow .22s ease}
+  .quick-access a:hover{transform:translateY(-4px);box-shadow:0 22px 44px rgba(15,23,42,.13)}
+  .quick-access i{color:var(--dds-logo-navy);font-size:1.25rem}
+  .quick-access strong{display:block;margin:.45rem 0 .08rem}
+  .quick-access span{color:#667085;font-size:.82rem}
+
+  .ad-strip{min-height:88px;border-radius:8px;background:linear-gradient(110deg,#eef4ff,#fff 42%,#fff4f5);border:1px solid #d8e0ec;display:grid;place-items:center;text-align:center;position:relative;overflow:hidden;color:#475467;font-weight:800}
+  .ad-strip:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent,rgba(255,255,255,.84),transparent);transform:translateX(-120%);animation:adGlide 5s ease-in-out infinite}
+  .ad-strip>div{position:relative;z-index:1;display:flex;align-items:center;gap:.7rem}
+  .ad-strip i{width:34px;height:34px;border-radius:7px;background:var(--dds-logo-navy);color:#fff;display:grid;place-items:center}
+  .ad-strip span{display:block;font-size:.78rem;color:#667085}
+  @keyframes adGlide{0%,35%{transform:translateX(-120%)}72%,100%{transform:translateX(120%)}}
+
+  .content-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:1.15rem;align-items:start}
+  .news-panel{padding:.2rem 0}
+  .story-list{display:grid;gap:.78rem}
+  .story-row{display:grid;grid-template-columns:170px minmax(0,1fr);gap:.9rem;align-items:center;background:#fff;border-radius:8px;padding:.72rem;box-shadow:0 10px 26px rgba(15,23,42,.06);transition:transform .2s ease,box-shadow .2s ease}
+  .story-row:hover{transform:translateX(5px);box-shadow:0 18px 38px rgba(15,23,42,.1)}
+  .story-row img{width:170px;aspect-ratio:16/10;object-fit:cover;border-radius:6px}
+  .meta{display:flex;gap:.5rem;flex-wrap:wrap;color:#667085;font-size:.75rem;font-weight:900}
+  .meta span:first-child{color:var(--dds-red)}
+  .story-row h3,.rank-list h3,.feature-card h3,.mini-card h3{margin:.25rem 0;color:#101828;line-height:1.32}
+  .story-row h3{font-size:1.05rem}
+  .story-row h3 a,.rank-list h3 a,.feature-card h3 a,.mini-card h3 a{color:inherit}
+  .story-row time,.mini-card time{color:#7a8598;font-size:.78rem;font-weight:800}
+
+  .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
+  .feature-card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 16px 36px rgba(15,23,42,.08);transition:transform .24s ease,box-shadow .24s ease}
+  .feature-card:hover{transform:translateY(-5px);box-shadow:0 26px 52px rgba(15,23,42,.13)}
+  .feature-card img{width:100%;aspect-ratio:16/10;object-fit:cover;transition:transform .6s ease}
+  .feature-card:hover img{transform:scale(1.06)}
+  .feature-card div{padding:.82rem}
+  .feature-card h3{font-size:1.02rem}
+
+  .category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.75rem}
+  .category-link{min-height:88px;border-radius:8px;padding:.82rem;color:#fff;background:linear-gradient(135deg,#09275a,#0b3474);display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 15px 34px rgba(11,52,116,.16);transition:transform .22s ease,box-shadow .22s ease}
+  .category-link:hover{transform:translateY(-4px);box-shadow:0 24px 48px rgba(11,52,116,.22)}
+  .category-link i{color:#fff;font-size:1.12rem}
+  .category-link strong{font-size:.98rem}
+  .category-link span{font-size:.76rem;color:#dbe7ff}
+
+  .side-stack{display:grid;gap:1rem;position:sticky;top:188px}
+  .side-panel{background:#fff;border-radius:8px;padding:.9rem;box-shadow:0 16px 36px rgba(15,23,42,.08);border:1px solid rgba(226,232,240,.72)}
+  .rank-list{counter-reset:rank;display:grid;gap:.7rem}
+  .rank-list a{counter-increment:rank;display:grid;grid-template-columns:32px minmax(0,1fr);gap:.65rem;color:#101828}
+  .rank-list a:before{content:counter(rank);width:32px;height:32px;border-radius:8px;background:#edf3ff;color:var(--dds-logo-navy);display:grid;place-items:center;font-weight:900}
+  .rank-list h3{font-size:.95rem}
+
+  .media-showcase{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem}
+  .media-card{min-height:260px;border-radius:8px;overflow:hidden;position:relative;background:#071024;color:#fff;box-shadow:0 22px 52px rgba(15,23,42,.13)}
+  .media-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.78;transition:transform .65s ease}
+  .media-card:hover img{transform:scale(1.07)}
+  .media-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(7,16,36,.86))}
+  .media-card div{position:absolute;left:1rem;right:1rem;bottom:1rem;z-index:1}
+  .media-card h3{margin:.35rem 0 0;color:#fff;font-size:1.18rem}
+  .webstory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
+  .webstory-card{min-height:240px;border-radius:8px;overflow:hidden;position:relative;color:#fff;background:#071024;box-shadow:0 18px 42px rgba(15,23,42,.12)}
+  .webstory-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.78}
+  .webstory-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(7,16,36,.88))}
+  .webstory-card h3{position:absolute;left:.85rem;right:.85rem;bottom:.8rem;z-index:1;color:#fff;font-size:1rem;line-height:1.25}
+  .two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+  .mini-card{background:#fff;border-radius:8px;padding:.85rem;box-shadow:0 12px 30px rgba(15,23,42,.06)}
+  .empty-state{min-height:92px;border-radius:8px;background:#fff;box-shadow:0 10px 26px rgba(15,23,42,.05);display:grid;place-items:center;text-align:center;color:#667085;font-weight:800;padding:1rem}
+
+  .home-reveal{opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s ease}
+  .home-reveal.is-visible{opacity:1;transform:translateY(0)}
+  @media(prefers-reduced-motion:reduce){.home-reveal{opacity:1;transform:none;transition:none}.ad-strip:before{animation:none}.hero-main img,.story-slat img,.feature-card img,.media-card img{transition:none!important}}
+  @media(max-width:1180px){.hero-layout,.content-grid,.media-showcase{grid-template-columns:1fr}.side-stack{position:static}.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:720px){.home-page{padding:.6rem 0 1.5rem}.home-stack{gap:.85rem}.story-lane{grid-template-columns:1fr;gap:.65rem}.story-lane-title{min-height:auto}.story-lane-scroll{padding-inline:2.35rem}.story-slat{min-width:88px;width:88px}.story-ring{width:76px;height:76px}.story-carousel-btn{width:34px;height:34px}.story-carousel-btn.prev{left:.25rem}.story-carousel-btn.next{right:.25rem}.hero-main,.hero-copy{min-height:350px}.hero-copy{padding:1.1rem}.hero-copy h1{font-size:1.8rem}.quick-access,.feature-grid,.category-grid,.webstory-grid,.two-col{grid-template-columns:1fr}.story-row{grid-template-columns:112px minmax(0,1fr);padding:.6rem}.story-row img{width:112px}.ad-strip>div{display:grid;justify-items:center;gap:.35rem}.section-title h2{font-size:1.25rem}}
+</style>
+
+<main class="home-page">
+  <div class="dds-container home-stack">
+    <section class="story-lane home-reveal" aria-labelledby="storiesTitle">
+      <div class="story-lane-title">
+        <span class="eyebrow">24hr Stories</span>
+        <strong id="storiesTitle">आज की तेज झलकियां</strong>
+      </div>
+      <div class="story-carousel" data-story-carousel>
+        <button class="story-carousel-btn prev" type="button" data-story-prev aria-label="Previous stories"><i class="bi bi-chevron-left"></i></button>
+        <div class="story-lane-scroll" data-story-track>
+          {% for story in day_stories %}
+            <a class="story-slat" href="{{ story.get_absolute_url }}" data-story-id="{{ story.pk }}">
+              <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}">{% endif %}</span>
+              <strong>{{ story.title }}</strong>
+            </a>
+          {% empty %}
+            {% for story in webstories|slice:":8" %}
+              <a class="story-slat" href="{{ story.get_absolute_url }}" data-story-id="{{ story.pk }}">
+                <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}">{% endif %}</span>
+                <strong>{{ story.title }}</strong>
+              </a>
+            {% empty %}
+              <div class="empty-state">24hr stories उपलब्ध नहीं हैं।</div>
+            {% endfor %}
+          {% endfor %}
+        </div>
+        <button class="story-carousel-btn next" type="button" data-story-next aria-label="Next stories"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </section>
+
+    {% include "includes/ad_slot.html" with placement="home_top" variant="leaderboard" %}
+
+    <section class="hero-layout home-reveal">
+      {% for article in hero_articles|slice:":1" %}
+        <article class="hero-main">
+          {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}">{% endif %}
+          <div class="hero-copy">
+            <span class="live-pill"><i class="bi bi-lightning-charge-fill"></i> Breaking News</span>
+            <h1><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h1>
+            {% if article.summary %}<p>{{ article.summary|truncatewords:28 }}</p>{% endif %}
+            <time>{{ article.published_at|date:"d M Y, h:i A" }}</time>
+          </div>
+        </article>
+      {% empty %}
+        <div class="hero-main"><div class="hero-copy"><span class="live-pill"><i class="bi bi-lightning-charge-fill"></i> Breaking News</span><h1>ताजा और भरोसेमंद खबरों के लिए तैयार</h1><p>यहां मुख्य खबरें CMS से प्रकाशित होते ही दिखाई देंगी।</p></div></div>
+      {% endfor %}
+
+      <aside class="hero-side">
+        <section class="live-desk">
+          <span class="eyebrow">Live Desk</span>
+          <h2>अभी की बड़ी खबरें</h2>
+          <div class="live-list">
+            {% for article in top_stories|slice:":3" %}
+              <a href="{{ article.get_absolute_url }}"><span>{{ article.category }}</span><strong>{{ article.short_title|default:article.title }}</strong></a>
+            {% empty %}
+              <div class="empty-state">Breaking news उपलब्ध नहीं है।</div>
+            {% endfor %}
+          </div>
+        </section>
+        <nav class="quick-access" aria-label="Quick access">
+          <a href="{% url 'news:latest' %}"><i class="bi bi-clock-history"></i><strong>Latest News</strong><span>नई अपडेट</span></a>
+          <a href="{% url 'news:trending' %}"><i class="bi bi-graph-up-arrow"></i><strong>Trending News</strong><span>सबसे चर्चित</span></a>
+          <a href="{% url 'videos:list' %}"><i class="bi bi-play-btn"></i><strong>Video News</strong><span>देखें रिपोर्ट</span></a>
+          <a href="{% url 'webstories:list' %}"><i class="bi bi-phone"></i><strong>Web Stories</strong><span>स्वाइप फॉर्मेट</span></a>
+        </nav>
+      </aside>
+    </section>
+
+    <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space">
+      <div><i class="bi bi-badge-ad"></i><strong>Top Banner Advertisement <span>High visibility campaign slot</span></strong></div>
+    </div>
+
+    <section class="content-grid">
+      <div class="home-stack">
+        <section class="news-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Fresh Updates</span><h2>Latest News</h2></div><a href="{% url 'news:latest' %}">All News →</a></div>
+          <div class="story-list">
+            {% for article in latest_articles|slice:":6" %}
+              <article class="story-row">
+                {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}">{% endif %}
+                <div><div class="meta"><span>{{ article.category }}</span>{% if article.city %}<span>{{ article.city }}</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></div>
+              </article>
+            {% empty %}<div class="empty-state">Latest news उपलब्ध नहीं है।</div>{% endfor %}
+          </div>
+        </section>
+
+        <section class="news-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Featured Desk</span><h2>Featured News</h2></div></div>
+          <div class="feature-grid">
+            {% for article in editor_picks|slice:":6" %}
+              <article class="feature-card">{% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}">{% endif %}<div><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3></div></article>
+            {% empty %}<div class="empty-state">Featured news उपलब्ध नहीं है।</div>{% endfor %}
+          </div>
+        </section>
+
+        <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space"><div><i class="bi bi-megaphone"></i><strong>In-feed Advertisement <span>Native story placement</span></strong></div></div>
+
+        <section class="news-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Coverage</span><h2>State / City News</h2></div></div>
+          <div class="category-grid">
+            <a class="category-link" href="{% url 'news:latest' %}?q=state"><i class="bi bi-geo-alt"></i><strong>State News</strong><span>प्रदेश अपडेट</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=city"><i class="bi bi-buildings"></i><strong>City News</strong><span>शहर की खबरें</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=national"><i class="bi bi-flag"></i><strong>National</strong><span>देश</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=international"><i class="bi bi-globe2"></i><strong>International</strong><span>दुनिया</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=indore"><i class="bi bi-signpost"></i><strong>Local</strong><span>आपके शहर से</span></a>
+          </div>
+        </section>
+
+        <section class="news-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Sections</span><h2>News Categories</h2></div></div>
+          <div class="category-grid">
+            <a class="category-link" href="{% url 'news:latest' %}?q=politics"><i class="bi bi-bank"></i><strong>Politics</strong><span>राजनीति</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=business"><i class="bi bi-briefcase"></i><strong>Business</strong><span>बिजनेस</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=sports"><i class="bi bi-trophy"></i><strong>Sports</strong><span>खेल</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=entertainment"><i class="bi bi-camera-reels"></i><strong>Entertainment</strong><span>मनोरंजन</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=technology"><i class="bi bi-cpu"></i><strong>Technology</strong><span>टेक्नोलॉजी</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=lifestyle"><i class="bi bi-stars"></i><strong>Lifestyle</strong><span>लाइफस्टाइल</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=education"><i class="bi bi-mortarboard"></i><strong>Education</strong><span>शिक्षा</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=jobs"><i class="bi bi-person-workspace"></i><strong>Jobs/Career</strong><span>नौकरी</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=crime"><i class="bi bi-shield-exclamation"></i><strong>Crime</strong><span>अपराध</span></a>
+            <a class="category-link" href="{% url 'news:latest' %}?q=religion"><i class="bi bi-flower1"></i><strong>Religion</strong><span>धर्म</span></a>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side-stack">
+        <section class="side-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Popular</span><h2>Trending</h2></div></div>
+          <div class="rank-list">
+            {% for article in trending_articles|slice:":5" %}<a href="{{ article.get_absolute_url }}"><h3>{{ article.short_title|default:article.title }}</h3></a>{% empty %}<div class="empty-state">Trending news उपलब्ध नहीं है।</div>{% endfor %}
+          </div>
+        </section>
+        <section class="side-panel home-reveal">
+          <div class="section-title"><div><span class="eyebrow">Most Viewed</span><h2>Most Read</h2></div></div>
+          <div class="rank-list">
+            {% for article in most_read|slice:":5" %}<a href="{{ article.get_absolute_url }}"><h3>{{ article.short_title|default:article.title }}</h3></a>{% empty %}<div class="empty-state">Most read उपलब्ध नहीं है।</div>{% endfor %}
+          </div>
+        </section>
+        <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space"><div><i class="bi bi-window-sidebar"></i><strong>Sidebar Ad <span>Premium placement</span></strong></div></div>
+        <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space"><div><i class="bi bi-broadcast"></i><strong>Sponsored Update <span>Compact campaign</span></strong></div></div>
+      </aside>
+    </section>
+
+    <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space"><div><i class="bi bi-aspect-ratio"></i><strong>Mid Page Advertisement <span>Responsive display banner</span></strong></div></div>
+
+    <section class="news-panel home-reveal">
+      <div class="section-title"><div><span class="eyebrow">Watch</span><h2>Photo Gallery & Video News</h2></div></div>
+      <div class="media-showcase">
+        {% for video in videos|slice:":1" %}
+          <a class="media-card" href="{{ video.get_absolute_url }}">{% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ video.title }}">{% endif %}<div><span class="live-pill"><i class="bi bi-play-fill"></i> Video</span><h3>{{ video.title }}</h3></div></a>
+        {% empty %}<div class="empty-state">Video news उपलब्ध नहीं है।</div>{% endfor %}
+        {% for gallery in galleries|slice:":1" %}
+          <a class="media-card" href="{{ gallery.get_absolute_url }}">{% if gallery.cover_image %}<img src="{{ gallery.cover_image.url }}" alt="{{ gallery.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ gallery.title }}">{% endif %}<div><span class="live-pill"><i class="bi bi-images"></i> Gallery</span><h3>{{ gallery.title }}</h3></div></a>
+        {% empty %}<div class="empty-state">Photo gallery उपलब्ध नहीं है।</div>{% endfor %}
+      </div>
+    </section>
+
+    <div class="ad-strip home-reveal" role="complementary" aria-label="Advertisement space"><div><i class="bi bi-stars"></i><strong>Brand Spotlight <span>Campaign highlight placement</span></strong></div></div>
+
+    <section class="news-panel home-reveal">
+      <div class="section-title"><div><span class="eyebrow">Swipe</span><h2>Web Stories</h2></div><a href="{% url 'webstories:list' %}">All Stories →</a></div>
+      <div class="webstory-grid">
+        {% for story in webstories|slice:":4" %}
+          <a class="webstory-card" href="{{ story.get_absolute_url }}">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}">{% endif %}<h3>{{ story.title }}</h3></a>
+        {% empty %}<div class="empty-state">Web stories उपलब्ध नहीं हैं।</div>{% endfor %}
+      </div>
+    </section>
+
+    <section class="two-col home-reveal">
+      <section class="news-panel">
+        <div class="section-title"><div><span class="eyebrow">Opinion</span><h2>Opinion / Editorial</h2></div></div>
+        <div class="story-list">{% for article in editor_picks|slice:":3" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></article>{% empty %}<div class="empty-state">Opinion stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
+      </section>
+      <section class="news-panel">
+        <div class="section-title"><div><span class="eyebrow">For You</span><h2>Recommended Stories</h2></div></div>
+        <div class="story-list">{% for article in latest_articles|slice:"6:10" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></article>{% empty %}<div class="empty-state">Recommended stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
+      </section>
+    </section>
+  </div>
+</main>
+{% endblock %}

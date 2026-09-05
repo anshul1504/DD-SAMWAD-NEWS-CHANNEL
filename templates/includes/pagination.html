@@ -1,0 +1,7 @@
+{% if page_obj.has_other_pages %}
+<nav class="pagination-wrap {% if infinite %}js-pagination is-infinite{% endif %}" aria-label="Pagination">
+  {% if page_obj.has_previous %}<a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+  <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="{% if infinite %}js-next-page{% endif %}" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+</nav>
+{% endif %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container author-hero">
+  {% if author_profile.profile_photo %}<img src="{{ author_profile.profile_photo.url }}" alt="{{ author_profile.display_name }}">{% endif %}
+  <div>
+    <span>Reporter Profile</span>
+    <h1>{{ author_profile.display_name }}</h1>
+    <p class="designation">{{ author_profile.designation }}</p>
+    <p>{{ author_profile.bio }}</p>
+  </div>
+</section>
+<section class="dds-container archive-main">
+  {% include "includes/section_header.html" with title="लेटेस्ट लेख" %}
+  <div class="archive-grid">
+    {% for article in page_obj %}
+      {% include "includes/news_card.html" with article=article class="horizontal-story" show_summary=True %}
+    {% empty %}<div class="empty-state">इस लेखक की प्रकाशित खबरें उपलब्ध नहीं हैं।</div>{% endfor %}
+  </div>
+  {% include "includes/pagination.html" %}
+</section>
+{% endblock %}

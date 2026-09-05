@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div><span>Swipe Stories</span><h1>{{ page_title }}</h1><p>कम समय में पढ़ने लायक विजुअल अपडेट।</p></div>
+</section>
+<section class="dds-container">
+  <div class="webstory-strip webstory-page-grid">
+    {% for story in page_obj %}
+      <a href="{{ story.get_absolute_url }}" class="webstory-card">
+        {% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Story</strong></div>{% endif %}
+        <span>{{ story.category|default:"DDS" }}</span>
+        <strong>{{ story.title }}</strong>
+      </a>
+    {% empty %}<div class="empty-state">वेब स्टोरीज उपलब्ध नहीं हैं।</div>{% endfor %}
+  </div>
+  {% include "includes/pagination.html" %}
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% for ad in active_ads %}
+  {% if ad.placement == placement %}
+    <aside class="ad-slot ad-slot-{{ placement }} ad-slot-{{ variant|default:'leaderboard' }}">
+      {% if ad.html_code %}
+        {{ ad.html_code|safe }}
+      {% elif ad.image or ad.desktop_image %}
+        <a href="{{ ad.target_url|default:'#' }}" {% if ad.target_url %}target="_blank" rel="noopener"{% endif %}>
+          <picture>
+            {% if ad.mobile_image %}<source media="(max-width: 576px)" srcset="{{ ad.mobile_image.url }}">{% endif %}
+            <img src="{% if ad.desktop_image %}{{ ad.desktop_image.url }}{% elif ad.image %}{{ ad.image.url }}{% endif %}" alt="{{ ad.name }}">
+          </picture>
+        </a>
+      {% else %}
+        <div class="ad-creative ad-creative-fallback">
+          <span>Sponsored</span>
+          <strong>{{ ad.name }}</strong>
+          <small>Campaign managed from CMS</small>
+        </div>
+      {% endif %}
+    </aside>
+  {% endif %}
+{% endfor %}

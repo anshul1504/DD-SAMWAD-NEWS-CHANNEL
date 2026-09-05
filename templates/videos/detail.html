@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="video-studio video-page">
+  <div class="dds-container video-detail">
+    <div>
+      <span class="media-eyebrow">Video News</span>
+      <h1>{{ video.title }}</h1>
+      <p>{{ video.published_at|date:"d F Y" }} · {{ video.views }} Views</p>
+    </div>
+    <div class="ratio ratio-16x9 video-frame"><iframe src="{{ video.youtube_url }}" title="{{ video.title }}" allowfullscreen></iframe></div>
+    {% if video.description %}<p class="video-description">{{ video.description }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

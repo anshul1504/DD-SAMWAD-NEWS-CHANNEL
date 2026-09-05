@@ -1,0 +1,46 @@
+{% extends "erp/base_portal.html" %}
+
+{% block content %}
+<style>
+  .erp-page{background:#f4f7fb;padding:1rem 0 2.4rem}
+  .erp-head{background:linear-gradient(135deg,#061b43,#0b3474);color:#fff;border-radius:12px;padding:1.25rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+  .erp-head h1{margin:.2rem 0 0;color:#fff;font-size:clamp(1.7rem,3vw,2.6rem)}
+  .erp-head span{color:#ffccd0;font-size:.76rem;font-weight:900;text-transform:uppercase}
+  .erp-actions{display:flex;gap:.55rem;flex-wrap:wrap}
+  .erp-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:40px;border-radius:8px;padding:.55rem .85rem;background:#fff;color:#061b43;font-weight:900}
+  .erp-btn.primary{background:#e31e28;color:#fff}
+  .erp-panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 14px 34px rgba(15,23,42,.06);overflow:hidden}
+  .erp-row{display:grid;grid-template-columns:80px minmax(0,1fr) 170px;gap:1rem;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #edf2f7;color:#0f172a}
+  .erp-row:last-child{border-bottom:0}
+  .erp-row strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .erp-row span{color:#64748b;font-weight:800;font-size:.85rem}
+  .erp-empty{padding:2rem;text-align:center;color:#64748b;font-weight:800}
+  @media(max-width:720px){.erp-head{display:grid}.erp-row{grid-template-columns:1fr;gap:.35rem}}
+</style>
+
+<main class="erp-page">
+  <div class="dds-container">
+    <header class="erp-head">
+      <div>
+        <span>ERP Module</span>
+        <h1>{{ config.title }}</h1>
+      </div>
+      <div class="erp-actions">
+        <a class="erp-btn" href="{% url 'accounts:dashboard' %}"><i class="bi bi-arrow-left"></i>Dashboard</a>
+        <a class="erp-btn primary" href="{% url 'accounts:portal_module_new' module %}"><i class="bi bi-plus-lg"></i>Add New</a>
+      </div>
+    </header>
+    <section class="erp-panel">
+      {% for object in objects %}
+        <div class="erp-row">
+          <span>#{{ object.pk }}</span>
+          <strong>{{ object }}</strong>
+          <span>Manage access ready</span>
+        </div>
+      {% empty %}
+        <div class="erp-empty">No records found in this module.</div>
+      {% endfor %}
+    </section>
+  </div>
+</main>
+{% endblock %}

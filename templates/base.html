@@ -1,0 +1,813 @@
+{% load static %}
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if seo_title %}{{ seo_title }}{% else %}{{ site_settings.site_name }}{% endif %}</title>
+  <meta name="description" content="{{ meta_description|default:site_settings.tagline }}">
+  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="{{ seo_title|default:site_settings.site_name }}">
+  <meta property="og:description" content="{{ meta_description|default:site_settings.tagline }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+  <meta property="og:image" content="{% static 'images/dds-final-logo.png' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Gurmukhi:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    :root{
+      --dds-red:#e31e28;
+      --dds-red-dark:#bf1019;
+      --dds-ink:#071024;
+      --dds-logo-navy:#082b68;
+      --dds-logo-navy-dark:#051b45;
+      --dds-text:#111827;
+      --dds-muted:#667085;
+      --dds-line:#e6eaf0;
+      --dds-soft:#f6f8fb;
+      --dds-container:min(100% - 32px, 1720px);
+      --font-indic:"Noto Sans Devanagari","Noto Sans Bengali","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Kannada","Noto Sans Malayalam","Noto Sans Oriya","Noto Sans Tamil","Noto Sans Telugu","Noto Nastaliq Urdu","Noto Sans",Arial,sans-serif;
+      --font-ui:var(--font-indic);
+      --font-headline:var(--font-indic);
+      --font-latin:"Poppins",var(--font-indic);
+    }
+    html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#082b68 #f2f5fa}
+    html::-webkit-scrollbar{width:10px;height:10px}
+    html::-webkit-scrollbar-track{background:#f2f5fa}
+    html::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#0b3474,#061b43);border:2px solid #f2f5fa;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+    html::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#0d3f89,#031434)}
+    html,body{max-width:100%;overflow-x:hidden}
+    body{font-family:var(--font-ui);font-weight:400;color:var(--dds-text);background:#fff;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-synthesis-weight:none;padding-top:190px}
+    h1,h2,h3,h4,h5,h6,.article-main h1,.lead-story h3,.major-story h3,.module-heading h2,.archive-hero h1,.search-hero h1{font-family:var(--font-headline);font-weight:700;letter-spacing:0}
+    body,button,input,select,textarea,.dds-pill,.dds-topbar,.dds-nav{font-family:var(--font-ui);letter-spacing:0}
+    .dds-search button,.dds-pill.sign,.dds-social a{font-family:var(--font-latin)}
+    html[lang="en"] body,.notranslate,.font-latin{font-family:var(--font-latin)}
+    html[lang="ur"] body,html[lang="sd"] body,html[lang="ks"] body,html.translated-rtl body{font-family:"Noto Nastaliq Urdu",var(--font-indic)}
+    a{text-decoration:none}
+    .dds-container{width:var(--dds-container);max-width:1720px;margin-inline:auto}
+    .skip-link{position:absolute;left:16px;top:-60px;z-index:2000;background:#fff;color:var(--dds-ink);padding:.6rem .8rem;border-radius:6px;box-shadow:0 12px 32px rgba(15,23,42,.18)}
+    .skip-link:focus{top:14px}
+
+    .dds-topbar{position:fixed;top:0;left:0;right:0;z-index:1045;background:linear-gradient(90deg,#050b18,var(--dds-logo-navy-dark) 48%,#071024);color:#e5e7eb;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.08)}
+    .dds-topbar-inner{height:34px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .dds-topbar-left,.dds-topbar-right{display:flex;align-items:center;gap:.72rem;min-width:0}
+    .dds-topbar-right{justify-content:flex-end}
+    .dds-topbar a{color:#fff;font-weight:600;white-space:nowrap}
+    .dds-topbar a:hover{color:#fff}
+    .dds-topbar .dot{width:4px;height:4px;border-radius:50%;background:#8993a4;display:inline-block}
+    .dds-social{display:flex;align-items:center;gap:.35rem}
+    .dds-social a{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);border-radius:50%;background:rgba(255,255,255,.06);color:#fff;font-size:.88rem;font-weight:700;transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease}
+    .dds-social a:hover{color:#fff;transform:translateY(-1px)}
+    .dds-social a.facebook:hover{background:#1877f2;border-color:#8bbcff;box-shadow:0 8px 18px rgba(24,119,242,.24),0 0 0 3px rgba(24,119,242,.13)}
+    .dds-social a.instagram:hover{background:linear-gradient(135deg,#f58529,#dd2a7b 48%,#8134af);border-color:#f5a6cd;box-shadow:0 8px 18px rgba(221,42,123,.24),0 0 0 3px rgba(221,42,123,.13)}
+    .dds-social a.youtube:hover{background:#ff0033;border-color:#ff8fa3;box-shadow:0 8px 18px rgba(255,0,51,.24),0 0 0 3px rgba(255,0,51,.13)}
+    .dds-social a.x:hover{background:#111;border-color:#9ca3af;box-shadow:0 8px 18px rgba(0,0,0,.24),0 0 0 3px rgba(255,255,255,.12)}
+    .dds-social a.telegram:hover{background:#229ed9;border-color:#8bd8ff;box-shadow:0 8px 18px rgba(34,158,217,.24),0 0 0 3px rgba(34,158,217,.13)}
+    .dds-social a.whatsapp:hover{background:#25d366;border-color:#a7f3c4;box-shadow:0 8px 18px rgba(37,211,102,.22),0 0 0 3px rgba(37,211,102,.13)}
+    .dds-utility-link{display:inline-flex;align-items:center;gap:.35rem}
+    .dds-utility-link.hot{color:#ffd6d9}
+    .dds-mobile-only{display:none!important}
+    .dds-language{position:relative;display:flex;align-items:center}
+    .dds-language select{height:28px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:#111a2d;color:#fff;padding:0 2rem 0 .7rem;font:600 .78rem var(--font-latin);outline:0;appearance:none;cursor:pointer}
+    .dds-language:after{content:"";position:absolute;right:.75rem;width:7px;height:7px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg) translateY(-2px);pointer-events:none}
+    .dds-language select option{background:#fff;color:#111827}
+    .skiptranslate iframe,
+    .goog-te-banner-frame,
+    .goog-te-banner-frame.skiptranslate,
+    .goog-te-balloon-frame,
+    .goog-te-menu-frame,
+    .goog-te-gadget-icon,
+    .goog-tooltip,
+    .goog-tooltip:hover,
+    .goog-text-highlight,
+    .VIpgJd-yAWNEb-L7lbkb,
+    .VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q,
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+    .VIpgJd-ZVi9od-aZ2wEe-OiiCO,
+    .VIpgJd-ZVi9od-xl07Ob-lTBxed,
+    iframe.goog-te-banner-frame,
+    iframe.skiptranslate{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;opacity:0!important;pointer-events:none!important}
+    html.translated-ltr,html.translated-rtl,body{margin-top:0!important;top:0!important}
+    #google_translate_element{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden}
+
+    .site-sticky-header{position:fixed;top:34px;left:0;right:0;z-index:1038;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.08),0 12px 28px rgba(15,23,42,.08)}
+    .dds-brand-row{height:66px;display:grid;grid-template-columns:250px minmax(0,1fr) auto;align-items:center;gap:clamp(.8rem,1.6vw,1.8rem);transition:none}
+    .site-sticky-header.is-compact .dds-brand-row{height:66px}
+    .dds-logo{display:flex;align-items:center;justify-content:flex-start;width:232px;min-width:232px;height:62px;position:relative;z-index:6;background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;overflow:hidden}
+    .dds-logo img{width:232px;height:62px;max-width:100%;max-height:100%;object-fit:contain;object-position:left center;transition:none}
+    .site-sticky-header.is-compact .dds-logo{width:232px;min-width:232px;height:62px}
+    .site-sticky-header.is-compact .dds-logo img{width:232px;height:62px}
+
+    .dds-search{height:46px;display:flex;align-items:center;background:#fff;border:1px solid var(--dds-line);border-radius:999px;box-shadow:0 10px 26px rgba(15,23,42,.06);overflow:hidden}
+    .dds-brand-row>.dds-search{display:none}
+    .dds-search:focus-within{box-shadow:0 16px 40px rgba(15,23,42,.12),0 0 0 4px rgba(227,30,40,.08)}
+    .dds-search-icon{width:18px;height:18px;margin-left:18px;border:2px solid #7a8493;border-radius:50%;position:relative;flex:0 0 auto}
+    .dds-search-icon:after{content:"";position:absolute;width:8px;height:2px;right:-6px;bottom:-3px;background:#7a8493;transform:rotate(45deg);border-radius:2px}
+    .dds-search input{min-width:0;flex:1;height:100%;border:0;outline:0;padding:0 .85rem;background:transparent;color:var(--dds-text);font-size:.94rem}
+    .dds-search button{height:38px;margin-right:4px;border:0;border-radius:999px;background:var(--dds-red);color:#fff;font-weight:700;padding:0 1.25rem}
+    .site-sticky-header.is-compact .dds-search{height:46px}
+    .site-sticky-header.is-compact .dds-search button{height:38px}
+    .dds-mobile-search-toggle{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--dds-line);border-radius:999px;background:#fff;color:var(--dds-logo-navy);font-size:1rem;box-shadow:0 8px 18px rgba(15,23,42,.07)}
+    .dds-mobile-search-panel{display:none;position:fixed;left:0;right:0;top:100px;z-index:1040;background:#fff;border-top:1px solid var(--dds-line);border-bottom:1px solid var(--dds-line);box-shadow:0 14px 28px rgba(15,23,42,.12);padding:.65rem 0}
+    body.search-open .dds-mobile-search-panel{display:block}
+
+    .dds-actions{display:flex;align-items:center;justify-content:flex-end;justify-self:end;gap:.45rem;min-width:0}
+    .dds-pill{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:.34rem;border:1px solid var(--dds-line);border-radius:999px;background:#fff;color:var(--dds-ink);font-weight:700;padding:.38rem .74rem;white-space:nowrap}
+    .dds-pill i,.dds-utility-link i,.dds-link-grid a i,.mobile-bottom-nav i,.dds-nav-track a i{font-size:1rem;line-height:1;flex:0 0 auto}
+    .dds-pill.live{background:#fff9ee;border-color:#f1dec1;color:#8a4b00}
+    .dds-pill.sign{font-weight:700}
+    .dds-pill.tip{background:#fff;border-color:#ffd4d7;color:var(--dds-red)}
+    .dds-menu-btn{width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:#fff;font-weight:800;padding:0;white-space:nowrap}
+    .dds-menu-btn i{width:18px;display:grid;gap:4px}
+    .dds-menu-btn i span{height:2px;background:#fff;border-radius:999px}
+
+    .dds-nav{height:50px;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457);overflow:visible}
+    .dds-nav-track{height:50px;display:flex;align-items:center;gap:.12rem;overflow:visible;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent;padding-left:0}
+    .dds-nav-track::-webkit-scrollbar{display:none}
+    .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:50px;flex:0 0 auto;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap}
+    .dds-nav-track>a,.dds-nav-dropdown>summary,.dds-nav-menu a,.dds-footer a,.dds-footer h3,.mobile-bottom-nav span{text-transform:capitalize}
+    .dds-nav-track>a:hover,.dds-nav-track>a.active{background:rgba(255,255,255,.12);color:#fff}
+    .dds-nav-track>.dds-menu-btn{position:sticky;left:0;z-index:5;background:var(--dds-logo-navy-dark);box-shadow:12px 0 22px rgba(5,27,69,.55)}
+    .dds-nav-dropdown{height:50px;flex:0 0 auto;position:relative}
+    .dds-nav-dropdown>summary{height:50px;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap;list-style:none;cursor:pointer}
+    .dds-nav-dropdown>summary::-webkit-details-marker{display:none}
+    .dds-nav-dropdown>summary:after{content:"";width:7px;height:7px;border-right:2px solid rgba(255,255,255,.9);border-bottom:2px solid rgba(255,255,255,.9);transform:rotate(45deg) translateY(-2px);margin-left:.1rem}
+    .dds-nav-dropdown[open]>summary,.dds-nav-dropdown>summary:hover{background:rgba(255,255,255,.12)}
+    .dds-nav-menu{position:absolute;top:100%;left:0;z-index:1060;min-width:220px;display:grid;grid-template-columns:repeat(2,minmax(96px,1fr));gap:.18rem;padding:.48rem;background:#fff;color:var(--dds-text);border:1px solid var(--dds-line);border-radius:0 0 10px 10px;box-shadow:0 22px 48px rgba(15,23,42,.18)}
+    .dds-nav-menu a{display:flex;align-items:center;gap:.45rem;min-height:34px;padding:.45rem .62rem;border-radius:7px;color:#1f2937;font-weight:700;font-size:.86rem}
+    .dds-nav-menu a:hover{background:#fff1f2;color:var(--dds-red)}
+
+    .dds-breaking{position:fixed;top:150px;left:0;right:0;z-index:1028;border-bottom:1px solid var(--dds-line);background:#fff;box-shadow:0 8px 18px rgba(15,23,42,.035)}
+    .dds-breaking-inner{min-height:40px;display:flex;align-items:center;gap:.75rem;overflow:hidden}
+    .dds-breaking-label{flex:0 0 auto;display:inline-flex;align-items:center;gap:.38rem;border-radius:999px;background:var(--dds-red);color:#fff;font-weight:800;padding:.35rem .7rem;font-size:.82rem}
+    .dds-breaking-label:before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.24)}
+    .dds-breaking-track{display:flex;align-items:center;gap:1.4rem;min-width:0;overflow:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .dds-breaking-track::-webkit-scrollbar{display:none}
+    .dds-breaking-track a{flex:0 0 auto;color:#1f2937;font-weight:700;white-space:nowrap}
+
+    .dds-mega{width:clamp(320px,86vw,420px);max-width:100vw;background:#061b43;color:#fff;border:0}
+    .dds-mega .offcanvas-header{min-height:68px;padding:.75rem 1rem;border:0;background:#061b43;box-shadow:0 1px 0 rgba(255,255,255,.08);display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:.75rem}
+    .dds-mega .offcanvas-title{display:none}
+    .dds-mega .btn-close{width:38px;height:38px;margin:0;justify-self:end;align-self:center;border-radius:50%;background-color:rgba(255,255,255,.08);opacity:1;filter:invert(1) grayscale(1);background-size:14px}
+    .dds-mega .btn-close:hover{background-color:rgba(255,255,255,.15)}
+    .dds-mega .offcanvas-body{padding:0;max-height:calc(100dvh - 68px);overflow:auto;background:#082b68;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.36) transparent;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch}
+    .dds-mega .offcanvas-body::-webkit-scrollbar{width:7px}
+    .dds-mega .offcanvas-body::-webkit-scrollbar-track{background:transparent}
+    .dds-mega .offcanvas-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.34);border-radius:999px;border:2px solid transparent;background-clip:content-box}
+    .dds-mega .offcanvas-body::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.52);background-clip:content-box}
+    .dds-mega-logo{width:188px;height:52px;display:flex;align-items:center;background:transparent;border-radius:0;padding:0;box-shadow:none}
+    .dds-mega-logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+    .dds-mega-actions{display:flex;gap:.55rem;padding:1rem 1rem 0}
+    .dds-mega-action{min-height:40px;flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:999px;background:#fff;color:var(--dds-logo-navy);font-weight:800}
+    .dds-mega-action.primary{background:#fff7e8;color:#8a4b00}
+    .dds-mega-action:hover{background:var(--dds-red);color:#fff}
+    .dds-mega-search{height:44px;display:flex;background:#fff;border-radius:999px;overflow:hidden;margin:1rem 1rem .85rem}
+    .dds-mega-search input{min-width:0;flex:1;border:0;outline:0;padding:0 .9rem;font-size:.9rem}
+    .dds-mega-search button{border:0;background:var(--dds-red);color:#fff;font-weight:800;padding:0 1rem}
+    .dds-mega-grid{display:block;padding:.85rem 0 calc(1.25rem + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.16)}
+    .dds-mega-section{padding:0;border:0;border-radius:0;background:transparent}
+    .dds-mega-section.primary{grid-row:auto}
+    .dds-mega-section h3{margin:1rem 1rem .35rem;color:#fff;font-size:.76rem;font-weight:800}
+    .dds-link-grid{display:block}
+    .dds-link-grid a{min-height:46px;display:flex;align-items:center;gap:.75rem;color:#fff;font-weight:700;padding:.72rem 1.15rem;background:transparent;border-radius:0;text-transform:capitalize}
+    .dds-link-grid a i{width:20px;text-align:center;color:#dbeafe;font-size:1.02rem}
+    .dds-link-grid a:hover{background:rgba(255,255,255,.1);color:#fff}
+
+    .dds-footer{margin-top:2.4rem;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457)!important;color:#d8dee8;position:relative;overflow:hidden}
+    .dds-footer:before{display:none}
+    .dds-footer .dds-container{position:relative;z-index:1}
+    .dds-footer-top{padding:1rem 0 .95rem;border-bottom:1px solid rgba(255,255,255,.13);display:grid;grid-template-columns:minmax(180px,280px) minmax(280px,520px);gap:1.4rem;align-items:center;justify-content:space-between}
+    .dds-footer-brand{display:flex;align-items:center;min-width:0}
+    .dds-footer-brand img{width:220px;max-width:100%;background:transparent;border-radius:0;padding:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.18))}
+    .dds-footer-about p{margin:.25rem 0 0;color:#c7d2e3;line-height:1.45;max-width:360px;font-size:.94rem}
+    .dds-footer-subscribe{display:flex;border:1px solid rgba(255,255,255,.18);border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);box-shadow:none}
+    .dds-footer-subscribe input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;padding:.95rem 1.1rem}
+    .dds-footer-subscribe input::placeholder{color:#aeb8c8}
+    .dds-footer-subscribe button{border:0;background:var(--dds-red);color:#fff;font-weight:800;padding:0 1.35rem}
+    .dds-footer-social{display:flex;align-items:center;gap:.42rem;flex-wrap:wrap;margin-top:.62rem}
+    .dds-footer-social a{width:31px;height:31px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;border:0;margin:0;line-height:1;text-decoration:none;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
+    .dds-footer-social a i{display:block;font-size:.9rem;line-height:1;color:#fff!important}
+    .dds-footer-social a:hover{transform:translateY(-2px);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(0,0,0,.2)}
+    .dds-footer-social .facebook{background:#1877f2}
+    .dds-footer-social .instagram{background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)}
+    .dds-footer-social .youtube{background:#ff0000}
+    .dds-footer-social .x{background:#111}
+    .dds-footer-social .telegram{background:#229ed9}
+    .dds-footer-social .whatsapp{background:#25d366}
+    .dds-footer-social a:hover{filter:saturate(1.12) brightness(1.06)}
+    .dds-footer-grid{padding:.9rem 0 1rem;display:grid;grid-template-columns:1fr 1fr 1fr 1fr minmax(136px,.68fr);gap:1.1rem;align-items:start}
+    .dds-footer h3{margin:0 0 .55rem;color:#fff;font-size:.98rem;font-weight:800}
+    .dds-footer a{display:flex;align-items:center;gap:.48rem;color:#cbd5e1;margin:.36rem 0;font-weight:650;line-height:1.3;font-size:.94rem}
+    .dds-footer a i{color:#fff;font-size:.95rem}
+    .dds-footer a:hover{color:#fff}
+    .dds-footer-contact p{margin:.3rem 0;color:#cbd5e1;line-height:1.4;font-size:.94rem}
+    .dds-footer-qr{width:112px;background:#fff;color:#071024;border-radius:8px;padding:.45rem;display:grid;gap:.28rem;justify-items:center;box-shadow:0 10px 24px rgba(0,0,0,.14)}
+    .dds-footer-qr img{width:92px;height:92px;object-fit:contain;display:block}
+    .dds-footer-qr strong{font-size:.67rem;color:#071024;line-height:1.1;text-align:center;font-weight:800}
+    .dds-footer-bottom{border-top:1px solid rgba(255,255,255,.13);padding:.68rem 0 .78rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;color:#b9c5d8;text-align:left}
+    .dds-footer-copy{display:inline-flex;align-items:center;gap:.38rem;padding:0;background:transparent;box-shadow:none;font-size:.86rem;font-weight:500;color:#b8c4d6}
+    .dds-footer-copy i{color:#fff;font-size:.88rem}
+    .dds-footer-credit{color:#aeb8c8;text-align:right;font-size:.84rem;font-weight:500}
+    .dds-footer-credit a{display:inline-flex;color:#d2dceb;margin-left:.22rem;text-decoration:none;border-bottom:1px solid rgba(210,220,235,.32);transition:color .18s ease,border-color .18s ease}
+    .dds-footer-credit a:hover{color:#fff;border-color:#fff}
+
+    .mobile-bottom-nav{display:none}
+    .scroll-top{position:fixed;right:22px;bottom:24px;z-index:900;width:44px;height:44px;border:0;border-radius:50%;background:linear-gradient(135deg,var(--dds-red),var(--dds-red-dark));color:#fff;box-shadow:0 14px 32px rgba(227,30,40,.28);display:grid;place-items:center;opacity:0;visibility:hidden;transform:translateY(12px) scale(.96);transition:opacity .2s ease,transform .2s ease,visibility .2s ease,box-shadow .2s ease}
+    .scroll-top.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+    .scroll-top:hover{box-shadow:0 18px 40px rgba(227,30,40,.38);transform:translateY(-2px)}
+    .scroll-top:focus-visible{outline:3px solid rgba(227,30,40,.28);outline-offset:3px}
+
+    @media(max-width:1200px){
+      .dds-brand-row{grid-template-columns:218px minmax(0,1fr) auto}
+      .dds-logo{width:204px;min-width:204px;height:58px;margin-bottom:0}
+      .dds-logo img{width:204px;height:58px}
+      .dds-nav-track{padding-left:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+      .dds-nav-track>a,.dds-nav-dropdown>summary{padding-inline:.68rem}
+    }
+    @media(min-width:992px){
+      .dds-mega{width:420px}
+      .dds-mega .offcanvas-body{max-height:calc(100dvh - 68px)}
+    }
+    @media(max-width:991px){
+      body{padding-top:166px}
+      .dds-topbar-left span:nth-child(n+3){display:none}
+      .dds-mobile-only{display:inline-flex!important}
+      .site-sticky-header{top:30px}
+      .dds-brand-row{grid-template-columns:150px minmax(0,1fr) auto;height:54px;gap:.65rem}
+      .dds-logo{width:144px;min-width:144px;height:48px;margin-bottom:0;padding:0}
+      .dds-logo img{width:144px;height:48px}
+      .dds-nav-track{padding-left:0}
+      .dds-brand-row>.dds-search{display:none}
+      .dds-mobile-search-toggle{width:36px;height:36px}
+      .dds-mobile-search-panel{top:84px}
+      .dds-mobile-search-panel .dds-search{display:flex;height:40px;box-shadow:none}
+      .dds-mobile-search-panel .dds-search-icon{width:15px;height:15px;margin-left:14px}
+      .dds-mobile-search-panel .dds-search input{font-size:.84rem;padding-inline:.65rem}
+      .dds-mobile-search-panel .dds-search button{height:34px;padding-inline:.9rem;font-size:.8rem}
+      .dds-nav,.dds-nav-track,.dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:42px}
+      .dds-nav-track>a{font-size:.84rem}
+      .dds-menu-btn strong{display:none}
+      .dds-breaking{top:126px}
+      .dds-nav-menu{position:fixed;top:126px}
+      .dds-mega-grid{grid-template-columns:1fr}
+      .dds-footer-top{grid-template-columns:minmax(160px,220px) minmax(260px,1fr);align-items:center}
+      .dds-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem 2rem}
+      .dds-footer{margin-top:2rem}
+      .dds-footer-top{gap:1rem}
+      .dds-footer-brand img{width:190px;max-width:58vw}
+      .dds-footer-about{max-width:440px}
+      .dds-footer-contact{justify-self:start}
+      .dds-footer-qr img{width:92px;height:92px}
+      .dds-mega-section.primary{grid-row:auto}
+      .mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:950;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--dds-line);box-shadow:0 -14px 30px rgba(15,23,42,.12);padding:.18rem .25rem calc(.18rem + env(safe-area-inset-bottom))}
+      .mobile-bottom-nav a,.mobile-bottom-nav button{height:56px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#475467;font-weight:700;font-size:.68rem;gap:.18rem;border:0;background:transparent;padding:.24rem .08rem;line-height:1.05;border-radius:8px}
+      .mobile-bottom-nav i{font-size:1.14rem;color:var(--dds-logo-navy);line-height:1}
+      .mobile-bottom-nav a:hover,.mobile-bottom-nav button:hover{background:#f5f7fb;color:var(--dds-logo-navy)}
+      .mobile-bottom-nav .is-live{color:var(--dds-red)}
+      .mobile-bottom-nav .is-live i{width:24px;height:18px;display:grid;place-items:center;border-radius:4px;background:var(--dds-red);color:#fff;font-size:.78rem}
+      .mobile-bottom-nav .mobile-menu-open{color:var(--dds-ink)}
+      .mobile-bottom-nav .mobile-menu-open i{color:var(--dds-logo-navy)}
+      body{padding-bottom:64px}
+    }
+    @media(max-width:560px){
+      :root{--dds-container:min(100% - 24px, 1720px)}
+      body{padding-top:160px}
+      .dds-topbar-inner{height:30px;font-size:.76rem}
+      .dds-topbar-left{display:flex}
+      .dds-topbar-left span:first-child{display:inline}
+      .dds-topbar-left span:nth-child(2),.dds-topbar-left span:nth-child(3),.dds-topbar-left span:nth-child(4){display:none}
+      .dds-topbar-left span:nth-child(5){display:inline}
+      .dds-topbar-right{width:auto;justify-content:flex-end;gap:.45rem;margin-left:auto}
+      .dds-topbar-right>a{display:none}
+      .dds-topbar-right>a.hot,.dds-topbar-right>a.dds-mobile-only{display:inline-flex}
+      .dds-topbar-right>a.hot{font-size:0}
+      .dds-topbar-right>a.hot i{font-size:.9rem}
+      .dds-mobile-only{font-size:0}
+      .dds-mobile-only i{font-size:.9rem}
+      .dds-social,.dds-follow-label,.dds-topbar-right>.dot{display:none}
+      .dds-language select{max-width:112px;padding-left:.55rem;padding-right:1.6rem;font-size:.72rem}
+      .dds-pill{min-height:36px;padding:.4rem .68rem;font-size:.82rem}
+      .dds-brand-row{height:50px;grid-template-columns:122px 1fr;gap:.65rem}
+      .dds-logo{width:116px;min-width:116px;height:42px;margin-bottom:0;border-radius:0}
+      .dds-logo img{width:116px;height:42px}
+      .dds-nav-track{padding-left:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+      .dds-actions{display:flex;justify-content:flex-end;gap:.32rem}
+      .dds-pill.live,.dds-pill.tip,.dds-pill.sign{min-width:38px;height:36px;min-height:36px;padding:.35rem .58rem;font-size:.78rem}
+      .dds-pill.live,.dds-pill.tip{font-size:0}
+      .dds-pill.live i,.dds-pill.tip i{font-size:.95rem}
+      .dds-pill.sign{font-size:.78rem}
+      .dds-mobile-search-toggle,.dds-pill.live,.dds-pill.tip{position:relative;width:36px;min-width:36px;height:36px;min-height:36px;border-radius:50%;padding:0;display:block;flex:0 0 36px;background:#fff;border:1px solid #e6eaf0;box-shadow:0 6px 14px rgba(15,23,42,.06);font-size:0;line-height:0;text-decoration:none!important}
+      .dds-mobile-search-toggle i,.dds-pill.live i,.dds-pill.tip i{position:absolute;left:50%;top:50%;width:16px;height:16px;display:block;margin:0;font-size:16px;line-height:16px;transform:translate(-50%,-50%);text-align:center}
+      .dds-mobile-search-toggle i:before,.dds-pill.live i:before,.dds-pill.tip i:before{display:block;width:16px;height:16px;line-height:16px;text-align:center}
+      .dds-mobile-search-toggle{color:var(--dds-logo-navy)}
+      .dds-pill.live{color:#9a5b00;border-color:#f2dfbe;background:#fffaf2}
+      .dds-pill.tip{color:var(--dds-red);border-color:#ffd7db;background:#fff}
+      .dds-pill.sign{gap:.28rem;border-color:#e6eaf0;background:#fff;box-shadow:0 6px 14px rgba(15,23,42,.04)}
+      .dds-nav,.dds-nav-track,.dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:42px}
+      .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{padding:0 .58rem;font-size:.8rem}
+      .dds-menu-btn{width:42px;height:42px}
+      .dds-nav-dropdown,.dds-nav-dropdown>summary{height:42px}
+      .dds-nav-dropdown>summary{padding:0 .62rem;font-size:.8rem}
+      .dds-mobile-search-panel{top:80px}
+      .dds-breaking{top:120px}
+      .dds-nav-menu{position:fixed;top:120px;left:12px;right:12px;min-width:0;grid-template-columns:1fr 1fr}
+      .dds-mega-logo{width:164px;height:48px}
+      .dds-mega .offcanvas-header{padding:.7rem .9rem}
+      .dds-link-grid{grid-template-columns:1fr}
+      .dds-footer{margin-top:1.8rem}
+      .dds-footer-top{grid-template-columns:1fr;gap:.9rem;padding:.95rem 0}
+      .dds-footer-brand{justify-content:flex-start}
+      .dds-footer-grid{grid-template-columns:1fr;gap:.95rem;padding:.9rem 0}
+      .dds-footer h3{margin-bottom:.42rem}
+      .dds-footer a{margin:.28rem 0;font-size:.92rem}
+      .dds-footer-about p{max-width:100%;font-size:.92rem}
+      .dds-footer-social{gap:.38rem;margin-top:.55rem}
+      .dds-footer-subscribe{border-radius:12px;display:grid}
+      .dds-footer-subscribe button{min-height:42px}
+      .dds-footer-bottom{display:grid;justify-items:center;text-align:center}
+      .dds-footer-social a{width:31px;height:31px}
+      .dds-footer-qr{width:106px;padding:.4rem}
+      .dds-footer-qr img{width:86px;height:86px}
+      .dds-footer-copy{border-radius:0;padding:0}
+      .dds-footer-brand img{width:180px}
+    }
+    @media(max-width:420px){
+      .dds-mega{width:100vw}
+      .dds-mega .offcanvas-header{grid-template-columns:minmax(0,1fr) 38px;padding:.65rem .8rem}
+      .dds-mega-logo{width:156px;height:44px}
+      .dds-mega-actions{gap:.45rem;padding:.85rem .8rem 0}
+      .dds-mega-action{min-height:38px;font-size:.86rem}
+      .dds-mega-search{height:42px;margin:.85rem .8rem .75rem}
+      .dds-mega-search input{font-size:.86rem}
+      .dds-mega-search button{padding:0 .85rem}
+      .dds-mega-section h3{margin:.82rem .8rem .26rem}
+      .dds-link-grid a{min-height:43px;padding:.62rem .9rem;font-size:.92rem}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">मुख्य सामग्री पर जाएं</a>
+
+  <div class="dds-topbar">
+    <div class="dds-container dds-topbar-inner">
+      <div class="dds-topbar-left">
+        <span>{{ today|date:"d F Y" }}</span>
+        <span class="dot"></span>
+        <span>इंदौर</span>
+        <span class="dot"></span>
+        <span>मौसम 28°C</span>
+      </div>
+      <div class="dds-topbar-right notranslate">
+        <a class="dds-utility-link hot" href="{% url 'news:latest' %}"><i class="bi bi-lightning-charge-fill"></i>ब्रेकिंग न्यूज़</a>
+        <a class="dds-utility-link dds-mobile-only" href="{% url 'liveblog:list' %}" aria-label="लाइव अपडेट"><i class="bi bi-broadcast-pin"></i>लाइव</a>
+        <a class="dds-utility-link" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        <label class="dds-language" aria-label="भाषा चुनें">
+          <select id="ddsLanguageSelect">
+            <option value="hi">हिन्दी</option>
+            <option value="en">English</option>
+            <option value="bn">বাংলা</option>
+            <option value="gu">ગુજરાતી</option>
+            <option value="as">অসমীয়া</option>
+            <option value="or">ଓଡ଼ିଆ</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ml">മലയാളം</option>
+            <option value="mr">मराठी</option>
+            <option value="ne">नेपाली</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+            <option value="sa">संस्कृत</option>
+            <option value="sd">سنڌي</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="ur">اردو</option>
+            <option value="bho">भोजपुरी</option>
+            <option value="mai">मैथिली</option>
+            <option value="doi">डोगरी</option>
+            <option value="gom">कोंकणी</option>
+            <option value="ks">کٲشُر</option>
+            <option value="mni-Mtei">ꯃꯩꯇꯩꯂꯣꯟ</option>
+          </select>
+        </label>
+        <span class="dds-follow-label">Follow us</span>
+        <div class="dds-social">
+          <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+          <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+          <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+          <a class="whatsapp" href="{{ site_settings.whatsapp_url|default:'#' }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-sticky-header">
+    <div class="dds-container dds-brand-row">
+      <a class="dds-logo" href="{% url 'home' %}" aria-label="Desh Darpan Samvad home">
+        {% if site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+        {% else %}
+          <img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad">
+        {% endif %}
+      </a>
+      <form class="dds-search" action="{% url 'news:search' %}">
+        <label class="visually-hidden" for="global-search">खबर खोजें</label>
+        <span class="dds-search-icon" aria-hidden="true"></span>
+        <input id="global-search" name="q" value="{{ query|default:'' }}" type="search" placeholder="खबर, शहर या विषय खोजें">
+        <button type="submit">Search</button>
+      </form>
+      <div class="dds-actions">
+        <a class="dds-pill live" href="{% url 'news:latest' %}"><i class="bi bi-broadcast"></i>लाइव अपडेट</a>
+        <a class="dds-pill tip" href="{% url 'core:contact' %}"><i class="bi bi-send"></i>न्यूज टिप</a>
+        <button class="dds-mobile-search-toggle" type="button" aria-label="खोज खोलें" aria-expanded="false" aria-controls="ddsMobileSearchPanel"><i class="bi bi-search"></i></button>
+        <a class="dds-pill sign" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
+      </div>
+    </div>
+    <div class="dds-mobile-search-panel" id="ddsMobileSearchPanel">
+      <form class="dds-container dds-search" action="{% url 'news:search' %}">
+        <label class="visually-hidden" for="mobile-global-search">खबर खोजें</label>
+        <span class="dds-search-icon" aria-hidden="true"></span>
+        <input id="mobile-global-search" name="q" value="{{ query|default:'' }}" type="search" placeholder="खबर, शहर या विषय खोजें">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <nav class="dds-nav" aria-label="मुख्य समाचार मेनू">
+      <div class="dds-container dds-nav-track">
+        <button class="dds-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu" aria-label="पूरा मेनू खोलें">
+          <i aria-hidden="true"><span></span><span></span><span></span></i>
+        </button>
+        <a href="{% url 'home' %}"><i class="bi bi-house-door"></i>होम</a>
+        <details class="dds-nav-dropdown">
+          <summary>देश</summary>
+          <div class="dds-nav-menu">
+            <a href="{% url 'news:latest' %}?q=भारत">भारत</a>
+            <a href="{% url 'news:latest' %}?q=सरकार">सरकार</a>
+            <a href="{% url 'news:latest' %}?q=चुनाव">चुनाव</a>
+            <a href="{% url 'news:latest' %}?q=न्यायालय">न्यायालय</a>
+          </div>
+        </details>
+        <details class="dds-nav-dropdown">
+          <summary>मध्य प्रदेश</summary>
+          <div class="dds-nav-menu">
+            <a href="{% url 'news:latest' %}?q=इंदौर">इंदौर</a>
+            <a href="{% url 'news:latest' %}?q=भोपाल">भोपाल</a>
+            <a href="{% url 'news:latest' %}?q=उज्जैन">उज्जैन</a>
+            <a href="{% url 'news:latest' %}?q=ग्वालियर">ग्वालियर</a>
+            <a href="{% url 'news:latest' %}?q=जबलपुर">जबलपुर</a>
+          </div>
+        </details>
+        <a href="{% url 'news:latest' %}?q=राजनीति">राजनीति</a>
+        <a href="{% url 'news:latest' %}?q=बिजनेस">बिजनेस</a>
+        <a href="{% url 'news:latest' %}?q=खेल">खेल</a>
+        <a href="{% url 'news:latest' %}?q=मनोरंजन">मनोरंजन</a>
+        <details class="dds-nav-dropdown">
+          <summary>मीडिया</summary>
+          <div class="dds-nav-menu">
+            <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i>वीडियो</a>
+            <a href="{% url 'videos:list' %}"><i class="bi bi-camera-reels"></i>रील्स</a>
+            <a href="{% url 'galleries:list' %}"><i class="bi bi-images"></i>फोटो</a>
+            <a href="{% url 'webstories:list' %}"><i class="bi bi-phone"></i>वेब स्टोरी</a>
+          </div>
+        </details>
+        <details class="dds-nav-dropdown">
+          <summary data-i18n-key="more">अधिक</summary>
+          <div class="dds-nav-menu">
+            <a href="{% url 'news:latest' %}?q=शिक्षा">शिक्षा</a>
+            <a href="{% url 'news:latest' %}?q=टेक्नोलॉजी">टेक्नोलॉजी</a>
+            <a href="{% url 'news:latest' %}?q=लाइफस्टाइल">लाइफस्टाइल</a>
+            <a href="{% url 'news:latest' %}?q=धर्म">धर्म</a>
+            <a href="{% url 'news:latest' %}?q=अपराध">अपराध</a>
+            <a href="{% url 'news:latest' %}?q=कृषि">कृषि</a>
+            <a href="{% url 'news:latest' %}?q=नौकरी">नौकरी</a>
+          </div>
+        </details>
+      </div>
+    </nav>
+  </header>
+
+  <div class="dds-breaking" aria-label="ब्रेकिंग न्यूज">
+    <div class="dds-container dds-breaking-inner">
+      <span class="dds-breaking-label" data-i18n-key="breaking">ब्रेकिंग न्यूज़</span>
+      <div class="dds-breaking-track">
+        {% for article in breaking_articles %}
+          <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+        {% empty %}
+          <a href="{% url 'news:latest' %}">देश-दुनिया की ताजा खबरें पढ़ें</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-start dds-mega" tabindex="-1" id="ddsMegaMenu" aria-labelledby="ddsMegaMenuLabel">
+    <div class="offcanvas-header">
+      <div>
+        <span class="dds-mega-logo"><img src="{% static 'images/dds-final-logo-light.png' %}" alt="Desh Darpan Samvad"></span>
+        <h2 class="offcanvas-title" id="ddsMegaMenuLabel">मेनू</h2>
+      </div>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="बंद करें"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div class="dds-mega-actions">
+        <a class="dds-mega-action primary" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        <a class="dds-mega-action" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
+      </div>
+      <form class="dds-mega-search" action="{% url 'news:search' %}">
+        <input name="q" type="search" placeholder="खबर, शहर या विषय खोजें">
+        <button type="submit">Search</button>
+      </form>
+      <div class="dds-mega-grid">
+        <section class="dds-mega-section primary">
+          <h3>Top Sections</h3>
+          <div class="dds-link-grid">
+            <a href="{% url 'home' %}"><i class="bi bi-house-door"></i>होम</a>
+            <a href="{% url 'news:latest' %}"><i class="bi bi-lightning-charge"></i>ताजा खबरें</a>
+            <a href="{% url 'news:trending' %}"><i class="bi bi-graph-up-arrow"></i>ट्रेंडिंग</a>
+            {% for category in menu_categories %}
+              <a href="{{ category.get_absolute_url }}">{{ category }}</a>
+            {% endfor %}
+          </div>
+        </section>
+        <section class="dds-mega-section">
+          <h3>Media</h3>
+          <div class="dds-link-grid">
+            <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i>वीडियो</a>
+            <a href="{% url 'videos:list' %}"><i class="bi bi-camera-reels"></i>रील्स</a>
+            <a href="{% url 'galleries:list' %}"><i class="bi bi-images"></i>फोटो गैलरी</a>
+            <a href="{% url 'webstories:list' %}"><i class="bi bi-phone"></i>वेब स्टोरी</a>
+            <a href="{% url 'liveblog:list' %}"><i class="bi bi-broadcast-pin"></i>लाइव ब्लॉग</a>
+          </div>
+        </section>
+        <section class="dds-mega-section">
+          <h3>Local / Regional</h3>
+          <div class="dds-link-grid">
+            {% for city in popular_cities|slice:":8" %}
+              <a href="{{ city.get_absolute_url }}">{{ city.name }}</a>
+            {% empty %}
+              <a href="{% url 'news:search' %}?q=इंदौर">इंदौर</a>
+              <a href="{% url 'news:search' %}?q=भोपाल">भोपाल</a>
+              <a href="{% url 'news:search' %}?q=उज्जैन">उज्जैन</a>
+              <a href="{% url 'news:search' %}?q=ग्वालियर">ग्वालियर</a>
+            {% endfor %}
+          </div>
+        </section>
+        <section class="dds-mega-section">
+          <h3>Reader Services</h3>
+          <div class="dds-link-grid">
+            <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+            <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}CMS Portal{% else %}Sign In{% endif %}</a>
+            <a href="{% url 'core:newsletter' %}"><i class="bi bi-envelope-paper"></i>न्यूजलेटर</a>
+            <a href="{% url 'core:advertise' %}"><i class="bi bi-megaphone"></i>विज्ञापन दें</a>
+            <a href="{% url 'core:contact' %}"><i class="bi bi-headset"></i>संपर्क</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div class="dds-container mt-3">
+      {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="main-content">{% block content %}{% endblock %}</main>
+
+  <footer class="dds-footer">
+    <div class="dds-container">
+      <div class="dds-footer-top">
+        <div class="dds-footer-brand">
+          {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+          {% else %}
+            <img src="{% static 'images/dds-final-logo-light.png' %}" alt="Desh Darpan Samvad">
+          {% endif %}
+        </div>
+        <form action="{% url 'core:newsletter' %}" method="post" class="dds-footer-subscribe">
+          {% csrf_token %}
+          <input type="email" name="email" placeholder="ईमेल डालें" aria-label="ईमेल">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+      <div class="dds-footer-grid">
+        <section class="dds-footer-about">
+          <h3>Desh Darpan Samvad</h3>
+          <p>विश्वसनीय हिंदी समाचार, स्थानीय अपडेट और डिजिटल मीडिया कवरेज।</p>
+          <div class="dds-footer-social" aria-label="Follow Desh Darpan Samvad">
+            <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+            <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+            <a class="whatsapp" href="{{ site_settings.whatsapp_url|default:'#' }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+          </div>
+        </section>
+        <section>
+          <h3>Media</h3>
+          <a href="{% url 'videos:list' %}">वीडियो</a>
+          <a href="{% url 'videos:list' %}">रील्स</a>
+          <a href="{% url 'galleries:list' %}">फोटो गैलरी</a>
+          <a href="{% url 'webstories:list' %}">वेब स्टोरी</a>
+          <a href="{% url 'liveblog:list' %}">लाइव ब्लॉग</a>
+        </section>
+        <section>
+          <h3>Reader Services</h3>
+          <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}">ई-पेपर</a>
+          <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}">{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
+          <a href="{% url 'core:newsletter' %}">न्यूजलेटर</a>
+          <a href="{% url 'core:advertise' %}">विज्ञापन दें</a>
+          <a href="{% url 'core:contact' %}">न्यूज टिप भेजें</a>
+        </section>
+        <section>
+          <h3>Company</h3>
+          <a href="{% url 'core:about' %}">हमारे बारे में</a>
+          <a href="{% url 'core:privacy' %}">प्राइवेसी पॉलिसी</a>
+          <a href="{% url 'core:terms' %}">नियम और शर्तें</a>
+          <a href="{% url 'core:disclaimer' %}">डिस्क्लेमर</a>
+          <a href="{% url 'core:editorial_policy' %}">एडिटोरियल पॉलिसी</a>
+          <a href="{% url 'core:grievance' %}">शिकायत / संपर्क</a>
+        </section>
+        <section class="dds-footer-contact">
+          <h3>Connect</h3>
+          <p><i class="bi bi-geo-alt"></i> Indore, Madhya Pradesh</p>
+          <p><i class="bi bi-envelope"></i> news@deshdarpansamvad.in</p>
+          <p><i class="bi bi-whatsapp"></i> WhatsApp Desk</p>
+          <div class="dds-footer-qr">
+            <img src="{% static 'images/dds-whatsapp-qr.png' %}" alt="Desh Darpan Samvad WhatsApp QR">
+            <strong>Scan For WhatsApp</strong>
+          </div>
+        </section>
+      </div>
+      <div class="dds-footer-bottom">
+        <span class="dds-footer-copy"><i class="bi bi-c-circle"></i> {{ today|date:"Y" }} Desh Darpan Samvad. All rights reserved.</span>
+        <span class="dds-footer-credit">Design &amp; Developed By <a href="https://www.thewebfix.in" target="_blank" rel="noopener">The Webfix</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="mobile-bottom-nav" aria-label="मोबाइल नेविगेशन">
+    <a href="{% url 'home' %}"><i class="bi bi-house-door"></i><span>होम</span></a>
+    <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i><span>वीडियो</span></a>
+    <a class="is-live" href="{% url 'liveblog:list' %}"><i class="bi bi-tv"></i><span>लाइव टीवी</span></a>
+    <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i><span>ई-पेपर</span></a>
+    <button class="mobile-menu-open" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu">
+      <i class="bi bi-list"></i><span>मेनू</span>
+    </button>
+  </nav>
+  <button class="scroll-top" type="button" aria-label="शीर्ष पर जाएं">↑</button>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function(){
+      var select = document.getElementById("ddsLanguageSelect");
+      var rtlLanguages = ["ur", "sd", "ks"];
+      var originalText = new WeakMap();
+      var originalAttrs = new WeakMap();
+      var skipSelector = "script,style,noscript,iframe,svg,canvas,select,option,.notranslate,.bi";
+
+      function getTextNodes(root) {
+        var walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
+          acceptNode: function(node) {
+            if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+            if (node.parentElement && node.parentElement.closest(skipSelector)) return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+        var nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        return nodes;
+      }
+
+      function collectAttrs() {
+        return Array.from(document.querySelectorAll("[placeholder], [aria-label], [title]")).filter(function(el){
+          return !el.closest(skipSelector);
+        });
+      }
+
+      function csrfToken() {
+        var input = document.querySelector("input[name='csrfmiddlewaretoken']");
+        return input ? input.value : "";
+      }
+
+      async function translateBatch(texts, target) {
+        var response = await fetch("{% url 'core:translate' %}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "X-CSRFToken": csrfToken()},
+          body: JSON.stringify({target: target, texts: texts})
+        });
+        if (!response.ok) return texts;
+        var data = await response.json();
+        return data.translations || texts;
+      }
+
+      async function applyLanguage(target) {
+        document.documentElement.setAttribute("lang", target);
+        document.documentElement.setAttribute("dir", rtlLanguages.indexOf(target) >= 0 ? "rtl" : "ltr");
+        document.documentElement.classList.toggle("translated-rtl", rtlLanguages.indexOf(target) >= 0);
+        document.documentElement.classList.toggle("translated-ltr", target !== "hi" && rtlLanguages.indexOf(target) < 0);
+
+        var nodes = getTextNodes(document.body);
+        nodes.forEach(function(node){ if (!originalText.has(node)) originalText.set(node, node.nodeValue); });
+        var attrItems = collectAttrs();
+        attrItems.forEach(function(el){
+          if (!originalAttrs.has(el)) {
+            originalAttrs.set(el, {
+              placeholder: el.getAttribute("placeholder"),
+              ariaLabel: el.getAttribute("aria-label"),
+              title: el.getAttribute("title")
+            });
+          }
+        });
+
+        if (target === "hi") {
+          nodes.forEach(function(node){ node.nodeValue = originalText.get(node) || node.nodeValue; });
+          attrItems.forEach(function(el){
+            var attrs = originalAttrs.get(el) || {};
+            if (attrs.placeholder !== null) el.setAttribute("placeholder", attrs.placeholder);
+            if (attrs.ariaLabel !== null) el.setAttribute("aria-label", attrs.ariaLabel);
+            if (attrs.title !== null) el.setAttribute("title", attrs.title);
+          });
+          return;
+        }
+
+        var textValues = nodes.map(function(node){ return originalText.get(node) || node.nodeValue; });
+        var attrValues = [];
+        attrItems.forEach(function(el){
+          var attrs = originalAttrs.get(el) || {};
+          ["placeholder", "ariaLabel", "title"].forEach(function(key){
+            if (attrs[key]) attrValues.push(attrs[key]);
+          });
+        });
+        var translated = await translateBatch(textValues.concat(attrValues), target);
+        nodes.forEach(function(node, index){ if (translated[index]) node.nodeValue = translated[index]; });
+        var offset = textValues.length;
+        attrItems.forEach(function(el){
+          var attrs = originalAttrs.get(el) || {};
+          if (attrs.placeholder) el.setAttribute("placeholder", translated[offset++] || attrs.placeholder);
+          if (attrs.ariaLabel) el.setAttribute("aria-label", translated[offset++] || attrs.ariaLabel);
+          if (attrs.title) el.setAttribute("title", translated[offset++] || attrs.title);
+        });
+      }
+
+      if (select) {
+        var savedLanguage = localStorage.getItem("dds_language") || "hi";
+        select.value = savedLanguage;
+        applyLanguage(savedLanguage);
+        select.addEventListener("change", function(){
+          localStorage.setItem("dds_language", select.value);
+          applyLanguage(select.value);
+        });
+      }
+
+      document.querySelectorAll(".dds-nav-dropdown").forEach(function(dropdown){
+        dropdown.addEventListener("toggle", function(){
+          if (!dropdown.open) return;
+          document.querySelectorAll(".dds-nav-dropdown[open]").forEach(function(other){
+            if (other !== dropdown) other.removeAttribute("open");
+          });
+        });
+      });
+      document.addEventListener("click", function(event){
+        if (event.target.closest(".dds-nav-dropdown")) return;
+        document.querySelectorAll(".dds-nav-dropdown[open]").forEach(function(dropdown){
+          dropdown.removeAttribute("open");
+        });
+      });
+
+      var mobileSearchToggle = document.querySelector(".dds-mobile-search-toggle");
+      var mobileSearchPanel = document.getElementById("ddsMobileSearchPanel");
+      if (mobileSearchToggle && mobileSearchPanel) {
+        mobileSearchToggle.addEventListener("click", function(event){
+          event.stopPropagation();
+          var isOpen = document.body.classList.toggle("search-open");
+          mobileSearchToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+          if (isOpen) {
+            var input = mobileSearchPanel.querySelector("input");
+            window.setTimeout(function(){ if (input) input.focus(); }, 80);
+          }
+        });
+        document.addEventListener("click", function(event){
+          if (!document.body.classList.contains("search-open")) return;
+          if (event.target.closest("#ddsMobileSearchPanel") || event.target.closest(".dds-mobile-search-toggle")) return;
+          document.body.classList.remove("search-open");
+          mobileSearchToggle.setAttribute("aria-expanded", "false");
+        });
+        document.addEventListener("keydown", function(event){
+          if (event.key !== "Escape") return;
+          document.body.classList.remove("search-open");
+          mobileSearchToggle.setAttribute("aria-expanded", "false");
+        });
+      }
+    });
+  </script>
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
+
+

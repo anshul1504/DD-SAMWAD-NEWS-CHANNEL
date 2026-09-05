@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="live-page">
+  <div class="dds-container live-header">
+    <span class="live-badge"><i></i> LIVE</span>
+    <h1>{{ liveblog.title }}</h1>
+    <p>{{ liveblog.description }}</p>
+  </div>
+  <div class="dds-container live-layout">
+    <div class="timeline">
+      {% for update in liveblog.updates.all %}
+        <article class="{% if update.is_breaking %}pinned{% endif %}">
+          <time>{{ update.timestamp|date:"h:i A" }}</time>
+          <h2>{{ update.heading }}</h2>
+          <p>{{ update.body }}</p>
+          {% if update.image %}<img src="{{ update.image.url }}" alt="{{ update.heading }}" loading="lazy">{% endif %}
+        </article>
+      {% empty %}<div class="empty-state">अपडेट जल्द आएंगे।</div>{% endfor %}
+    </div>
+    <aside class="side-note"><strong>लाइव कवरेज</strong><p>नए अपडेट सबसे ऊपर दिखाए जाते हैं।</p></aside>
+  </div>
+</section>
+{% endblock %}

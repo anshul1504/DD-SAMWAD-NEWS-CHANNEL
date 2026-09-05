@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div><span>Live Desk</span><h1>{{ page_title }}</h1><p>रियल टाइम अपडेट, बड़ी घटनाओं की सतत कवरेज और महत्वपूर्ण टाइमलाइन।</p></div>
+</section>
+<section class="dds-container live-list-grid">
+  {% for live in page_obj %}
+    <a class="live-card" href="{{ live.get_absolute_url }}">
+      <span class="live-badge"><i></i> LIVE</span>
+      <h2>{{ live.title }}</h2>
+      <p>{{ live.description|truncatewords:26 }}</p>
+    </a>
+  {% empty %}<div class="empty-state">लाइव ब्लॉग उपलब्ध नहीं है।</div>{% endfor %}
+  {% include "includes/pagination.html" %}
+</section>
+{% endblock %}

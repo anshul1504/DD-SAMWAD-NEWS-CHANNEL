@@ -1,0 +1,10 @@
+<div class="ranked-list">
+  {% for article in articles %}
+    <a class="ranked-item" href="{{ article.get_absolute_url }}">
+      <span>{{ forloop.counter|stringformat:"02d" }}</span>
+      <strong>{{ article.title }}</strong>
+    </a>
+  {% empty %}
+    <div class="empty-state compact">अभी खबरें उपलब्ध नहीं हैं।</div>
+  {% endfor %}
+</div>

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="article-page">
+  <div class="dds-container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}">होम</a>
+      <span>›</span>
+      <a href="{{ article.category.get_absolute_url }}">{{ article.category }}</a>
+      {% if article.city %}<span>›</span><a href="{{ article.city.get_absolute_url }}">{{ article.city }}</a>{% endif %}
+    </nav>
+    <div class="article-grid">
+      <aside class="share-rail" aria-label="शेयर करें">
+        <button data-share>Share</button>
+        <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener">WA</a>
+        <button data-copy="{{ request.build_absolute_uri }}">Link</button>
+      </aside>
+      <main class="article-main">
+        <div class="story-meta article-meta">
+          <span>{{ article.category }}</span>
+          {% if article.is_breaking %}<span class="breaking-chip">Breaking</span>{% endif %}
+          {% if article.city %}<span>{{ article.city }}</span>{% endif %}
+        </div>
+        <h1>{{ article.title }}</h1>
+        {% if article.summary %}<p class="article-summary">{{ article.summary }}</p>{% endif %}
+        <div class="article-byline">
+          <span>By {% if article.reporter %}<a href="{{ article.reporter.get_absolute_url }}">{{ article.reporter.display_name }}</a>{% else %}{{ article.author.get_full_name|default:article.author.username }}{% endif %}</span>
+          <span>{{ article.published_at|date:"d F Y, h:i A" }}</span>
+          <span>{{ article.reading_time }} मिनट पढ़ें</span>
+          <span>{{ article.views }} Views</span>
+        </div>
+        <div class="mobile-share-row">
+          <button data-share>Share</button>
+          <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener">WhatsApp</a>
+          <button data-copy="{{ request.build_absolute_uri }}">Copy Link</button>
+          {% if user.is_authenticated %}<a href="{% url 'news:bookmark' article.pk %}">Save</a>{% endif %}
+        </div>
+        {% include "includes/ad_slot.html" with placement="article_top" variant="leaderboard" %}
+        <figure class="article-figure">
+          {% if article.featured_image %}
+            <img class="article-image" src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}">
+          {% else %}
+            <div class="article-image story-fallback"><strong>{{ article.category }}</strong><span>देश दर्पण संवाद</span></div>
+          {% endif %}
+          {% if article.image_caption or article.image_credit %}<figcaption>{{ article.image_caption }} {% if article.image_credit %}({{ article.image_credit }}){% endif %}</figcaption>{% endif %}
+        </figure>
+        <div class="article-body">{{ article.body|safe }}</div>
+        {% include "includes/ad_slot.html" with placement="article_middle" variant="leaderboard" %}
+        <div class="tags">{% for tag in article.tags.all %}<a href="{{ tag.get_absolute_url }}">#{{ tag.name }}</a>{% endfor %}</div>
+        <section class="related">
+          {% include "includes/section_header.html" with title="संबंधित खबरें" %}
+          <div class="related-grid">{% for article in related_articles %}{% include "includes/news_card.html" with article=article class="compact-story" %}{% endfor %}</div>
+        </section>
+      </main>
+      <aside class="article-sidebar sidebar-stack">
+        {% include "includes/section_header.html" with title="ताजा खबरें" %}
+        {% include "includes/latest_stream.html" with articles=latest_articles %}
+        {% include "includes/section_header.html" with title="Most Read" %}
+        {% include "includes/ranked_list.html" with articles=most_read %}
+        {% include "includes/ad_slot.html" with placement="article_bottom" variant="sidebar" %}
+      </aside>
+    </div>
+  </div>
+</article>
+{{ article_jsonld|json_script:"article-schema" }}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% load static %}
+<footer class="newsroom-footer">
+  <div class="footer-newsletter">
+    <div class="dds-container footer-newsletter-inner">
+      <div>
+        <span>DESH DARPAN SAMVAD</span>
+        <h2>हर जरूरी अपडेट, एक जिम्मेदार न्यूजरूम से</h2>
+        <p>ताजा खबरें, लोकल अपडेट और विशेष रिपोर्ट सीधे आपके इनबॉक्स में।</p>
+      </div>
+      <form action="{% url 'core:newsletter' %}" method="post" class="footer-subscribe">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="आपका ईमेल पता" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="dds-container footer-main">
+    <section class="footer-brand-panel">
+      <a class="footer-logo" href="{% url 'home' %}">
+        {% if site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+        {% else %}
+          <img src="{% static 'images/dds-logo.svg' %}" alt="Desh Darpan Samvad">
+        {% endif %}
+      </a>
+      <p>{{ site_settings.footer_description|default:"विश्वसनीय, तेज और पाठक-केंद्रित हिंदी डिजिटल पत्रकारिता।" }}</p>
+    </section>
+    <nav class="footer-column" aria-label="प्रमुख श्रेणियां">
+      <h3>प्रमुख श्रेणियां</h3>
+      {% for category in menu_categories|slice:":8" %}<a href="{{ category.get_absolute_url }}">{{ category }}</a>{% endfor %}
+    </nav>
+    <nav class="footer-column" aria-label="लोकल शहर">
+      <h3>लोकल शहर</h3>
+      {% for city in popular_cities|slice:":8" %}<a href="{{ city.get_absolute_url }}">{{ city.name }}</a>{% endfor %}
+    </nav>
+    <nav class="footer-column" aria-label="उपयोगी लिंक">
+      <h3>उपयोगी लिंक</h3>
+      <a href="{% url 'core:about' %}">हमारे बारे में</a>
+      <a href="{% url 'core:contact' %}">संपर्क करें</a>
+      <a href="{% url 'core:advertise' %}">विज्ञापन दें</a>
+      <a href="{% url 'core:grievance' %}">शिकायत / संपर्क</a>
+      <a href="{% url 'galleries:list' %}">फोटो गैलरी</a>
+      <a href="{% url 'videos:list' %}">वीडियो</a>
+    </nav>
+    <nav class="footer-column" aria-label="नीतियां">
+      <h3>नीतियां</h3>
+      <a href="{% url 'core:privacy' %}">प्राइवेसी पॉलिसी</a>
+      <a href="{% url 'core:terms' %}">नियम और शर्तें</a>
+      <a href="{% url 'core:disclaimer' %}">डिस्क्लेमर</a>
+      <a href="{% url 'core:editorial_policy' %}">एडिटोरियल पॉलिसी</a>
+    </nav>
+  </div>
+
+  <div class="dds-container footer-social-row">
+    <div class="footer-social">
+      {% if site_settings.facebook_url %}<a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+      {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      {% if site_settings.youtube_url %}<a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener">YouTube</a>{% endif %}
+      {% if site_settings.twitter_url %}<a href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener">X</a>{% endif %}
+      {% if site_settings.telegram_url %}<a href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener">Telegram</a>{% endif %}
+    </div>
+    <a href="{% url 'core:contact' %}" class="footer-tipline">न्यूज टिप भेजें</a>
+  </div>
+
+  <div class="footer-legal">
+    <div class="dds-container">
+      <span>Copyright © {% now "Y" %} Desh Darpan Samvad. All Rights Reserved.</span>
+      <span>स्वतंत्र, जिम्मेदार और पारदर्शी पत्रकारिता</span>
+    </div>
+  </div>
+</footer>

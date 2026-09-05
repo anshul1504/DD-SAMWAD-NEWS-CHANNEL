@@ -1,0 +1,141 @@
+{% extends "erp/base_portal.html" %}
+
+{% block content %}
+<style>
+  .portal-page{background:#f4f7fb}
+  .portal-main{display:grid;gap:1rem;min-width:0}
+  .portal-hero{background:linear-gradient(135deg,#061b43,#0b3474);color:#fff;border-radius:10px;padding:1.2rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;box-shadow:0 22px 60px rgba(8,43,104,.16)}
+  .portal-hero .eyebrow{color:#ffccd0}
+  .portal-hero h1{margin:.2rem 0 .35rem;font-size:clamp(1.55rem,2.4vw,2.5rem);line-height:1.1;color:#fff}
+  .portal-hero p{margin:0;color:#d8e4f6;max-width:700px}
+  .portal-actions{display:flex;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
+  .portal-btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border-radius:8px;padding:.55rem .85rem;font-weight:900;border:1px solid rgba(255,255,255,.14);background:#fff;color:#061b43}
+  .portal-btn.primary{background:#e31e28;color:#fff;border-color:#e31e28}
+  .portal-btn.muted{background:rgba(255,255,255,.1);color:#fff}
+  .portal-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.75rem}
+  .portal-stat{background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:.85rem;box-shadow:0 12px 28px rgba(15,23,42,.05)}
+  .portal-stat span{display:flex;align-items:center;gap:.42rem;color:#64748b;font-size:.78rem;font-weight:900}
+  .portal-stat strong{display:block;margin-top:.5rem;color:#0f172a;font-size:1.75rem;line-height:1}
+  .portal-modules{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+  .portal-module{background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:.9rem;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 14px 32px rgba(15,23,42,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+  .portal-module:hover{transform:translateY(-3px);box-shadow:0 22px 44px rgba(15,23,42,.1);border-color:#cbd5e1}
+  .portal-module.is-locked{opacity:.62;background:#f8fafc}
+  .portal-module-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem}
+  .portal-module i{width:38px;height:38px;border-radius:8px;background:#edf3ff;color:#0b3474;display:grid;place-items:center;font-size:1.1rem}
+  .portal-module span{display:block;color:#e31e28;font-size:.72rem;font-weight:900;text-transform:uppercase}
+  .portal-module h2{margin:.25rem 0 0;font-size:1.05rem;color:#101828}
+  .portal-module strong{color:#0b3474;font-size:1.45rem}
+  .portal-module-actions{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.9rem}
+  .portal-module-actions a,.portal-module-actions em{display:inline-flex;align-items:center;gap:.35rem;border-radius:7px;padding:.42rem .58rem;background:#f1f5f9;color:#0f172a;font-size:.78rem;font-weight:900;font-style:normal}
+  .portal-module-actions a:hover{background:#0b3474;color:#fff}
+  .portal-grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:1rem;align-items:start}
+  .portal-panel{background:#fff;border:1px solid #e2e8f0;border-radius:9px;padding:1rem;box-shadow:0 14px 32px rgba(15,23,42,.05)}
+  .portal-panel-title{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+  .portal-panel-title h2{margin:0;font-size:1.25rem;color:#101828}
+  .portal-panel-title span{color:#e31e28;font-size:.72rem;font-weight:900;text-transform:uppercase}
+  .portal-table{display:grid}
+  .portal-row{display:grid;grid-template-columns:132px minmax(0,1fr) 120px;gap:.75rem;align-items:center;padding:.72rem 0;border-bottom:1px solid #edf2f7;color:#101828}
+  .portal-row:last-child{border-bottom:0}
+  .portal-row small{font-weight:900;color:#64748b}
+  .portal-row strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .portal-status{width:max-content;border-radius:999px;background:#f1f5f9;color:#334155;padding:.28rem .55rem;font-size:.72rem;font-weight:900}
+  .portal-status.published{background:#dcfce7;color:#166534}
+  .portal-status.submitted,.portal-status.under_review{background:#fff7ed;color:#9a3412}
+  .portal-status.draft{background:#eef2ff;color:#3730a3}
+  .portal-empty{border:1px dashed #cbd5e1;border-radius:8px;padding:1rem;text-align:center;color:#64748b;font-weight:800;background:#f8fafc}
+  @media(max-width:1180px){.portal-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.portal-modules{grid-template-columns:repeat(2,minmax(0,1fr))}.portal-grid{grid-template-columns:1fr}}
+  @media(max-width:720px){.portal-hero{grid-template-columns:1fr}.portal-actions{justify-content:flex-start}.portal-stats,.portal-modules{grid-template-columns:1fr}.portal-row{grid-template-columns:1fr;gap:.32rem}}
+</style>
+
+<div class="portal-page">
+  <section class="portal-main">
+      <header class="portal-hero">
+        <div>
+          <span class="eyebrow">Newsroom Command</span>
+          <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
+          <p>Manage news, stories, videos, galleries, ads, live blogs, users and editorial workflow from one smart role-based portal.</p>
+        </div>
+        <div class="portal-actions">
+          {% if permissions.article_add %}<a class="portal-btn primary" href="/accounts/portal/articles/new/"><i class="bi bi-plus-lg"></i>New Article</a>{% endif %}
+          {% if permissions.webstories %}<a class="portal-btn" href="/accounts/portal/stories/new/"><i class="bi bi-phone"></i>New Story</a>{% endif %}
+          <a class="portal-btn muted" href="/accounts/portal/articles/"><i class="bi bi-sliders"></i>Open Portal</a>
+        </div>
+      </header>
+
+      {% if is_guest_user %}
+        <section class="portal-panel">
+          <div class="portal-panel-title">
+            <div><span>Access Pending</span><h2>Your account is waiting for role approval</h2></div>
+          </div>
+          <p style="margin:0;color:#64748b;line-height:1.7;font-weight:700">You are signed in as a guest user. An administrator can assign Reporter, Editor, Media Manager, Ads Manager, SEO Manager, Live Desk or Admin access from the Users & Roles module.</p>
+        </section>
+      {% endif %}
+
+      <section class="portal-stats" aria-label="Portal statistics">
+        <article class="portal-stat"><span><i class="bi bi-pencil-square"></i>Drafts</span><strong>{{ draft_count }}</strong></article>
+        <article class="portal-stat"><span><i class="bi bi-send"></i>Submitted</span><strong>{{ submitted_count }}</strong></article>
+        <article class="portal-stat"><span><i class="bi bi-check-circle"></i>Published</span><strong>{{ published_count }}</strong></article>
+        <article class="portal-stat"><span><i class="bi bi-eye"></i>Review</span><strong>{{ review_count }}</strong></article>
+        <article class="portal-stat"><span><i class="bi bi-badge-ad"></i>Live Ads</span><strong>{{ active_ads }}</strong></article>
+        <article class="portal-stat"><span><i class="bi bi-phone"></i>Stories</span><strong>{{ active_stories }}</strong></article>
+      </section>
+
+      <section class="portal-modules" aria-label="Management modules">
+        {% for module in modules %}
+          <article class="portal-module{% if not module.enabled %} is-locked{% endif %}">
+            <div>
+              <div class="portal-module-head">
+                <div><span>{{ module.label }}</span><h2>{{ module.title }}</h2></div>
+                <i class="bi {{ module.icon }}"></i>
+              </div>
+              <strong>{{ module.count }}</strong>
+            </div>
+            <div class="portal-module-actions">
+              {% if module.enabled %}
+                <a href="{{ module.url }}"><i class="bi bi-folder2-open"></i>Manage</a>
+                <a href="{{ module.add_url }}"><i class="bi bi-plus-lg"></i>Add New</a>
+              {% else %}
+                <em><i class="bi bi-lock"></i>Restricted</em>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="portal-grid">
+        <div class="portal-panel">
+          <div class="portal-panel-title">
+            <div><span>Workflow</span><h2>My Articles</h2></div>
+            {% if permissions.article_change %}<a href="/accounts/portal/articles/">Manage all</a>{% endif %}
+          </div>
+          <div class="portal-table">
+            {% for article in my_articles %}
+              <a class="portal-row" href="/accounts/portal/articles/">
+                <span class="portal-status {{ article.status }}">{{ article.get_status_display }}</span>
+                <strong>{{ article.title }}</strong>
+                <small>{{ article.updated_at|date:"d M, h:i A" }}</small>
+              </a>
+            {% empty %}
+              <div class="portal-empty">No article assigned yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <aside class="portal-panel">
+          <div class="portal-panel-title"><div><span>Editor Queue</span><h2>Needs Attention</h2></div></div>
+          <div class="portal-table">
+            {% for article in review_queue %}
+              <a class="portal-row" href="/accounts/portal/articles/">
+                <span class="portal-status {{ article.status }}">{{ article.get_status_display }}</span>
+                <strong>{{ article.title }}</strong>
+                <small>{{ article.author.username }}</small>
+              </a>
+            {% empty %}
+              <div class="portal-empty">Review queue is clear.</div>
+            {% endfor %}
+          </div>
+        </aside>
+      </section>
+  </section>
+</div>
+{% endblock %}

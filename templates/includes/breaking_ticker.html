@@ -1,0 +1,14 @@
+<section class="breaking-news" aria-label="ब्रेकिंग न्यूज">
+  <div class="dds-container breaking-inner">
+    <div class="breaking-label"><span></span>ताजा खबर</div>
+    <div class="ticker" aria-live="polite">
+      <div class="ticker-track">
+        {% for item in breaking_articles %}
+          <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+        {% empty %}
+          <span>अभी कोई ब्रेकिंग न्यूज उपलब्ध नहीं है।</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>

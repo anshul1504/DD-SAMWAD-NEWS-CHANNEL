@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div><span>Visual Desk</span><h1>{{ page_title }}</h1><p>तस्वीरों में देखें दिन की बड़ी घटनाएं और स्थानीय झलकियां।</p></div>
+</section>
+<section class="dds-container">
+  <div class="photo-mosaic archive-photo-grid">
+    {% for gallery in page_obj %}
+      <a href="{{ gallery.get_absolute_url }}" class="{% if forloop.first %}photo-large{% endif %}">
+        {% if gallery.cover_image %}<img src="{{ gallery.cover_image.url }}" alt="{{ gallery.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Photo</strong></div>{% endif %}
+        <span>{{ gallery.title }}</span>
+      </a>
+    {% empty %}<div class="empty-state">फोटो गैलरी उपलब्ध नहीं है।</div>{% endfor %}
+  </div>
+  {% include "includes/pagination.html" %}
+</section>
+{% endblock %}

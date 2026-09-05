@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div><span>Photo Story</span><h1>{{ gallery.title }}</h1><p>{{ gallery.description }}</p></div>
+</section>
+<section class="dds-container gallery-detail-grid">
+  {% for image in gallery.images.all %}
+    <figure>
+      {% if image.image %}<img src="{{ image.image.url }}" alt="{{ image.caption|default:gallery.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Photo</strong></div>{% endif %}
+      {% if image.caption or image.credit %}<figcaption>{{ image.caption }} {% if image.credit %}({{ image.credit }}){% endif %}</figcaption>{% endif %}
+    </figure>
+  {% empty %}<div class="empty-state">इस गैलरी में अभी तस्वीरें उपलब्ध नहीं हैं।</div>{% endfor %}
+</section>
+{% endblock %}

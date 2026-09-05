@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  body:has(.webstory-viewer){padding-top:0;background:#020817}
+  body:has(.webstory-viewer) .dds-topbar,
+  body:has(.webstory-viewer) .site-sticky-header,
+  body:has(.webstory-viewer) .dds-breaking,
+  body:has(.webstory-viewer) .dds-footer,
+  body:has(.webstory-viewer) .mobile-bottom-nav,
+  body:has(.webstory-viewer) .scroll-top{display:none!important}
+  .webstory-viewer{min-height:100dvh;background:radial-gradient(circle at top,#12336b 0,#020817 52%,#01050f 100%);display:grid;place-items:center;padding:20px;color:#fff;overflow:hidden}
+  .story-phone{width:min(430px,100%);height:min(840px,calc(100dvh - 40px));min-height:560px;border-radius:18px;background:#071024;position:relative;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.12)}
+  .story-progress{position:absolute;top:12px;left:12px;right:12px;z-index:8;display:grid;grid-auto-flow:column;gap:5px}
+  .story-progress span{height:3px;border-radius:999px;background:rgba(255,255,255,.32);overflow:hidden}
+  .story-progress span:before{content:"";display:block;width:0;height:100%;background:#fff;border-radius:inherit}
+  .story-progress span.is-done:before{width:100%}
+  .story-progress span.is-active:before{animation:storyProgress 5s linear forwards}
+  .story-close{position:absolute;right:14px;top:24px;z-index:9;width:38px;height:38px;border-radius:10px;background:rgba(2,8,23,.5);color:#fff;display:grid;place-items:center;font-size:1.6rem;line-height:1;text-decoration:none;backdrop-filter:blur(12px)}
+  .story-close:hover{color:#fff;background:rgba(227,30,40,.9)}
+  .story-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+  .story-slide.active{opacity:1;visibility:visible}
+  .story-slide img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02)}
+  .story-slide:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,23,.45) 0,rgba(2,8,23,.08) 38%,rgba(2,8,23,.88) 100%)}
+  .story-content{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:4.5rem 1.25rem 1.3rem}
+  .story-content h1{font-size:clamp(1.55rem,7vw,2.15rem);line-height:1.12;margin:0 0 .65rem;color:#fff}
+  .story-content p{font-size:.98rem;line-height:1.58;color:#dbe4f3;margin:0}
+  .story-content a{margin-top:.95rem;display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:.45rem .9rem;border-radius:999px;background:#fff;color:#071024;font-weight:900}
+  .story-nav{position:absolute;top:0;bottom:0;z-index:5;width:40%;border:0;background:transparent;color:transparent}
+  .story-nav.prev{left:0}
+  .story-nav.next{right:0}
+  .story-arrow{position:absolute;top:50%;z-index:7;width:42px;height:42px;border:0;border-radius:10px;background:rgba(255,255,255,.13);color:#fff;display:grid;place-items:center;transform:translateY(-50%);backdrop-filter:blur(10px)}
+  .story-arrow.prev{left:calc(50% - 278px)}
+  .story-arrow.next{right:calc(50% - 278px)}
+  .story-arrow:hover{background:#fff;color:#071024}
+  .story-empty{padding:2rem;text-align:center;color:#dbe4f3}
+  @keyframes storyProgress{to{width:100%}}
+  @media(max-width:620px){
+    .webstory-viewer{padding:0}
+    .story-phone{width:100%;height:100dvh;min-height:100dvh;border-radius:0}
+    .story-arrow{display:none}
+  }
+</style>
+
+<section class="webstory-viewer" data-story data-story-duration="5000">
+  <div class="story-phone">
+    <a class="story-close" href="{% url 'webstories:list' %}" aria-label="Close story">&times;</a>
+    <div class="story-progress" aria-hidden="true">
+      {% for slide in story.slides.all %}<span{% if forloop.first %} class="is-active"{% endif %}></span>{% endfor %}
+    </div>
+    {% for slide in story.slides.all %}
+      <article class="story-slide{% if forloop.first %} active{% endif %}">
+        {% if slide.image %}
+          <img src="{{ slide.image.url }}" alt="{{ slide.heading }}">
+        {% elif story.cover %}
+          <img src="{{ story.cover.url }}" alt="{{ slide.heading }}">
+        {% else %}
+          <img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ slide.heading }}">
+        {% endif %}
+        <div class="story-content">
+          <h1>{{ slide.heading }}</h1>
+          {% if slide.text %}<p>{{ slide.text }}</p>{% endif %}
+          {% if slide.cta_url %}<a href="{{ slide.cta_url }}">{{ slide.cta_label|default:"Read More" }}</a>{% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="story-empty">This story has no slides yet.</div>
+    {% endfor %}
+    <button class="story-nav prev" type="button" data-story-prev aria-label="Previous slide"></button>
+    <button class="story-nav next" type="button" data-story-next aria-label="Next slide"></button>
+  </div>
+  <button class="story-arrow prev" type="button" data-story-prev aria-label="Previous slide"><i class="bi bi-chevron-left"></i></button>
+  <button class="story-arrow next" type="button" data-story-next aria-label="Next slide"><i class="bi bi-chevron-right"></i></button>
+</section>
+{% endblock %}

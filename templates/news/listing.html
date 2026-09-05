@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div>
+    <span>News Section</span>
+    <h1>{{ page_title }}</h1>
+    {% if category.description %}<p>{{ category.description }}</p>{% elif state.description %}<p>{{ state.description }}</p>{% elif city.description %}<p>{{ city.description }}</p>{% else %}<p>ताजा, विश्वसनीय और व्यवस्थित खबरें एक ही जगह पढ़ें।</p>{% endif %}
+  </div>
+  <nav>
+    {% for city in popular_cities|slice:":6" %}<a href="{{ city.get_absolute_url }}">{{ city.name }}</a>{% endfor %}
+  </nav>
+</section>
+
+<section class="dds-container archive-layout">
+  <div class="archive-main">
+    <div class="archive-grid js-infinite-grid">
+      {% for article in page_obj %}
+        {% if forloop.first %}
+          {% include "includes/news_card.html" with article=article class="archive-lead" show_summary=True %}
+        {% else %}
+          {% include "includes/news_card.html" with article=article class="horizontal-story" show_summary=True %}
+        {% endif %}
+      {% empty %}
+        <div class="empty-state">इस सेक्शन में अभी कोई खबर उपलब्ध नहीं है।</div>
+      {% endfor %}
+    </div>
+    {% include "includes/pagination.html" with infinite=True %}
+  </div>
+  <aside class="sidebar-stack">
+    <div class="side-note">
+      <strong>न्यूजरूम अपडेट</strong>
+      <p>प्रकाशित खबरें समय और संपादकीय प्राथमिकता के आधार पर दिखती हैं।</p>
+    </div>
+    {% include "includes/ad_slot.html" with placement="category_page" variant="sidebar" %}
+  </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "erp/auth/base_auth.html" %}
+{% block auth_content %}
+<span class="auth-kicker">OTP verification</span>
+<h2>Check your email</h2>
+<p>Enter the 6 digit code sent to <strong>{{ otp.email }}</strong>. The code is valid for 10 minutes.</p>
+<form class="auth-form" method="post">
+  {% csrf_token %}
+  <div class="field"><label for="{{ form.code.id_for_label }}">Verification code</label>{{ form.code }}{{ form.code.errors }}</div>
+  <button class="auth-submit" type="submit">Verify & Continue</button>
+</form>
+<div class="auth-links"><a href="{% url 'accounts:login' %}">Start again</a></div>
+{% endblock %}
