@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div>
+    <span>Careers</span>
+    <h1>{{ job.title }}</h1>
+    <p>
+      {% if job.department %}{{ job.department }} · {% endif %}
+      {% if job.location %}{{ job.location }} · {% endif %}
+      {{ job.get_employment_type_display }}
+    </p>
+  </div>
+</section>
+
+{% if job.description %}
+<section class="dds-container static-layout" style="margin-bottom:0">
+  <article class="static-content" style="grid-column:1/-1">
+    <h2>भूमिका का विवरण</h2>
+    <p style="white-space:pre-line">{{ job.description }}</p>
+    <p><a href="{% url 'core:careers' %}"><i class="bi bi-arrow-left"></i> सभी वैकेंसी देखें</a></p>
+  </article>
+</section>
+{% endif %}
+
+<section class="dds-container contact-layout">
+  <aside>
+    <div class="contact-info-card">
+      {% if job.department %}
+      <div class="contact-info-item">
+        <i class="bi bi-diagram-3"></i>
+        <div><strong>विभाग</strong><span>{{ job.department }}</span></div>
+      </div>
+      {% endif %}
+      {% if job.location %}
+      <div class="contact-info-item">
+        <i class="bi bi-geo-alt-fill"></i>
+        <div><strong>स्थान</strong><span>{{ job.location }}</span></div>
+      </div>
+      {% endif %}
+      <div class="contact-info-item">
+        <i class="bi bi-briefcase-fill"></i>
+        <div><strong>प्रकार</strong><span>{{ job.get_employment_type_display }}</span></div>
+      </div>
+      {% if site_settings.careers_email or site_settings.email %}
+      <div class="contact-info-item">
+        <i class="bi bi-envelope-fill"></i>
+        <div><strong>ईमेल</strong><a href="mailto:{{ site_settings.careers_email|default:site_settings.email }}">{{ site_settings.careers_email|default:site_settings.email }}</a></div>
+      </div>
+      {% endif %}
+      {% if not job.description %}
+      <div class="contact-info-item">
+        <i class="bi bi-arrow-left-circle"></i>
+        <div><a href="{% url 'core:careers' %}">सभी वैकेंसी देखें</a></div>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <div class="contact-form-card">
+    <h2>"{{ job.title }}" के लिए आवेदन करें</h2>
+    <p>रिज्यूमे (PDF/DOC, अधिकतम 5MB) अपलोड करें, हमारी टीम उपयुक्त उम्मीदवारों से सीधे संपर्क करेगी।</p>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {{ form.job }}
+      {{ form.role_applied }}
+      <div class="contact-hp" aria-hidden="true">
+        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+        {{ form.website }}
+      </div>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="{{ form.name.id_for_label }}">पूरा नाम</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.email.id_for_label }}">ईमेल</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.phone.id_for_label }}">फोन नंबर</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.resume.id_for_label }}">रिज्यूमे (PDF/DOC)</label>
+          {{ form.resume }}
+          {{ form.resume.errors }}
+        </div>
+        <div class="contact-field full">
+          <label for="{{ form.cover_note.id_for_label }}">आपके बारे में संक्षेप में</label>
+          {{ form.cover_note }}
+          {{ form.cover_note.errors }}
+        </div>
+      </div>
+      <button class="contact-submit" type="submit">आवेदन भेजें</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

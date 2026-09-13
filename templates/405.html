@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}अस्वीकृत तरीका (405) - Desh Darpan Samvad{% endblock %}
+{% block content %}
+<section class="dds-container error-page">
+  <span class="error-code">405</span>
+  <h1>यह क्रिया इस तरह नहीं की जा सकती।</h1>
+  <p>सुरक्षा कारणों से कुछ क्रियाएं सिर्फ पेज के बटन से ही की जा सकती हैं। कृपया संबंधित पेज पर जाकर दोबारा कोशिश करें।</p>
+  <div class="error-actions">
+    <a class="error-home-link" href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> होम पर जाएं</a>
+    <a class="error-secondary-link" href="{% url 'news:latest' %}">ताजा खबरें</a>
+  </div>
+</section>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
 from galleries.models import Gallery
+from liveblog.models import LiveBlog
 from news.models import Article, Category
 from videos.models import Video
 from webstories.models import WebStory
@@ -50,12 +51,20 @@ class WebStorySitemap(Sitemap):
         return WebStory.objects.filter(active=True)
 
 
+class LiveBlogSitemap(Sitemap):
+    changefreq = "hourly"
+    priority = 0.7
+
+    def items(self):
+        return LiveBlog.objects.filter(active=True)
+
+
 class StaticSitemap(Sitemap):
     priority = 0.5
     changefreq = "monthly"
 
     def items(self):
-        return ["home", "news:latest", "news:trending", "galleries:list", "videos:list", "webstories:list", "liveblog:list", "core:about", "core:contact"]
+        return ["home", "news:latest", "news:trending", "galleries:list", "videos:list", "videos:shorts", "webstories:list", "liveblog:list", "core:about", "core:contact"]
 
     def location(self, item):
         return reverse(item)

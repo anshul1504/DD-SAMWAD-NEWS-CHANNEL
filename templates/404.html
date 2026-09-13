@@ -1,2 +1,13 @@
 {% extends "base.html" %}
-{% block content %}<section class="container error-page"><h1>404</h1><p>यह पेज उपलब्ध नहीं है।</p><a href="{% url 'home' %}">होम पर जाएं</a></section>{% endblock %}
+{% block title %}पेज नहीं मिला (404) - Desh Darpan Samvad{% endblock %}
+{% block content %}
+<section class="dds-container error-page">
+  <span class="error-code">404</span>
+  <h1>यह पेज उपलब्ध नहीं है।</h1>
+  <p>जिस पेज को आप खोज रहे हैं वह हटा दिया गया है या कभी मौजूद नहीं था।</p>
+  <div class="error-actions">
+    <a class="error-home-link" href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> होम पर जाएं</a>
+    <a class="error-secondary-link" href="{% url 'news:latest' %}">ताजा खबरें</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dds-container contact-hero">
+  <span>Investor Relations</span>
+  <h1>इन्वेस्टर रिलेशंस</h1>
+  <p>देश दर्पण संवाद के विकास में निवेश या रणनीतिक साझेदारी में रुचि रखने वाले पक्षों के लिए संपर्क का माध्यम।</p>
+</section>
+
+<section class="dds-container contact-layout">
+  <aside>
+    <div class="contact-info-card">
+      <div class="contact-info-item">
+        <i class="bi bi-info-circle-fill"></i>
+        <div><strong>हमारे बारे में</strong><span>हिंदी-प्रथम डिजिटल समाचार मंच — राष्ट्रीय कवरेज के साथ राज्य/जिला स्तर की खबरें। <a href="{% url 'core:about' %}">विस्तार से देखें</a></span></div>
+      </div>
+      <div class="contact-info-item">
+        <i class="bi bi-graph-up-arrow"></i>
+        <div><strong>रुचि के क्षेत्र</strong><span>प्लेटफ़ॉर्म विस्तार, तकनीकी विकास, क्षेत्रीय/भाषाई विस्तार में साझेदारी।</span></div>
+      </div>
+      <div class="contact-info-item">
+        <i class="bi bi-file-lock-fill"></i>
+        <div><strong>गोपनीयता</strong><span>वित्तीय जानकारी का खुलासा केवल पारस्परिक NDA के बाद किया जाता है।</span></div>
+      </div>
+      {% if site_settings.investor_email or site_settings.email %}
+      <div class="contact-info-item">
+        <i class="bi bi-envelope-fill"></i>
+        <div><strong>ईमेल</strong><a href="mailto:{{ site_settings.investor_email|default:site_settings.email }}">{{ site_settings.investor_email|default:site_settings.email }}</a></div>
+      </div>
+      {% endif %}
+      {% if site_settings.primary_phone %}
+      <div class="contact-info-item">
+        <i class="bi bi-telephone-fill"></i>
+        <div><strong>फोन</strong><a href="tel:{{ site_settings.primary_phone }}">{{ site_settings.primary_phone }}</a></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="contact-quicklinks">
+      <h3>अन्य पार्टनरशिप विकल्प</h3>
+      <a href="{% url 'core:advertise' %}"><i class="bi bi-megaphone-fill"></i> विज्ञापन दें</a>
+      <a href="{% url 'core:sponsorship' %}"><i class="bi bi-award-fill"></i> स्पॉन्सरशिप</a>
+    </div>
+  </aside>
+
+  <div class="contact-form-card">
+    <h2>अपना प्रस्ताव भेजें</h2>
+    <p>अपना परिचय, संस्था/फंड का नाम (यदि लागू हो) और रुचि का क्षेत्र संक्षेप में बताएं। प्रारंभिक समीक्षा के बाद हमारी टीम सीधे संपर्क करेगी।</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="contact-hp" aria-hidden="true">
+        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+        {{ form.website }}
+      </div>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="{{ form.name.id_for_label }}">आपका नाम</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.email.id_for_label }}">ईमेल</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.phone.id_for_label }}">फोन नंबर</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.subject.id_for_label }}">संस्था / फंड का नाम</label>
+          {{ form.subject }}
+          {{ form.subject.errors }}
+        </div>
+        <div class="contact-field full">
+          <label for="{{ form.message.id_for_label }}">प्रस्ताव / रुचि का विवरण</label>
+          {{ form.message }}
+          {{ form.message.errors }}
+        </div>
+      </div>
+      <button class="contact-submit" type="submit">भेजें</button>
+    </form>
+  </div>
+</section>
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dds-container contact-hero">
+  <span>News Tip</span>
+  <h1>कोई खबर या सुराग है?</h1>
+  <p>अपने इलाके की कोई घटना, दस्तावेज़ या जानकारी है जो खबर बन सकती है — हमें बताएं। हमारी टीम हर टिप की पुष्टि करने के बाद ही प्रकाशित करती है।</p>
+</section>
+
+<section class="dds-container contact-layout">
+  <aside>
+    <div class="contact-info-card">
+      <div class="contact-info-item">
+        <i class="bi bi-shield-check"></i>
+        <div><strong>गोपनीयता</strong><span>आपकी जानकारी केवल संपादकीय टीम के साथ साझा की जाती है।</span></div>
+      </div>
+      <div class="contact-info-item">
+        <i class="bi bi-patch-check"></i>
+        <div><strong>सत्यापन</strong><span>प्रकाशन से पहले हर टिप की तथ्य-जांच की जाती है।</span></div>
+      </div>
+      {% if site_settings.whatsapp_url %}
+      <div class="contact-info-item">
+        <i class="bi bi-whatsapp"></i>
+        <div><strong>WhatsApp पर भेजें</strong><a href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener">सीधा संदेश भेजें</a></div>
+      </div>
+      {% endif %}
+      {% if site_settings.tips_email or site_settings.email %}
+      <div class="contact-info-item">
+        <i class="bi bi-envelope-fill"></i>
+        <div><strong>ईमेल</strong><a href="mailto:{{ site_settings.tips_email|default:site_settings.email }}">{{ site_settings.tips_email|default:site_settings.email }}</a></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="contact-quicklinks">
+      <h3>अन्य ज़रूरी लिंक</h3>
+      <a href="{% url 'core:contact' %}"><i class="bi bi-chat-dots-fill"></i> सामान्य संपर्क</a>
+      <a href="{% url 'core:grievance' %}"><i class="bi bi-shield-exclamation"></i> शिकायत / Grievance</a>
+      <a href="{% url 'core:editorial_policy' %}"><i class="bi bi-journal-check"></i> एडिटोरियल पॉलिसी</a>
+    </div>
+  </aside>
+
+  <div class="contact-form-card">
+    <h2>अपनी टिप भेजें</h2>
+    <p>जितना विस्तार से बताएंगे, सत्यापन उतनी जल्दी होगा।</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="contact-hp" aria-hidden="true">
+        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+        {{ form.website }}
+      </div>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="{{ form.name.id_for_label }}">आपका नाम</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.email.id_for_label }}">ईमेल</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.phone.id_for_label }}">फोन नंबर</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.subject.id_for_label }}">खबर का विषय / शहर</label>
+          {{ form.subject }}
+          {{ form.subject.errors }}
+        </div>
+        <div class="contact-field full">
+          <label for="{{ form.message.id_for_label }}">पूरी जानकारी</label>
+          {{ form.message }}
+          {{ form.message.errors }}
+        </div>
+      </div>
+      <button class="contact-submit" type="submit">टिप भेजें</button>
+    </form>
+  </div>
+</section>
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+{% endblock %}

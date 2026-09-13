@@ -2,13 +2,25 @@
 {% block auth_content %}
 <span class="auth-kicker">Create account</span>
 <h2>Join the portal</h2>
-<p>Signup requests are OTP verified. New users start with Reporter access.</p>
-<form class="auth-form" method="post">
+<p class="auth-sub">Signup requests are verified by a one-time code. New accounts start with Guest access until an administrator assigns a newsroom role.</p>
+<form class="auth-form" method="post" novalidate>
   {% csrf_token %}
-  <div class="field"><label for="{{ form.full_name.id_for_label }}">Full name</label>{{ form.full_name }}{{ form.full_name.errors }}</div>
-  <div class="field"><label for="{{ form.email.id_for_label }}">Email address</label>{{ form.email }}{{ form.email.errors }}</div>
-  <div class="field"><label for="{{ form.password.id_for_label }}">Password</label>{{ form.password }}{{ form.password.errors }}</div>
-  <button class="auth-submit" type="submit">Send Verification OTP</button>
+  <div class="field">
+    <label for="{{ form.full_name.id_for_label }}">Full name</label>
+    {{ form.full_name }}
+    {{ form.full_name.errors }}
+  </div>
+  <div class="field">
+    <label for="{{ form.email.id_for_label }}">Email address</label>
+    {{ form.email }}
+    {{ form.email.errors }}
+  </div>
+  <div class="field">
+    <label for="{{ form.password.id_for_label }}">Password</label>
+    {{ form.password }}
+    {{ form.password.errors }}
+  </div>
+  <button class="auth-submit" type="submit">Send verification code</button>
 </form>
 <div class="auth-links"><span>Already registered? <a href="{% url 'accounts:login' %}">Sign in</a></span></div>
 {% endblock %}

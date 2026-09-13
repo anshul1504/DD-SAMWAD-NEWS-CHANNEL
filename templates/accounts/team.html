@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div>
+    <span>Newsroom</span>
+    <h1>हमारी टीम</h1>
+    <p>देश दर्पण संवाद की रिपोर्टिंग और संपादकीय टीम से मिलें — हर खबर के पीछे असली लोग हैं।</p>
+  </div>
+</section>
+<section class="dds-container">
+  <div class="team-grid">
+    {% for reporter in reporters %}
+      <a class="team-card" href="{{ reporter.get_absolute_url }}">
+        {% if reporter.profile_photo %}
+          <img src="{{ reporter.profile_photo.url }}" alt="{{ reporter.display_name }}" loading="lazy" decoding="async">
+        {% else %}
+          <span class="team-card-avatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span>
+        {% endif %}
+        <strong>{{ reporter.display_name }}</strong>
+        {% if reporter.designation %}<span>{{ reporter.designation }}</span>{% endif %}
+        {% if reporter.city %}<small><i class="bi bi-geo-alt"></i> {{ reporter.city.name }}</small>{% endif %}
+      </a>
+    {% empty %}
+      <div class="empty-state">टीम प्रोफाइल जल्द ही जोड़ी जाएंगी।</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<div style="background:#050b18;padding:22px 28px;font-family:Arial,Helvetica,sans-serif;">
+  <p style="margin:0 0 10px;color:#aeb8c8;font-size:12px;line-height:1.6;">
+    {% if site_settings.address %}{{ site_settings.address }}<br>{% endif %}
+    {% if site_settings.email %}<a href="mailto:{{ site_settings.email }}" style="color:#d2dceb;text-decoration:none;">{{ site_settings.email }}</a>{% endif %}
+    {% if site_settings.primary_phone %} &middot; <a href="tel:{{ site_settings.primary_phone }}" style="color:#d2dceb;text-decoration:none;">{{ site_settings.primary_phone }}</a>{% endif %}
+  </p>
+  <p style="margin:0;color:#7c879b;font-size:11px;">
+    &copy; {% now "Y" %} Desh Darpan Samvad. All rights reserved.
+  </p>
+</div>

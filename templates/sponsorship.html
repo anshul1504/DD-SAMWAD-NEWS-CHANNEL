@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dds-container contact-hero">
+  <span>Sponsorship</span>
+  <h1>ब्रांड पार्टनरशिप और स्पॉन्सरशिप</h1>
+  <p>इवेंट कवरेज, थीम आधारित सीरीज़ या श्रेणी-विशेष कंटेंट में अपने ब्रांड को जोड़ें — स्पष्ट रूप से चिह्नित, संपादकीय सामग्री से अलग।</p>
+</section>
+
+<section class="dds-container contact-layout">
+  <aside>
+    <div class="contact-info-card">
+      <div class="contact-info-item">
+        <i class="bi bi-tags-fill"></i>
+        <div><strong>श्रेणी स्पॉन्सरशिप</strong><span>किसी एक सेक्शन (बिजनेस, स्पोर्ट्स आदि) को तय अवधि के लिए प्रायोजित करें।</span></div>
+      </div>
+      <div class="contact-info-item">
+        <i class="bi bi-broadcast-pin"></i>
+        <div><strong>इवेंट कवरेज</strong><span>लाइव ब्लॉग या विशेष इवेंट कवरेज के साथ ब्रांड एसोसिएशन।</span></div>
+      </div>
+      <div class="contact-info-item">
+        <i class="bi bi-journal-richtext"></i>
+        <div><strong>प्रायोजित सीरीज़</strong><span>बहु-भाग कंटेंट सीरीज़, स्पष्ट रूप से "प्रायोजित" चिह्नित।</span></div>
+      </div>
+      {% if site_settings.sponsorship_email or site_settings.email %}
+      <div class="contact-info-item">
+        <i class="bi bi-envelope-fill"></i>
+        <div><strong>ईमेल</strong><a href="mailto:{{ site_settings.sponsorship_email|default:site_settings.email }}">{{ site_settings.sponsorship_email|default:site_settings.email }}</a></div>
+      </div>
+      {% endif %}
+      {% if site_settings.primary_phone %}
+      <div class="contact-info-item">
+        <i class="bi bi-telephone-fill"></i>
+        <div><strong>फोन</strong><a href="tel:{{ site_settings.primary_phone }}">{{ site_settings.primary_phone }}</a></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="contact-quicklinks">
+      <h3>अन्य पार्टनरशिप विकल्प</h3>
+      <a href="{% url 'core:advertise' %}"><i class="bi bi-megaphone-fill"></i> विज्ञापन दें</a>
+      <a href="{% url 'core:investors' %}"><i class="bi bi-graph-up-arrow"></i> इन्वेस्टर रिलेशंस</a>
+    </div>
+  </aside>
+
+  <div class="contact-form-card">
+    <h2>स्पॉन्सरशिप पूछताछ भेजें</h2>
+    <p>अपनी कंपनी और आप किस तरह की पार्टनरशिप में रुचि रखते हैं, बताएं — हमारी टीम विकल्प और दरें भेजेगी।</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="contact-hp" aria-hidden="true">
+        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+        {{ form.website }}
+      </div>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="{{ form.name.id_for_label }}">आपका नाम</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.email.id_for_label }}">ईमेल</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.phone.id_for_label }}">फोन नंबर</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.subject.id_for_label }}">कंपनी / ब्रांड का नाम</label>
+          {{ form.subject }}
+          {{ form.subject.errors }}
+        </div>
+        <div class="contact-field full">
+          <label for="{{ form.message.id_for_label }}">पार्टनरशिप का प्रकार और विवरण</label>
+          {{ form.message }}
+          {{ form.message.errors }}
+        </div>
+      </div>
+      <button class="contact-submit" type="submit">पूछताछ भेजें</button>
+    </form>
+  </div>
+</section>
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+{% endblock %}

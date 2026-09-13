@@ -23,8 +23,16 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 from django.views.static import serve
 
-from core.sitemaps import ArticleSitemap, CategorySitemap, GallerySitemap, StaticSitemap, VideoSitemap, WebStorySitemap
-from core.views import robots_txt
+from core.sitemaps import (
+    ArticleSitemap,
+    CategorySitemap,
+    GallerySitemap,
+    LiveBlogSitemap,
+    StaticSitemap,
+    VideoSitemap,
+    WebStorySitemap,
+)
+from core.views import healthz, robots_txt
 from news.views import home
 
 sitemaps = {
@@ -33,6 +41,7 @@ sitemaps = {
     "galleries": GallerySitemap,
     "videos": VideoSitemap,
     "webstories": WebStorySitemap,
+    "liveblog": LiveBlogSitemap,
     "static": StaticSitemap,
 }
 
@@ -49,6 +58,9 @@ urlpatterns = [
     path("", include("core.urls")),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", robots_txt, name="robots_txt"),
+    # Kept at the project root (not under core/) so monitoring has a stable URL
+    # that does not move if app routing changes.
+    path("healthz", healthz, name="healthz"),
 ]
 
 if settings.DEBUG:

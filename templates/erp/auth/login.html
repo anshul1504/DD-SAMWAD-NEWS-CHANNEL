@@ -2,14 +2,103 @@
 {% block auth_content %}
 <span class="auth-kicker">Sign in</span>
 <h2>Welcome back</h2>
-<p>Enter your registered email. We will send a secure OTP to continue.</p>
-<form class="auth-form" method="post">
+<p class="auth-sub">Enter your work email, then choose how you'd like to continue — with your password or a one-time code.</p>
+
+<form class="auth-form" method="post" id="loginForm" novalidate>
   {% csrf_token %}
-  <div class="field"><label for="{{ form.email.id_for_label }}">Email address</label>{{ form.email }}{{ form.email.errors }}</div>
-  <button class="auth-submit" type="submit">Send OTP</button>
+  {{ form.non_field_errors }}
+
+  <div class="field" id="emailStep">
+    <label for="{{ form.email.id_for_label }}">Email address</label>
+    {{ form.email }}
+    {{ form.email.errors }}
+    <button class="auth-submit" type="button" id="continueBtn">Continue</button>
+  </div>
+
+  <div id="methodStep" hidden>
+    <div class="auth-email-lock">
+      <i class="bi bi-envelope"></i>
+      <strong id="emailPreview"></strong>
+      <button type="button" id="changeEmailBtn">Change</button>
+    </div>
+
+    <p class="auth-method-label">How would you like to sign in?</p>
+    <div class="auth-method-row">
+      <button type="button" class="auth-method-btn" id="chooseOtpBtn"><i class="bi bi-envelope-paper"></i> One-time code</button>
+      <button type="button" class="auth-method-btn" id="choosePasswordBtn"><i class="bi bi-key"></i> Password</button>
+    </div>
+
+    <div class="field" id="passwordField" hidden>
+      <label for="{{ form.password.id_for_label }}">Password</label>
+      {{ form.password }}
+      {{ form.password.errors }}
+    </div>
+
+    <button class="auth-submit" type="submit" id="submitBtn" hidden></button>
+  </div>
 </form>
+
 <div class="auth-links">
   <a href="{% url 'accounts:forgot_password' %}">Forgot password?</a>
-  <span>New user? <a href="{% url 'accounts:signup' %}">Create account</a></span>
+  <span>New here? <a href="{% url 'accounts:signup' %}">Create an account</a></span>
 </div>
+
+<script>
+(function () {
+  var emailInput = document.getElementById("{{ form.email.id_for_label }}");
+  var passwordInput = document.getElementById("{{ form.password.id_for_label }}");
+  var emailStep = document.getElementById("emailStep");
+  var methodStep = document.getElementById("methodStep");
+  var emailPreview = document.getElementById("emailPreview");
+  var passwordField = document.getElementById("passwordField");
+  var submitBtn = document.getElementById("submitBtn");
+  var hasServerErrors = {{ form.errors|yesno:"true,false" }};
+  // Password inputs never render their value back, so the server tells us which
+  // method was attempted; otherwise a failed password login silently reopens in
+  // OTP mode with a password error attached.
+  var passwordWasAttempted = {{ login_password_attempted|yesno:"true,false" }};
+
+  function showMethodStep() {
+    if (!emailInput.value.trim()) { emailInput.focus(); return; }
+    emailStep.hidden = true;
+    methodStep.hidden = false;
+    emailPreview.textContent = emailInput.value.trim();
+  }
+
+  function chooseOtp() {
+    passwordInput.value = "";
+    passwordField.hidden = true;
+    submitBtn.hidden = false;
+    submitBtn.textContent = "Send one-time code";
+    document.getElementById("chooseOtpBtn").classList.add("is-selected");
+    document.getElementById("choosePasswordBtn").classList.remove("is-selected");
+  }
+
+  function choosePassword() {
+    passwordField.hidden = false;
+    submitBtn.hidden = false;
+    submitBtn.textContent = "Sign in";
+    document.getElementById("choosePasswordBtn").classList.add("is-selected");
+    document.getElementById("chooseOtpBtn").classList.remove("is-selected");
+    passwordInput.focus();
+  }
+
+  document.getElementById("continueBtn").addEventListener("click", showMethodStep);
+  document.getElementById("changeEmailBtn").addEventListener("click", function () {
+    methodStep.hidden = true;
+    emailStep.hidden = false;
+    emailInput.focus();
+  });
+  document.getElementById("chooseOtpBtn").addEventListener("click", chooseOtp);
+  document.getElementById("choosePasswordBtn").addEventListener("click", choosePassword);
+  emailInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") { event.preventDefault(); showMethodStep(); }
+  });
+
+  if (hasServerErrors) {
+    showMethodStep();
+    if (passwordWasAttempted) { choosePassword(); } else { chooseOtp(); }
+  }
+})();
+</script>
 {% endblock %}

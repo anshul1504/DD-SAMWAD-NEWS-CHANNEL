@@ -1,0 +1,23 @@
+<div style="margin:0;padding:24px;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+    {% include "emails/_header.html" %}
+    <div style="padding:32px 28px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:#f0fdf4;color:#059669;display:table-cell;vertical-align:middle;text-align:center;font-size:26px;">&#10003;</div>
+      <h2 style="margin:18px 0 6px;font-size:20px;color:#101828;">धन्यवाद, {{ application.name }} जी!</h2>
+      <p style="margin:0 0 20px;color:#475467;font-size:14.5px;line-height:1.7;">
+        आपका आवेदन हमें सफलतापूर्वक प्राप्त हो गया है। हमारी टीम इसकी समीक्षा करेगी और
+        उपयुक्त पाए जाने पर सीधे आपसे संपर्क करेगी।
+      </p>
+
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:22px;">
+        <p style="margin:0 0 4px;color:#667085;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">आवेदन की गई भूमिका</p>
+        <p style="margin:0;color:#101828;font-size:15px;font-weight:700;">{% if application.job %}{{ application.job.title }}{% else %}{{ application.role_applied }}{% endif %}</p>
+      </div>
+
+      <p style="margin:26px 0 0;color:#667085;font-size:13px;">
+        सादर,<br><strong style="color:#101828;">देश दर्पण संवाद टीम</strong>
+      </p>
+    </div>
+    {% include "emails/_footer.html" %}
+  </div>
+</div>

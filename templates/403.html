@@ -1,2 +1,13 @@
 {% extends "base.html" %}
-{% block content %}<section class="container error-page"><h1>403</h1><p>आपको इस पेज की अनुमति नहीं है।</p></section>{% endblock %}
+{% block title %}अनुमति नहीं (403) - Desh Darpan Samvad{% endblock %}
+{% block content %}
+<section class="dds-container error-page">
+  <span class="error-code">403</span>
+  <h1>आपको इस पेज की अनुमति नहीं है।</h1>
+  <p>इस पेज तक पहुंचने के लिए आपके पास आवश्यक अनुमति नहीं है।</p>
+  <div class="error-actions">
+    <a class="error-home-link" href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> होम पर जाएं</a>
+    <a class="error-secondary-link" href="{% url 'accounts:login' %}">साइन इन करें</a>
+  </div>
+</section>
+{% endblock %}

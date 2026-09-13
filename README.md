@@ -22,6 +22,7 @@ pip install -r requirements.txt
 copy .env.example .env
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 python manage.py migrate
+python manage.py createcachetable
 python manage.py createsuperuser
 python manage.py setup_portal_roles
 python manage.py seed_home_demo
@@ -68,6 +69,55 @@ Generate a new production secret key with:
 
 ```powershell
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+## Production deployment
+
+> Full operations guide — backups, restore, monitoring, disaster scenarios, CI —
+> is in [docs/deployment.md](docs/deployment.md). The summary below covers setup only.
+
+### Cache table (required unless using Redis)
+
+When `REDIS_URL` is not set, the cache falls back to a database table that must be
+created once. OTP throttling and contact-form throttling both depend on the cache,
+so this step is not optional:
+
+```powershell
+python manage.py createcachetable
+```
+
+Set `REDIS_URL` to use Redis instead (the `redis` driver is in `requirements.txt`).
+A per-process `LocMemCache` is deliberately **not** used: throttle counters must be
+shared across workers or the limits can be bypassed by hitting a different worker.
+
+### Static files
+
+WhiteNoise serves collected static files when `DEBUG=False`. Run before each deploy:
+
+```powershell
+python manage.py collectstatic --noinput
+```
+
+### Uploaded media
+
+WhiteNoise does **not** serve `MEDIA_ROOT`. Map `MEDIA_URL` to `MEDIA_ROOT` at the
+reverse proxy, or article images will 404 in production. Example nginx:
+
+```nginx
+location /media/ {
+    alias /srv/dds/media/;
+    expires 30d;
+}
+```
+
+### Deploy sequence
+
+```powershell
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createcachetable        # skip only if REDIS_URL is set
+python manage.py collectstatic --noinput
+python manage.py check --deploy          # run with the production .env
 ```
 
 ## OTP Email

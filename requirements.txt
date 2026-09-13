@@ -1,3 +1,16 @@
 Django>=5.2,<5.3
+# Bootstrap-based theme for the Django admin (/admin/) -- must be listed in
+# INSTALLED_APPS before django.contrib.admin.
+django-jazzmin>=3.0
 Pillow>=11.0
 python-dotenv>=1.0
+nh3>=0.2
+# Production WSGI server (runserver is dev-only, never for AWS/production).
+gunicorn>=22.0
+# Serves collected static files under DEBUG=False without a separate web server.
+whitenoise>=6.6
+# Driver for the Redis cache backend selected when REDIS_URL is set (config/settings.py).
+redis>=5.0
+# Optional error tracking. Only used when SENTRY_DSN is set; the app starts
+# normally when it is absent or uninstalled.
+sentry-sdk>=2.0

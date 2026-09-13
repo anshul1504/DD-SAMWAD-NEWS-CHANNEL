@@ -3,6 +3,7 @@ from django.core.cache import cache
 from django.db.models import Q
 
 from advertisements.models import Advertisement
+from liveblog.models import LiveBlog
 from locations.models import City
 from news.models import Article, Category
 
@@ -36,11 +37,19 @@ def global_site_context(request):
         60,
     )
     active_ads = [ad for ad in active_ads if (not ad.end_date or ad.end_date >= now)]
+    # The header's "live update" pill needs somewhere real to point: the live
+    # blog actually in progress right now, not a duplicate of "Latest News".
+    active_live_blog = cache.get_or_set(
+        "dds:active_live_blog",
+        lambda: LiveBlog.objects.filter(active=True, status=LiveBlog.Status.LIVE).first(),
+        30,
+    )
     return {
         "site_settings": site_settings,
         "menu_categories": menu_categories,
         "breaking_articles": breaking_articles,
         "popular_cities": popular_cities,
         "active_ads": active_ads,
+        "active_live_blog": active_live_blog,
         "today": now,
     }

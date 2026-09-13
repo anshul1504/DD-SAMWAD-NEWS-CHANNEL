@@ -1,12 +1,21 @@
 {% extends "erp/auth/base_auth.html" %}
 {% block auth_content %}
-<span class="auth-kicker">OTP verification</span>
-<h2>Check your email</h2>
-<p>Enter the 6 digit code sent to <strong>{{ otp.email }}</strong>. The code is valid for 10 minutes.</p>
+<span class="auth-kicker">Verification</span>
+<h2>Enter the code</h2>
+<p class="auth-sub">We've sent a 6-digit code to <strong>{{ otp_email }}</strong>. It's valid for 10 minutes.</p>
+<div class="auth-otp-meta">
+  <i class="bi bi-envelope-check"></i>
+  <span>Sent to <strong>{{ otp_email }}</strong></span>
+</div>
 <form class="auth-form" method="post">
   {% csrf_token %}
-  <div class="field"><label for="{{ form.code.id_for_label }}">Verification code</label>{{ form.code }}{{ form.code.errors }}</div>
-  <button class="auth-submit" type="submit">Verify & Continue</button>
+  {{ form.non_field_errors }}
+  <div class="field">
+    <label for="{{ form.code.id_for_label }}">6-digit code</label>
+    {{ form.code }}
+    {{ form.code.errors }}
+  </div>
+  <button class="auth-submit" type="submit">Verify &amp; continue</button>
 </form>
-<div class="auth-links"><a href="{% url 'accounts:login' %}">Start again</a></div>
+<a class="auth-back-link" href="{% url 'accounts:login' %}"><i class="bi bi-arrow-left"></i> Back to sign in</a>
 {% endblock %}

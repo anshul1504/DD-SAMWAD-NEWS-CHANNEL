@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}गलत अनुरोध (400) - Desh Darpan Samvad{% endblock %}
+{% block content %}
+<section class="dds-container error-page">
+  <span class="error-code">400</span>
+  <h1>अनुरोध समझ नहीं आया।</h1>
+  <p>आपका अनुरोध अधूरा या गलत प्रारूप में था। कृपया दोबारा कोशिश करें।</p>
+  <div class="error-actions">
+    <a class="error-home-link" href="{% url 'home' %}"><i class="bi bi-house-door-fill"></i> होम पर जाएं</a>
+    <a class="error-secondary-link" href="{% url 'news:latest' %}">ताजा खबरें</a>
+  </div>
+</section>
+{% endblock %}

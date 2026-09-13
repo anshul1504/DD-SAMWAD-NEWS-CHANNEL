@@ -10,3 +10,5 @@ media/
 *.bak
 .DS_Store
 Thumbs.db
+docs/test-credentials.md
+backups/

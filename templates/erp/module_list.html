@@ -1,46 +1,96 @@
 {% extends "erp/base_portal.html" %}
+{% load portal_extras %}
 
 {% block content %}
-<style>
-  .erp-page{background:#f4f7fb;padding:1rem 0 2.4rem}
-  .erp-head{background:linear-gradient(135deg,#061b43,#0b3474);color:#fff;border-radius:12px;padding:1.25rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem}
-  .erp-head h1{margin:.2rem 0 0;color:#fff;font-size:clamp(1.7rem,3vw,2.6rem)}
-  .erp-head span{color:#ffccd0;font-size:.76rem;font-weight:900;text-transform:uppercase}
-  .erp-actions{display:flex;gap:.55rem;flex-wrap:wrap}
-  .erp-btn{display:inline-flex;align-items:center;gap:.45rem;min-height:40px;border-radius:8px;padding:.55rem .85rem;background:#fff;color:#061b43;font-weight:900}
-  .erp-btn.primary{background:#e31e28;color:#fff}
-  .erp-panel{background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 14px 34px rgba(15,23,42,.06);overflow:hidden}
-  .erp-row{display:grid;grid-template-columns:80px minmax(0,1fr) 170px;gap:1rem;align-items:center;padding:.9rem 1rem;border-bottom:1px solid #edf2f7;color:#0f172a}
-  .erp-row:last-child{border-bottom:0}
-  .erp-row strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .erp-row span{color:#64748b;font-weight:800;font-size:.85rem}
-  .erp-empty{padding:2rem;text-align:center;color:#64748b;font-weight:800}
-  @media(max-width:720px){.erp-head{display:grid}.erp-row{grid-template-columns:1fr;gap:.35rem}}
-</style>
+<section class="portal-main">
+  <header class="portal-hero">
+    <div>
+      <span class="eyebrow">ERP Module</span>
+      <h1>{{ config.title }}</h1>
+      <p>{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }} in this module.</p>
+    </div>
+    <div class="portal-actions">
+      <a class="portal-btn muted" href="{% url 'accounts:dashboard' %}"><i class="bi bi-arrow-left"></i>Dashboard</a>
+      {% if can_edit %}
+        <a class="portal-btn primary" href="{% url 'accounts:portal_module_new' module %}"><i class="bi bi-plus-lg"></i>Add New</a>
+      {% endif %}
+    </div>
+  </header>
 
-<main class="erp-page">
-  <div class="dds-container">
-    <header class="erp-head">
-      <div>
-        <span>ERP Module</span>
-        <h1>{{ config.title }}</h1>
-      </div>
-      <div class="erp-actions">
-        <a class="erp-btn" href="{% url 'accounts:dashboard' %}"><i class="bi bi-arrow-left"></i>Dashboard</a>
-        <a class="erp-btn primary" href="{% url 'accounts:portal_module_new' module %}"><i class="bi bi-plus-lg"></i>Add New</a>
-      </div>
-    </header>
-    <section class="erp-panel">
-      {% for object in objects %}
-        <div class="erp-row">
-          <span>#{{ object.pk }}</span>
-          <strong>{{ object }}</strong>
-          <span>Manage access ready</span>
-        </div>
-      {% empty %}
-        <div class="erp-empty">No records found in this module.</div>
-      {% endfor %}
-    </section>
+  <div class="portal-toolbar">
+    <form class="portal-search" method="get" role="search">
+      <label class="visually-hidden-label" for="portalSearch">Search {{ config.title }}</label>
+      <input id="portalSearch" type="search" name="q" value="{{ query }}" placeholder="Search {{ config.title|lower }}&hellip;">
+      <button class="portal-btn" type="submit"><i class="bi bi-search"></i>Search</button>
+      {% if query %}<a class="portal-btn" href="{% url 'accounts:portal_module' module %}">Clear</a>{% endif %}
+    </form>
   </div>
-</main>
+
+  <div class="portal-list">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          {% for field in config.fields %}
+            <th>{% portal_column_label config.model field %}</th>
+          {% endfor %}
+          {% if can_edit %}<th class="col-actions">Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for object in page_obj %}
+          <tr>
+            <td class="col-id">#{{ object.pk }}</td>
+            {% for field in config.fields %}
+              <td>{% portal_column_value object field %}</td>
+            {% endfor %}
+            {% if can_edit %}
+              <td class="col-actions">
+                <span class="portal-row-actions">
+                  <a href="{% url 'accounts:portal_module_edit' module object.pk %}"><i class="bi bi-pencil"></i>Edit</a>
+                  <form method="post" action="{% url 'accounts:portal_module_delete' module object.pk %}" data-confirm-remove>
+                    {% csrf_token %}
+                    <button type="submit"><i class="bi bi-archive"></i>Remove</button>
+                  </form>
+                </span>
+              </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="{{ config.fields|length|add:2 }}">
+              <div class="portal-empty">
+                {% if query %}No records match &ldquo;{{ query }}&rdquo;.{% else %}No records found in this module.{% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="portal-pagination" aria-label="Pagination">
+      <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      <span class="pages">
+        {% if page_obj.has_previous %}
+          <a href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i>Previous</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <a href="?{% if query %}q={{ query|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next<i class="bi bi-chevron-right"></i></a>
+        {% endif %}
+      </span>
+    </nav>
+  {% endif %}
+</section>
+
+<script>
+  document.querySelectorAll("form[data-confirm-remove]").forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+      if (!window.confirm("Remove this record? Articles are archived rather than deleted; other records are deactivated.")) {
+        event.preventDefault();
+      }
+    });
+  });
+</script>
 {% endblock %}

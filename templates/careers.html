@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dds-container archive-hero">
+  <div>
+    <span>Careers</span>
+    <h1>देश दर्पण संवाद के साथ काम करें</h1>
+    <p>रिपोर्टिंग, एडिटिंग और डिजिटल मीडिया में हमारे साथ जुड़ें — नीचे खुली वैकेंसी देखें और सीधे उसी पद के लिए आवेदन करें।</p>
+  </div>
+</section>
+
+<section class="dds-container static-layout">
+  <article class="static-content">
+    {% include "pages/careers.html" %}
+
+    <h2>खुली वैकेंसी</h2>
+    <div class="job-list">
+      {% for job in openings %}
+        <a class="job-card" href="{{ job.get_absolute_url }}">
+          <div>
+            <strong>{{ job.title }}</strong>
+            <div class="job-meta">
+              {% if job.department %}<span><i class="bi bi-diagram-3"></i>{{ job.department }}</span>{% endif %}
+              {% if job.location %}<span><i class="bi bi-geo-alt"></i>{{ job.location }}</span>{% endif %}
+              <span><i class="bi bi-briefcase"></i>{{ job.get_employment_type_display }}</span>
+            </div>
+            {% if job.description %}<p>{{ job.description|truncatewords:24 }}</p>{% endif %}
+          </div>
+          <span class="job-apply-btn">विवरण / आवेदन करें</span>
+        </a>
+      {% empty %}
+        <div class="empty-state">इस समय कोई विशेष वैकेंसी सूचीबद्ध नहीं है। नई वैकेंसी आते ही यहां दिखाई देंगी।</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <aside class="static-aside">
+    <div class="static-card">
+      <h2>संपर्क</h2>
+      {% if site_settings.careers_email or site_settings.email %}
+        <p><i class="bi bi-envelope"></i> <a href="mailto:{{ site_settings.careers_email|default:site_settings.email }}">{{ site_settings.careers_email|default:site_settings.email }}</a></p>
+      {% endif %}
+      {% if site_settings.primary_phone %}
+        <p><i class="bi bi-telephone"></i> <a href="tel:{{ site_settings.primary_phone }}">{{ site_settings.primary_phone }}</a></p>
+      {% endif %}
+    </div>
+  </aside>
+</section>
+{% endblock %}

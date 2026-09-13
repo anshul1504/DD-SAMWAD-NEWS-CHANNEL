@@ -1,0 +1,52 @@
+{% extends "erp/base_portal.html" %}
+
+{% block content %}
+<section class="portal-main">
+  <header class="portal-hero">
+    <div>
+      <span class="eyebrow">{{ config.title }}</span>
+      <h1>{% if is_new %}New {{ config.title }}{% else %}Edit {{ config.title }}{% endif %}</h1>
+      {% if not is_new %}<p>Editing &ldquo;{{ instance }}&rdquo; (#{{ instance.pk }}).</p>{% endif %}
+    </div>
+    <div class="portal-actions">
+      <a class="portal-btn muted" href="{% url 'accounts:portal_module' module %}"><i class="bi bi-arrow-left"></i>Back to {{ config.title }}</a>
+    </div>
+  </header>
+
+  <div class="portal-panel">
+    <form class="portal-form" method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <ul class="portal-nonfield-errors">
+          {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+
+      {% for field in form %}
+        {% if field.field.widget.input_type == "checkbox" %}
+          <div class="field is-checkbox">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field.errors }}
+          </div>
+        {% else %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {{ field.errors }}
+          </div>
+        {% endif %}
+        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+      {% endfor %}
+
+      <div class="portal-form-actions">
+        <button class="portal-btn primary" type="submit">
+          <i class="bi bi-check-lg"></i>{% if is_new %}Create {{ config.title }}{% else %}Save changes{% endif %}
+        </button>
+        <a class="portal-btn" href="{% url 'accounts:portal_module' module %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

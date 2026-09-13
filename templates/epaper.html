@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load news_extras %}
+{% block content %}
+<section class="dds-container epaper-hero">
+  <div class="epaper-hero-text">
+    <span><i class="bi bi-newspaper"></i> E-Paper</span>
+    <h1>ई-पेपर</h1>
+    <p>देश दर्पण संवाद का डिजिटल प्रिंट संस्करण — रोज़ का पूरा अखबार, हर पेज असली प्रिंट जैसा।</p>
+  </div>
+  {% if current %}
+  <div class="epaper-hero-today">
+    <span class="epaper-hero-today-label">{% if current.edition_date == today %}आज का अंक{% else %}नवीनतम संस्करण{% endif %}</span>
+    <strong>{{ current.edition_date|hindi_date:False }}</strong>
+  </div>
+  {% endif %}
+</section>
+
+<section class="dds-container epaper-layout">
+  <div class="epaper-viewer">
+    {% if current %}
+      {{ page_images|json_script:"epaper-pages-data" }}
+      <div class="epaper-cover-badges">
+        {% if current.edition_date == today %}<span class="epaper-today-badge"><i class="bi bi-broadcast"></i> आज का अंक</span>{% endif %}
+        {% if current.page_count %}<span class="epaper-page-badge">{{ current.page_count }} पेज</span>{% endif %}
+      </div>
+      <div class="epaper-cover-wrap">
+        <button type="button" class="epaper-open-btn" data-epaper-open data-epaper-title="{{ current.title|default:'ई-पेपर' }} - {{ current.edition_date }}">
+          {% if current.cover_image %}
+            <img src="{{ current.cover_image.url }}" alt="{{ current.title|default:'ई-पेपर' }} - {{ current.edition_date }}" loading="lazy">
+          {% else %}
+            <div class="epaper-cover-fallback"><i class="bi bi-newspaper"></i><span>{{ current.edition_date }}</span></div>
+          {% endif %}
+          <span class="epaper-cover-hover"><i class="bi bi-zoom-in"></i> पूरा एडिशन देखें</span>
+        </button>
+      </div>
+      <div class="epaper-meta">
+        <h2>{{ current.title|default:"ई-पेपर" }}</h2>
+        <p><i class="bi bi-calendar3"></i> {{ current.edition_date|hindi_date:False }}{% if current.page_count %} · {{ current.page_count }} पेज{% endif %}</p>
+        <div class="epaper-actions">
+          <button type="button" class="epaper-btn primary" data-epaper-open data-epaper-title="{{ current.title|default:'ई-पेपर' }} - {{ current.edition_date }}"><i class="bi bi-eye"></i> पूरा एडिशन देखें</button>
+          <a class="epaper-btn" href="{{ current.pdf.url }}" download><i class="bi bi-download"></i> PDF डाउनलोड करें</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">आज का ई-पेपर अभी उपलब्ध नहीं है। कृपया बाद में फिर देखें।</div>
+    {% endif %}
+  </div>
+
+  {% if recent_editions %}
+  <aside class="epaper-archive">
+    <div class="epaper-archive-head">
+      <h3>पिछले संस्करण</h3>
+      <span>{{ recent_editions|length }} संस्करण उपलब्ध</span>
+    </div>
+    <div class="epaper-city-grid">
+      {% for edition in recent_editions %}
+        <div class="epaper-city-card{% if current.pk == edition.pk %} is-active{% endif %}">
+          <div class="epaper-city-card-head">
+            <strong>{{ edition.edition_date|hindi_date:False }}</strong>
+            <button type="button" class="epaper-city-share" data-share="{{ request.scheme }}://{{ request.get_host }}{% url 'core:epaper_date' edition.edition_date|date:'Y-m-d' %}{% if current_city %}?city={{ current_city }}{% endif %}" aria-label="{{ edition.edition_date }} संस्करण शेयर करें"><i class="bi bi-share-fill"></i></button>
+          </div>
+          <a href="{% url 'core:epaper_date' edition.edition_date|date:'Y-m-d' %}{% if current_city %}?city={{ current_city }}{% endif %}" class="epaper-city-thumb">
+            {% if edition.cover_image %}<img src="{{ edition.cover_image.url }}" alt="{{ edition.edition_date }}" loading="lazy">{% else %}<div class="epaper-cover-fallback"><i class="bi bi-newspaper"></i></div>{% endif %}
+            {% if edition.edition_date == today %}<span class="epaper-city-today">आज का अंक</span>{% endif %}
+            {% if current.pk == edition.pk %}<span class="epaper-date-check"><i class="bi bi-check-circle-fill"></i></span>{% endif %}
+            <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|date:"d-M-Y" }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </aside>
+  {% endif %}
+</section>
+
+{% if local_editions %}
+<section class="dds-container epaper-local-section">
+  <div class="epaper-archive-head">
+    <h3>{{ current.city.name|default:"आपके क्षेत्र" }} के आसपास स्थानीय संस्करण</h3>
+    <span>{{ local_editions|length }} शहर उपलब्ध</span>
+  </div>
+  <div class="epaper-city-grid">
+    {% for edition in local_editions %}
+      <div class="epaper-city-card">
+        <div class="epaper-city-card-head">
+          <strong>{{ edition.city.name }}</strong>
+          <button type="button" class="epaper-city-share" data-share="{{ request.scheme }}://{{ request.get_host }}{% url 'core:epaper_date' edition.edition_date|date:'Y-m-d' %}?city={{ edition.city.slug }}" aria-label="{{ edition.city.name }} संस्करण शेयर करें"><i class="bi bi-share-fill"></i></button>
+        </div>
+        <a href="{% url 'core:epaper_date' edition.edition_date|date:'Y-m-d' %}?city={{ edition.city.slug }}" class="epaper-city-thumb">
+          {% if edition.cover_image %}<img src="{{ edition.cover_image.url }}" alt="{{ edition.city.name }} - {{ edition.edition_date }}" loading="lazy">{% else %}<div class="epaper-cover-fallback"><i class="bi bi-newspaper"></i></div>{% endif %}
+          <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|date:"d-M-Y" }}</span>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if current %}
+<div class="epaper-modal" data-epaper-modal
+     data-pdf-url="{{ current.pdf.url }}"
+     data-title="{{ current.title|default:'ई-पेपर' }} - {{ current.edition_date }}" hidden>
+  <div class="epaper-modal-bar">
+    <span data-epaper-modal-title></span>
+    <span class="epaper-modal-page-indicator" data-epaper-modal-indicator></span>
+    <div class="epaper-modal-zoom">
+      <button type="button" data-epaper-modal-zoom-out aria-label="ज़ूम आउट"><i class="bi bi-dash-lg"></i></button>
+      <span data-epaper-modal-zoom-level>100%</span>
+      <button type="button" data-epaper-modal-zoom-in aria-label="ज़ूम इन"><i class="bi bi-plus-lg"></i></button>
+    </div>
+    <div class="epaper-modal-actions">
+      <a class="epaper-modal-download" data-epaper-modal-download href="#" download title="PDF डाउनलोड करें"><i class="bi bi-download"></i></a>
+      <button type="button" class="epaper-modal-close" data-epaper-modal-close aria-label="बंद करें">&times;</button>
+    </div>
+  </div>
+  <div class="epaper-modal-body">
+    <button type="button" class="epaper-modal-nav prev" data-epaper-modal-prev aria-label="पिछला पेज"><i class="bi bi-chevron-left"></i></button>
+    <div class="epaper-modal-page-wrap" data-epaper-modal-wrap>
+      <img data-epaper-modal-page src="" alt="ई-पेपर पेज">
+    </div>
+    <button type="button" class="epaper-modal-nav next" data-epaper-modal-next aria-label="अगला पेज"><i class="bi bi-chevron-right"></i></button>
+    <span class="epaper-modal-zoom-hint" data-epaper-modal-zoom-hint><i class="bi bi-zoom-in"></i> ज़ूम के लिए क्लिक करें या स्क्रॉल करें</span>
+  </div>
+  <div class="epaper-modal-thumbs" data-epaper-modal-thumbs></div>
+</div>
+{% endif %}
+{% endblock %}

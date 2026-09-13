@@ -1,0 +1,41 @@
+<div style="margin:0;padding:24px;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+    {% include "emails/_header.html" %}
+    <div style="padding:28px;">
+      <span style="display:inline-block;background:#fff5f5;color:#e31e28;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px;">नया आवेदन / New Career Application</span>
+      <h2 style="margin:14px 0 4px;font-size:19px;color:#101828;">{% if application.job %}{{ application.job.title }}{% else %}{{ application.role_applied }}{% endif %}</h2>
+      <p style="margin:0 0 20px;color:#667085;font-size:13px;">{{ application.created_at|date:"d M Y, h:i A" }}</p>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:18px;">
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;color:#667085;font-size:13px;width:110px;">नाम</td>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;color:#101828;font-size:14px;font-weight:700;">{{ application.name }}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;color:#667085;font-size:13px;">ईमेल</td>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;font-size:14px;"><a href="mailto:{{ application.email }}" style="color:#0b5cab;text-decoration:none;">{{ application.email }}</a></td>
+        </tr>
+        {% if application.phone %}
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;color:#667085;font-size:13px;">फोन</td>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;font-size:14px;"><a href="tel:{{ application.phone }}" style="color:#101828;text-decoration:none;">{{ application.phone }}</a></td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;color:#667085;font-size:13px;">रिज्यूमे</td>
+          <td style="padding:8px 0;border-bottom:1px solid #eef1f5;font-size:14px;"><a href="{{ site_url }}{{ application.resume.url }}" style="color:#0b5cab;text-decoration:none;">डाउनलोड करें</a></td>
+        </tr>
+      </table>
+
+      {% if application.cover_note %}
+      <p style="margin:0 0 6px;color:#667085;font-size:13px;font-weight:700;">आवेदक के बारे में</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;color:#1f2937;font-size:14px;line-height:1.7;white-space:pre-wrap;">{{ application.cover_note }}</div>
+      {% endif %}
+
+      <div style="margin-top:22px;">
+        <a href="{{ site_url }}/admin/core/careerapplication/{{ application.pk }}/change/" style="display:inline-block;background:#e31e28;color:#ffffff;font-weight:700;font-size:14px;padding:11px 22px;border-radius:8px;text-decoration:none;">एडमिन में देखें</a>
+      </div>
+    </div>
+    {% include "emails/_footer.html" %}
+  </div>
+</div>

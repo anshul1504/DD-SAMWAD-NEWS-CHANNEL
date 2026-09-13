@@ -1,2 +1,43 @@
+{% comment %}
+  Deliberately standalone: a 500 may be caused by the database or a context
+  processor, so this page must not extend base.html or touch the ORM.
+{% endcomment %}
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Server Error</title><style>body{font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;color:#161719}.box{text-align:center;max-width:560px;padding:2rem}.box h1{color:#b5121b;font-size:4rem;margin:0}</style></head><body><main class="box"><h1>500</h1><p>सर्वर में समस्या आई है। कृपया थोड़ी देर बाद कोशिश करें।</p><a href="/">होम पर जाएं</a></main></body></html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>सर्वर में समस्या — Desh Darpan Samvad</title>
+  <meta name="robots" content="noindex">
+  <style>
+    :root{--brand-primary:#d71920;--brand-secondary:#0f172a;--text-secondary:#667085;--border:#e5e7eb;--surface-soft:#f6f7f9}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px;
+         font-family:"Noto Sans Devanagari","Noto Sans",Arial,sans-serif;
+         background:var(--surface-soft);color:var(--brand-secondary);-webkit-font-smoothing:antialiased}
+    .box{text-align:center;max-width:560px;width:100%;background:#fff;border:1px solid var(--border);
+         border-radius:8px;padding:2.5rem 1.75rem;box-shadow:0 16px 42px rgba(15,23,42,.08)}
+    .code{display:block;font-size:clamp(3rem,12vw,4.5rem);line-height:1;font-weight:800;color:var(--brand-primary)}
+    h1{font-size:clamp(1.2rem,4vw,1.6rem);margin:.75rem 0 .5rem}
+    p{color:var(--text-secondary);line-height:1.65;margin:0 0 1.5rem}
+    .actions{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+    a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.1rem;
+      border-radius:4px;font-weight:800;text-decoration:none}
+    .primary{background:var(--brand-primary);color:#fff}
+    .primary:hover{background:#bf1019}
+    .secondary{border:1px solid var(--border);color:var(--brand-secondary)}
+    .secondary:hover{border-color:var(--brand-secondary)}
+  </style>
+</head>
+<body>
+  <main class="box">
+    <span class="code">500</span>
+    <h1>सर्वर में समस्या आई है।</h1>
+    <p>हमारी तकनीकी टीम को इसकी जानकारी मिल गई है। कृपया थोड़ी देर बाद दोबारा कोशिश करें।</p>
+    <div class="actions">
+      <a class="primary" href="/">होम पर जाएं</a>
+      <a class="secondary" href="/latest/">ताजा खबरें</a>
+    </div>
+  </main>
+</body>
+</html>

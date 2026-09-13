@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import logging
 import os
 from pathlib import Path
 
@@ -37,14 +38,20 @@ if not SECRET_KEY:
         SECRET_KEY = "local-development-only-desh-darpan-samvad-secret-key-change-before-production"
     else:
         raise RuntimeError("SECRET_KEY must be set when DEBUG=False.")
+elif not DEBUG and SECRET_KEY.startswith(("replace-", "django-insecure-", "change-me")):
+    raise RuntimeError("SECRET_KEY is still a placeholder. Generate a real production key.")
 
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if host.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # Must be listed before django.contrib.admin -- it overrides the admin's
+    # own templates to render the Jazzmin theme instead of the stock one.
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -65,12 +72,18 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves STATIC_ROOT directly from the app when DEBUG=False. Must sit
+    # immediately after SecurityMiddleware so redirects/security headers still apply.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Renders 405.html for method-not-allowed responses, which Django otherwise
+    # returns with an empty body.
+    "core.middleware.FriendlyMethodNotAllowedMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -103,6 +116,25 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# Cache backend: Redis in production (set REDIS_URL), database cache as a
+# dependency-free fallback so per-worker LocMemCache never silently
+# undermines cache-based rate limiting (e.g. the OTP throttle).
+REDIS_URL = os.getenv("REDIS_URL", "")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+            "LOCATION": "django_cache_table",
+        }
+    }
 
 
 # Password validation
@@ -143,7 +175,19 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", BASE_DIR / "media"))
+
+# WhiteNoise serves collected static files in production. Compression is applied
+# at collectstatic time; cache-busting already comes from the static_v template
+# tag, so the non-manifest backend is used to avoid hard-failing a page render
+# when a stylesheet references an asset that is not collected.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+# Uploaded media is NOT served by WhiteNoise. In production, map MEDIA_URL to
+# MEDIA_ROOT at the reverse proxy (see README "Production deployment").
+WHITENOISE_MAX_AGE = int(os.getenv("WHITENOISE_MAX_AGE", "31536000" if not DEBUG else "0"))
 LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "home"
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
@@ -167,7 +211,105 @@ SECURE_PROXY_SSL_HEADER_NAME = os.getenv("SECURE_PROXY_SSL_HEADER_NAME", "")
 if SECURE_PROXY_SSL_HEADER_NAME:
     SECURE_PROXY_SSL_HEADER = (SECURE_PROXY_SSL_HEADER_NAME, os.getenv("SECURE_PROXY_SSL_HEADER_VALUE", "https"))
 
+# Django's own default is DENY, which also blocks the e-paper PDF from
+# loading in its own on-site viewer iframe (framing our own content, not
+# someone else's, so SAMEORIGIN gives the same clickjacking protection).
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
+SESSION_COOKIE_AGE = 28800  # 8 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Upload size limits (also enforce client_max_body_size at the reverse proxy).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
+# ADMINS drives mail_admins for unhandled 500s. Format: "Name <a@b.com>, Name2 <c@d.com>".
+# Left empty in development so nothing is sent.
+def _parse_admins(raw):
+    admins = []
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        if "<" in entry and entry.endswith(">"):
+            name, _, email = entry.partition("<")
+            admins.append((name.strip() or "Admin", email[:-1].strip()))
+        else:
+            admins.append(("Admin", entry))
+    return admins
+
+
+ADMINS = _parse_admins(os.getenv("ADMINS", ""))
+MANAGERS = ADMINS
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        # Only unhandled server errors, and only in production. Warnings stay on
+        # the console so this never becomes noise that gets filtered out.
+        "mail_admins": {
+            "class": "django.utils.log.AdminEmailHandler",
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "include_html": False,
+        },
+    },
+    "loggers": {
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["console", "mail_admins"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+    },
+}
+
+# Error tracking is entirely optional: with no SENTRY_DSN set, nothing is
+# imported and the application behaves exactly as before. A missing or broken
+# sentry-sdk must never prevent the site from starting.
+SENTRY_DSN = os.getenv("SENTRY_DSN", "").strip()
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            environment=os.getenv("SENTRY_ENVIRONMENT", "production"),
+            release=os.getenv("SENTRY_RELEASE") or None,
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0")),
+            # OTP codes, passwords and session cookies must never leave the box.
+            send_default_pii=False,
+        )
+    except Exception:  # pragma: no cover - depends on optional dependency
+        logging.getLogger(__name__).warning(
+            "SENTRY_DSN is set but Sentry could not be initialised; continuing without error tracking.",
+            exc_info=True,
+        )
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Jazzmin admin theme -- left mostly at its defaults (site name/branding
+# only) rather than reskinned, so it stays on Jazzmin's own maintained look.
+JAZZMIN_SETTINGS = {
+    "site_title": "Desh Darpan Samvad Admin",
+    "site_header": "Desh Darpan Samvad",
+    "site_brand": "Desh Darpan Samvad",
+    "welcome_sign": "देश दर्पण संवाद एडमिन में आपका स्वागत है",
+    "copyright": "Desh Darpan Samvad",
+    "show_sidebar": True,
+    "navigation_expanded": False,
+}
