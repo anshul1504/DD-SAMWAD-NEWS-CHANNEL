@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -29,6 +30,12 @@ class WebStory(models.Model):
 class StorySlide(models.Model):
     story = models.ForeignKey(WebStory, on_delete=models.CASCADE, related_name="slides")
     image = models.ImageField(upload_to="webstories/slides/", blank=True)
+    video = models.FileField(
+        upload_to="webstories/slides/videos/",
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=["mp4", "webm", "mov"])],
+        help_text="Optional short vertical video for this slide. When set, it plays instead of the image.",
+    )
     heading = models.CharField(max_length=180)
     text = models.TextField(blank=True)
     cta_label = models.CharField(max_length=80, blank=True)

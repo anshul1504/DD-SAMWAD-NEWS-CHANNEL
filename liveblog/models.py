@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from locations.models import City
 from news.models import Category
+from core.youtube import youtube_embed_url
 
 
 class LiveBlog(models.Model):
@@ -16,6 +17,10 @@ class LiveBlog(models.Model):
     slug = models.SlugField(max_length=240, unique=True, allow_unicode=True)
     description = models.TextField(blank=True)
     featured_image = models.ImageField(upload_to="liveblogs/", blank=True)
+    youtube_live_url = models.URLField(
+        blank=True,
+        help_text="YouTube video/live URL to embed above the timeline while this is live (any youtube.com/youtu.be link works).",
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.SCHEDULED)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -32,6 +37,10 @@ class LiveBlog(models.Model):
     def get_absolute_url(self):
         return reverse("liveblog:detail", args=[self.slug])
 
+    @property
+    def embed_url(self):
+        return youtube_embed_url(self.youtube_live_url)
+
 
 class LiveUpdate(models.Model):
     live_blog = models.ForeignKey(LiveBlog, on_delete=models.CASCADE, related_name="updates")
@@ -47,5 +56,9 @@ class LiveUpdate(models.Model):
 
     def __str__(self):
         return self.heading
+
+    @property
+    def embed_url(self):
+        return youtube_embed_url(self.video_url)
 
 # Create your models here.

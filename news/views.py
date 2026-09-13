@@ -1,3 +1,5 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -5,6 +7,12 @@ from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.views.decorators.http import require_POST
+
+# Same escapes Django's json_script applies: prevents a "</script>" sequence in
+# article data from breaking out of the JSON-LD block.
+_JSONLD_ESCAPES = {ord("<"): "\\u003C", ord(">"): "\\u003E", ord("&"): "\\u0026"}
 
 from core.forms import NewsletterForm
 from advertisements.models import Advertisement
@@ -26,6 +34,11 @@ def pagination_context(request, queryset, per_page=20):
     return {
         "page_obj": paginate(request, queryset, per_page),
         "pagination_query": params.urlencode(),
+        # Same sidebar widgets as the homepage, so listing pages (latest,
+        # trending, category, tag) feel like one consistent site rather than
+        # a bare secondary page.
+        "trending_articles": Article.objects.optimized().trending()[:5],
+        "most_read": Article.objects.optimized().published().order_by("-views")[:5],
     }
 
 
@@ -50,12 +63,13 @@ def home(request):
         "most_read": articles.order_by("-views")[:6],
         "home_categories": home_categories,
         "galleries": Gallery.objects.filter(active=True).prefetch_related("images")[:6],
-        "videos": Video.objects.filter(active=True)[:6],
+        "videos": Video.objects.filter(active=True, is_short=False)[:6],
+        "shorts": Video.objects.filter(active=True, is_short=True)[:6],
         "webstories": stories[:8],
         "day_stories": stories.filter(published_at__gte=story_cutoff)[:12],
         "liveblogs": LiveBlog.objects.filter(active=True)[:3],
         "newsletter_form": NewsletterForm(),
-        "seo_title": "Desh Darpan Samvad - ताजा हिंदी समाचार",
+        "seo_title": "ताजा हिंदी समाचार, ब्रेकिंग न्यूज़ और लाइव अपडेट",
         "meta_description": "देश, प्रदेश, शहर और दुनिया की ताजा हिंदी खबरें।",
     }
     return render(request, "home.html", context)
@@ -71,25 +85,32 @@ def article_detail(request, slug):
     related = Article.objects.optimized().published().filter(
         Q(category=article.category) | Q(city=article.city) | Q(tags__in=article.tags.all())
     ).exclude(pk=article.pk).distinct()[:6]
+    featured_image_url = request.build_absolute_uri(article.featured_image.url) if article.featured_image else ""
+    article_jsonld = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": article.title,
+        "description": article.meta_description or article.summary,
+        "datePublished": article.published_at.isoformat(),
+        "dateModified": article.updated_at.isoformat(),
+        "author": {"@type": "Person", "name": article.reporter.display_name if article.reporter else article.author.get_full_name() or article.author.username},
+        "publisher": {"@type": "Organization", "name": "Desh Darpan Samvad"},
+        "mainEntityOfPage": request.build_absolute_uri(),
+        "image": featured_image_url,
+    }
     context = {
         "article": article,
         "related_articles": related,
+        "og_type": "article",
+        "og_image": featured_image_url,
+        # Serialised here rather than with the json_script filter, which emits
+        # type="application/json" and is therefore ignored by search engines.
+        # <, > and & are escaped so the payload cannot break out of the script tag.
+        "article_jsonld_json": mark_safe(json.dumps(article_jsonld).translate(_JSONLD_ESCAPES)),
         "latest_articles": Article.objects.optimized().published().exclude(pk=article.pk)[:6],
         "most_read": Article.objects.optimized().published().exclude(pk=article.pk).order_by("-views")[:6],
         "seo_title": article.seo_title or article.title,
         "meta_description": article.meta_description or article.summary,
-        "article_jsonld": {
-            "@context": "https://schema.org",
-            "@type": "NewsArticle",
-            "headline": article.title,
-            "description": article.meta_description or article.summary,
-            "datePublished": article.published_at.isoformat(),
-            "dateModified": article.updated_at.isoformat(),
-            "author": {"@type": "Person", "name": article.reporter.display_name if article.reporter else article.author.get_full_name() or article.author.username},
-            "publisher": {"@type": "Organization", "name": "Desh Darpan Samvad"},
-            "mainEntityOfPage": request.build_absolute_uri(),
-            "image": request.build_absolute_uri(article.featured_image.url) if article.featured_image else "",
-        },
     }
     return render(request, "news/article_detail.html", context)
 
@@ -108,34 +129,69 @@ def category_detail(request, slug):
 
 def latest(request):
     queryset = Article.objects.optimized().published()
-    return render(request, "news/listing.html", {"page_title": "ताजा खबरें", **pagination_context(request, queryset)})
+    return render(request, "news/listing.html", {
+        "page_title": "ताजा खबरें",
+        "seo_title": "ताजा खबरें - Latest News",
+        "meta_description": "देश-दुनिया की ताजा खबरें, ब्रेकिंग न्यूज़ और अपडेट सबसे पहले हिंदी में।",
+        **pagination_context(request, queryset),
+    })
 
 
 def trending(request):
     queryset = Article.objects.optimized().trending()
-    return render(request, "news/listing.html", {"page_title": "ट्रेंडिंग", **pagination_context(request, queryset)})
+    return render(request, "news/listing.html", {
+        "page_title": "ट्रेंडिंग",
+        "seo_title": "ट्रेंडिंग खबरें - Trending News",
+        "meta_description": "सबसे ज्यादा पढ़ी और चर्चा में रहीं खबरें एक जगह।",
+        **pagination_context(request, queryset),
+    })
 
 
 def tag_detail(request, slug):
     tag = get_object_or_404(Tag, slug=slug)
     queryset = tag.articles.optimized().published()
-    return render(request, "news/listing.html", {"page_title": f"#{tag.name}", **pagination_context(request, queryset)})
+    return render(request, "news/listing.html", {
+        "page_title": f"#{tag.name}",
+        "seo_title": f"#{tag.name} की खबरें",
+        "meta_description": f"#{tag.name} से जुड़ी सभी खबरें और अपडेट।",
+        **pagination_context(request, queryset),
+    })
+
+
+SEARCH_MIN_QUERY_LENGTH = 3
 
 
 def search(request):
     query = request.GET.get("q", "").strip()
     results = Article.objects.optimized().published()
-    if query:
+    too_short = bool(query) and len(query) < SEARCH_MIN_QUERY_LENGTH
+
+    if query and not too_short:
+        # `body` is deliberately excluded: icontains compiles to LIKE '%term%',
+        # which no index can serve, so searching the full article HTML meant a
+        # table scan of every story's body on an unauthenticated endpoint.
         results = results.filter(
             Q(title__icontains=query) | Q(short_title__icontains=query) | Q(summary__icontains=query) |
-            Q(body__icontains=query) | Q(tags__name__icontains=query) | Q(keywords__icontains=query) |
+            Q(tags__name__icontains=query) | Q(keywords__icontains=query) |
             Q(author__username__icontains=query) | Q(reporter__display_name__icontains=query)
         ).distinct()
     else:
         results = results.none()
-    return render(request, "news/search_results.html", {"query": query, "result_count": results.count(), **pagination_context(request, results)})
+
+    context = pagination_context(request, results)
+    return render(request, "news/search_results.html", {
+        "query": query,
+        # Reuse the paginator's count instead of a second full query.
+        "result_count": context["page_obj"].paginator.count,
+        "query_too_short": too_short,
+        "search_min_length": SEARCH_MIN_QUERY_LENGTH,
+        "seo_title": f'"{query}" के लिए खोज परिणाम' if query else "खबर खोजें",
+        "meta_description": f'"{query}" से जुड़े खोज परिणाम।' if query else "देश दर्पण संवाद पर खबरें खोजें।",
+        **context,
+    })
 
 
+@require_POST
 @login_required
 def bookmark_article(request, pk):
     article = get_object_or_404(Article.objects.published(), pk=pk)
@@ -197,7 +253,17 @@ def dashboard(request):
         "is_guest_user": "Guest" in role_names,
         "permissions": permissions,
         "modules": modules,
-        "review_queue": Article.objects.filter(status__in=[Article.Status.SUBMITTED, Article.Status.UNDER_REVIEW]).select_related("category", "author")[:8],
-        "recent_articles": Article.objects.select_related("category", "author").order_by("-updated_at")[:8],
+        "review_queue": (
+            Article.objects.filter(status__in=[Article.Status.SUBMITTED, Article.Status.UNDER_REVIEW])
+            .select_related("category", "author")[:8]
+            if permissions["article_change"]
+            else Article.objects.none()
+        ),
+        "recent_articles": (
+            Article.objects.select_related("category", "author").order_by("-updated_at")[:8]
+            if permissions["article_change"]
+            else Article.objects.none()
+        ),
+        "page_title": "Dashboard",
     }
     return render(request, "accounts/dashboard.html", context)

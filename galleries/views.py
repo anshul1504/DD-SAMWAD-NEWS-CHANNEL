@@ -6,7 +6,7 @@ from .models import Gallery
 
 def gallery_list(request):
     page_obj = Paginator(Gallery.objects.filter(active=True), 20).get_page(request.GET.get("page"))
-    return render(request, "galleries/list.html", {"page_obj": page_obj, "page_title": "फोटो गैलरी"})
+    return render(request, "galleries/list.html", {"page_obj": page_obj, "page_title": "फोटो गैलरी", "seo_title": "फोटो गैलरी"})
 
 
 def gallery_detail(request, slug):

@@ -8,12 +8,16 @@ User = get_user_model()
 
 class EmailLoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Enter your work email", "autocomplete": "email"}))
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={"placeholder": "Password (optional — leave blank for OTP)", "autocomplete": "current-password"}),
+    )
 
     def clean_email(self):
-        email = self.cleaned_data["email"].strip().lower()
-        if not User.objects.filter(email__iexact=email, is_active=True).exists():
-            raise forms.ValidationError("No active account found with this email.")
-        return email
+        # Deliberately does NOT check whether the account exists. Rejecting
+        # unknown addresses here turned the form into an account-enumeration
+        # oracle; the view now returns an identical response either way.
+        return self.cleaned_data["email"].strip().lower()
 
 
 class SignupForm(forms.Form):
@@ -51,10 +55,8 @@ class ForgotPasswordForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Enter your registered email"}))
 
     def clean_email(self):
-        email = self.cleaned_data["email"].strip().lower()
-        if not User.objects.filter(email__iexact=email, is_active=True).exists():
-            raise forms.ValidationError("No active account found with this email.")
-        return email
+        # See EmailLoginForm.clean_email — existence is deliberately not checked.
+        return self.cleaned_data["email"].strip().lower()
 
 
 class ResetPasswordForm(forms.Form):

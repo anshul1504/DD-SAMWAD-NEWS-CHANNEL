@@ -16,5 +16,8 @@ urlpatterns = [
     path("dashboard/", dashboard, name="dashboard"),
     path("portal/<str:module>/", views.portal_module, name="portal_module"),
     path("portal/<str:module>/new/", views.portal_module_new, name="portal_module_new"),
+    path("portal/<str:module>/<int:pk>/edit/", views.portal_module_edit, name="portal_module_edit"),
+    path("portal/<str:module>/<int:pk>/delete/", views.portal_module_delete, name="portal_module_delete"),
     path("author/<str:slug>/", views.author_detail, name="author_detail"),
+    path("team/", views.team, name="team"),
 ]

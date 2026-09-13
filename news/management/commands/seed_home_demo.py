@@ -48,7 +48,7 @@ class Command(BaseCommand):
 
         author, _ = User.objects.get_or_create(
             username="dds_editor",
-            defaults={"first_name": "Desk", "last_name": "Editor", "email": "editor@deshdarpansamvad.in", "is_staff": True},
+            defaults={"first_name": "Desk", "last_name": "Editor", "email": "info@ddsamvad.com", "is_staff": True},
         )
         editor_password = os.getenv("DEMO_EDITOR_PASSWORD") or get_random_string(14)
         author.set_password(editor_password)
@@ -148,7 +148,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Demo editor username: dds_editor | password: {editor_password}")
 
     def _font(self, size):
-        for name in ["arial.ttf", "Nirmala.ttf", "NirmalaB.ttf", "DejaVuSans-Bold.ttf"]:
+        # Nirmala first: it has Devanagari glyphs. arial.ttf loads without
+        # error but silently renders every Hindi character as a tofu box.
+        for name in ["Nirmala.ttf", "NirmalaB.ttf", "mangal.ttf", "arial.ttf", "DejaVuSans-Bold.ttf"]:
             try:
                 return ImageFont.truetype(name, size)
             except OSError:

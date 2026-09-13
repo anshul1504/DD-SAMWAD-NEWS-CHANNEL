@@ -1,3 +1,4 @@
+import nh3
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,7 +8,20 @@ from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 from accounts.models import ReporterProfile
+from core.youtube import youtube_embed_url
 from locations.models import City, District, State
+
+ARTICLE_BODY_ALLOWED_TAGS = {
+    "p", "br", "strong", "em", "u", "s", "blockquote", "h2", "h3", "h4",
+    "ul", "ol", "li", "a", "img", "figure", "figcaption", "table", "thead",
+    "tbody", "tr", "th", "td", "hr", "sub", "sup",
+}
+ARTICLE_BODY_ALLOWED_ATTRIBUTES = {
+    "a": {"href", "title", "target"},
+    "img": {"src", "alt", "title", "width", "height", "loading"},
+    "td": {"colspan", "rowspan"},
+    "th": {"colspan", "rowspan"},
+}
 
 
 class Category(models.Model):
@@ -95,7 +109,10 @@ class Article(models.Model):
     image_caption = models.CharField(max_length=220, blank=True)
     image_credit = models.CharField(max_length=120, blank=True)
     video_url = models.URLField(blank=True)
-    youtube_url = models.URLField(blank=True)
+    youtube_url = models.URLField(
+        blank=True,
+        help_text="कोई भी YouTube लिंक चलेगा — Watch, Shorts, Share (?si=...) या Embed लिंक, जो भी कॉपी करें।",
+    )
     seo_title = models.CharField(max_length=180, blank=True)
     meta_description = models.CharField(max_length=300, blank=True)
     keywords = models.CharField(max_length=300, blank=True)
@@ -139,12 +156,24 @@ class Article(models.Model):
                 slug = f"{base}-{counter}"
                 counter += 1
             self.slug = slug
+        if self.body:
+            self.body = nh3.clean(
+                self.body,
+                tags=ARTICLE_BODY_ALLOWED_TAGS,
+                attributes=ARTICLE_BODY_ALLOWED_ATTRIBUTES,
+                url_schemes={"http", "https", "mailto"},
+                link_rel="noopener noreferrer nofollow",
+            )
         words = strip_tags(self.body).split()
         self.reading_time = max(1, round(len(words) / 220))
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("news:article_detail", args=[self.slug])
+
+    @property
+    def embed_url(self):
+        return youtube_embed_url(self.youtube_url) or youtube_embed_url(self.video_url)
 
 
 class Bookmark(models.Model):
