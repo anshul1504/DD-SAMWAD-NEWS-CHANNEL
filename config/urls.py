@@ -45,6 +45,13 @@ sitemaps = {
     "static": StaticSitemap,
 }
 
+
+def public_sitemap(request, *args, **kwargs):
+    response = sitemap(request, *args, **kwargs)
+    response.headers.pop("X-Robots-Tag", None)
+    return response
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home, name="home"),
@@ -56,7 +63,7 @@ urlpatterns = [
     path("", include("liveblog.urls")),
     path("accounts/", include("accounts.urls")),
     path("", include("core.urls")),
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    path("sitemap.xml", public_sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", robots_txt, name="robots_txt"),
     # Kept at the project root (not under core/) so monitoring has a stable URL
     # that does not move if app routing changes.
