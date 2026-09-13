@@ -3,7 +3,6 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -15,6 +14,7 @@ from django.views.decorators.http import require_POST
 _JSONLD_ESCAPES = {ord("<"): "\\u003C", ord(">"): "\\u003E", ord("&"): "\\u0026"}
 
 from core.forms import NewsletterForm
+from core.utils import paginate
 from advertisements.models import Advertisement
 from galleries.models import Gallery
 from liveblog.models import LiveBlog
@@ -22,10 +22,6 @@ from videos.models import Video
 from webstories.models import WebStory
 
 from .models import Article, Bookmark, Category, Tag
-
-
-def paginate(request, queryset, per_page=20):
-    return Paginator(queryset, per_page).get_page(request.GET.get("page"))
 
 
 def pagination_context(request, queryset, per_page=20):

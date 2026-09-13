@@ -1,7 +1,7 @@
-from django.core.paginator import Paginator
 from django.db.models import Case, IntegerField, When
 from django.shortcuts import get_object_or_404, render
 
+from core.utils import paginate
 from .models import LiveBlog
 
 # Live-in-progress first, then scheduled (coming up), then ended — instead of
@@ -16,7 +16,7 @@ _STATUS_ORDER = Case(
 
 def live_list(request):
     queryset = LiveBlog.objects.filter(active=True).annotate(status_order=_STATUS_ORDER).order_by("status_order", "-start_time")
-    page_obj = Paginator(queryset, 20).get_page(request.GET.get("page"))
+    page_obj = paginate(request, queryset, per_page=20)
     return render(request, "liveblog/list.html", {"page_obj": page_obj, "page_title": "लाइव", "seo_title": "लाइव अपडेट"})
 
 

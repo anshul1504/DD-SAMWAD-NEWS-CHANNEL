@@ -1,6 +1,6 @@
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 
+from core.utils import paginate
 from news.models import Category
 from .models import WebStory
 
@@ -27,7 +27,7 @@ def story_list(request):
         .order_by("display_order", "name")
     )
 
-    page_obj = Paginator(queryset, 20).get_page(request.GET.get("page"))
+    page_obj = paginate(request, queryset, per_page=20)
     seo_title = f"{active_category} की वेब स्टोरीज" if active_category else "वेब स्टोरीज"
     return render(request, "webstories/list.html", {
         "page_obj": page_obj,

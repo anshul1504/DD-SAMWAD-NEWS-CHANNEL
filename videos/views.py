@@ -2,7 +2,6 @@ import hashlib
 import json
 
 from django.conf import settings
-from django.core.paginator import Paginator
 from django.db.models import Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -10,6 +9,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
 from core.throttling import check_rate_limit, client_ip
+from core.utils import paginate
 from .forms import VideoCommentForm
 from .models import Video, VideoLike, youtube_embed_url
 
@@ -50,7 +50,7 @@ def _video_archive(request, *, shorts=False):
         .order_by("display_order", "name")
     )
 
-    page_obj = Paginator(queryset, 24 if shorts else 15).get_page(request.GET.get("page"))
+    page_obj = paginate(request, queryset, per_page=24 if shorts else 15)
     page_title = "Shorts" if shorts else "Video News"
     seo_title = f"{active_category} {page_title}" if active_category else page_title
     return render(request, "videos/list.html", {
