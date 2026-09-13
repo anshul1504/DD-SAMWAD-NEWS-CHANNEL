@@ -217,7 +217,7 @@ class ArticleShareMetadataTests(TestCase):
         # still be an absolute URL, which Open Graph requires.
         response = self.client.get(self.article.get_absolute_url())
         content = response.content.decode()
-        self.assertIn('property="og:image" content="http://testserver/static/images/dds-final-logo.png"', content)
+        self.assertIn('property="og:image" content="https://ddsamvad.com/static/images/dds-final-logo.png"', content)
 
     def test_og_image_uses_featured_image_when_present(self):
         self.article.featured_image = "articles/2026/09/story.jpg"
@@ -225,4 +225,4 @@ class ArticleShareMetadataTests(TestCase):
         response = self.client.get(self.article.get_absolute_url())
         content = response.content.decode()
         self.assertIn("articles/2026/09/story.jpg", content)
-        self.assertIn('property="og:image" content="http://testserver/media/', content)
+        self.assertIn('property="og:image" content="https://ddsamvad.com/media/', content)

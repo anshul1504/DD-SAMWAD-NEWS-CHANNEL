@@ -6,12 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}{% if seo_title %}{{ seo_title }} - {{ site_settings.site_name|default:"Desh Darpan Samvad" }}{% else %}{{ site_settings.site_name|default:"Desh Darpan Samvad" }}{% endif %}{% endblock %}</title>
   <meta name="description" content="{{ meta_description|default:site_settings.tagline }}">
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  {% if site_settings.search_console_verification %}<meta name="google-site-verification" content="{{ site_settings.search_console_verification }}">{% endif %}
+  <link rel="canonical" href="{{ article.canonical_url|default:canonical_url }}">
+  <link rel="alternate" hreflang="hi-IN" href="{{ article.canonical_url|default:canonical_url }}">
+  <link rel="alternate" hreflang="x-default" href="{{ article.canonical_url|default:canonical_url }}">
   <meta property="og:title" content="{{ seo_title|default:site_settings.site_name }}">
   <meta property="og:description" content="{{ meta_description|default:site_settings.tagline }}">
   <meta property="og:type" content="{{ og_type|default:'website' }}">
-  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:url" content="{{ article.canonical_url|default:canonical_url }}">
+  <meta property="og:site_name" content="{{ site_settings.site_name|default:'Desh Darpan Samvad' }}">
+  <meta property="og:locale" content="hi_IN">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ seo_title|default:site_settings.site_name }}">
+  <meta name="twitter:description" content="{{ meta_description|default:site_settings.tagline }}">
   <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon-48x48.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
@@ -21,9 +28,20 @@
     as the site logo suppressed click-through on every WhatsApp/Facebook share.
     Open Graph requires an absolute URL, so the logo fallback is qualified too.
   {% endcomment %}
-  <meta property="og:image" content="{% if og_image %}{{ og_image }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/dds-final-logo.png' %}{% endif %}">
-  <meta name="twitter:image" content="{% if og_image %}{{ og_image }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/dds-final-logo.png' %}{% endif %}">
+  <meta property="og:image" content="{% if og_image %}{{ og_image }}{% else %}{{ default_og_image }}{% endif %}">
+  <meta name="twitter:image" content="{% if og_image %}{{ og_image }}{% else %}{{ default_og_image }}{% endif %}">
   <meta name="csrf-token" content="{{ csrf_token }}">
+  <script type="application/ld+json">{{ organization_jsonld }}</script>
+  <script type="application/ld+json">{{ website_jsonld }}</script>
+  {% if site_settings.google_analytics_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site_settings.google_analytics_id }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ site_settings.google_analytics_id }}');
+    </script>
+  {% endif %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
-Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'django.contrib.sitemaps.views.sitemap' %}
+Disallow: /accounts/
+Allow: /accounts/login/
+Sitemap: {{ site_url }}{% url 'django.contrib.sitemaps.views.sitemap' %}

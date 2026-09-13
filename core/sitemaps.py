@@ -64,7 +64,28 @@ class StaticSitemap(Sitemap):
     changefreq = "monthly"
 
     def items(self):
-        return ["home", "news:latest", "news:trending", "galleries:list", "videos:list", "videos:shorts", "webstories:list", "liveblog:list", "core:about", "core:contact"]
+        return [
+            "home",
+            "news:latest",
+            "news:trending",
+            "galleries:list",
+            "videos:list",
+            "videos:shorts",
+            "webstories:list",
+            "liveblog:list",
+            "core:epaper",
+            "core:about",
+            "core:contact",
+            "core:news_tip",
+            "core:advertise",
+            "core:sponsorship",
+            "core:careers",
+            "core:privacy",
+            "core:terms",
+            "core:disclaimer",
+            "core:editorial_policy",
+            "core:grievance",
+        ]
 
     def location(self, item):
         return reverse(item)

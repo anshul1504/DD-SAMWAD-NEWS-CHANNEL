@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -22,6 +23,10 @@ from videos.models import Video
 from webstories.models import WebStory
 
 from .models import Article, Bookmark, Category, Tag
+
+
+def absolute_site_url(path):
+    return f"{settings.SITE_URL.rstrip('/')}{path}"
 
 
 def pagination_context(request, queryset, per_page=20):
@@ -81,7 +86,8 @@ def article_detail(request, slug):
     related = Article.objects.optimized().published().filter(
         Q(category=article.category) | Q(city=article.city) | Q(tags__in=article.tags.all())
     ).exclude(pk=article.pk).distinct()[:6]
-    featured_image_url = request.build_absolute_uri(article.featured_image.url) if article.featured_image else ""
+    featured_image_url = absolute_site_url(article.featured_image.url) if article.featured_image else ""
+    canonical_url = article.canonical_url or absolute_site_url(article.get_absolute_url())
     article_jsonld = {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
@@ -91,11 +97,12 @@ def article_detail(request, slug):
         "dateModified": article.updated_at.isoformat(),
         "author": {"@type": "Person", "name": article.reporter.display_name if article.reporter else article.author.get_full_name() or article.author.username},
         "publisher": {"@type": "Organization", "name": "Desh Darpan Samvad"},
-        "mainEntityOfPage": request.build_absolute_uri(),
+        "mainEntityOfPage": canonical_url,
         "image": featured_image_url,
     }
     context = {
         "article": article,
+        "canonical_url": canonical_url,
         "related_articles": related,
         "og_type": "article",
         "og_image": featured_image_url,
