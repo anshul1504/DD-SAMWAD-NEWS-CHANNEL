@@ -27,6 +27,9 @@ python manage.py createsuperuser
 python manage.py setup_portal_roles
 python manage.py seed_home_demo
 python manage.py seed_story_reel
+python manage.py seed_webstories
+python manage.py seed_epaper
+python manage.py reset_video_uploads
 python manage.py runserver
 ```
 
@@ -39,7 +42,10 @@ Open:
 ## Environment
 
 Use `.env` for local secrets and runtime settings. Never commit `.env`.
-Use `.env.example` for local development defaults and `.env.production.example` as the deployment checklist. Replace every production placeholder, especially `SECRET_KEY` and `EMAIL_HOST_PASSWORD`.
+`.env.example` is the one committed template -- it documents both the local
+development defaults and, inline as "PRODUCTION:" comments, what to change
+when deploying for real. Replace every production placeholder, especially
+`SECRET_KEY` and `EMAIL_HOST_PASSWORD`.
 
 Important settings:
 
@@ -201,11 +207,14 @@ python manage.py test
 ## Demo Data
 
 ```powershell
-python manage.py seed_home_demo
-python manage.py seed_story_reel
+python manage.py seed_home_demo      # homepage: categories, articles, one video, one web story
+python manage.py seed_story_reel     # extra web stories for the homepage "24hr Stories" rail
+python manage.py seed_webstories     # 50 web stories with generated cover images
+python manage.py seed_epaper         # 7 days of e-paper editions with real generated PDFs/pages
+python manage.py reset_video_uploads # replaces existing videos with 5 long-form + 5 Shorts
 ```
 
-These commands seed local demo content and images for homepage and story UI testing. Do not rely on demo data for production.
+These commands seed local demo content and images for homepage, video, e-paper, and story UI testing. Do not rely on demo data for production; `reset_video_uploads` in particular deletes all existing Video rows before reseeding.
 
 ## Production Notes
 
