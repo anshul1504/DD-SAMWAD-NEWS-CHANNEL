@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="dds-container author-hero">
-  {% if author_profile.profile_photo %}<img src="{{ author_profile.profile_photo.url }}" alt="{{ author_profile.display_name }}">{% endif %}
+  {% if author_profile.profile_photo %}<img src="{{ author_profile.profile_photo.url }}" alt="{{ author_profile.display_name }}" loading="lazy" decoding="async">{% endif %}
   <div>
     <span>Reporter Profile</span>
     <h1>{{ author_profile.display_name }}</h1>
@@ -9,6 +9,7 @@
     <p>{{ author_profile.bio }}</p>
   </div>
 </section>
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
 <section class="dds-container archive-main">
   {% include "includes/section_header.html" with title="लेटेस्ट लेख" %}
   <div class="archive-grid">

@@ -21,7 +21,7 @@
   .story-close:hover{color:#fff;background:rgba(227,30,40,.9)}
   .story-slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
   .story-slide.active{opacity:1;visibility:visible}
-  .story-slide img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02)}
+  .story-slide img,.story-slide video{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.02)}
   .story-slide:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,23,.45) 0,rgba(2,8,23,.08) 38%,rgba(2,8,23,.88) 100%)}
   .story-content{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:4.5rem 1.25rem 1.3rem}
   .story-content h1{font-size:clamp(1.55rem,7vw,2.15rem);line-height:1.12;margin:0 0 .65rem;color:#fff}
@@ -51,12 +51,14 @@
     </div>
     {% for slide in story.slides.all %}
       <article class="story-slide{% if forloop.first %} active{% endif %}">
-        {% if slide.image %}
-          <img src="{{ slide.image.url }}" alt="{{ slide.heading }}">
+        {% if slide.video %}
+          <video src="{{ slide.video.url }}" playsinline muted loop autoplay preload="metadata"></video>
+        {% elif slide.image %}
+          <img src="{{ slide.image.url }}" alt="{{ slide.heading }}" loading="lazy" decoding="async">
         {% elif story.cover %}
-          <img src="{{ story.cover.url }}" alt="{{ slide.heading }}">
+          <img src="{{ story.cover.url }}" alt="{{ slide.heading }}" loading="lazy" decoding="async">
         {% else %}
-          <img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ slide.heading }}">
+          <img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ slide.heading }}" loading="lazy" decoding="async">
         {% endif %}
         <div class="story-content">
           <h1>{{ slide.heading }}</h1>

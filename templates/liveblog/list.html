@@ -3,14 +3,24 @@
 <section class="dds-container archive-hero">
   <div><span>Live Desk</span><h1>{{ page_title }}</h1><p>रियल टाइम अपडेट, बड़ी घटनाओं की सतत कवरेज और महत्वपूर्ण टाइमलाइन।</p></div>
 </section>
-<section class="dds-container live-list-grid">
-  {% for live in page_obj %}
-    <a class="live-card" href="{{ live.get_absolute_url }}">
-      <span class="live-badge"><i></i> LIVE</span>
-      <h2>{{ live.title }}</h2>
-      <p>{{ live.description|truncatewords:26 }}</p>
-    </a>
-  {% empty %}<div class="empty-state">लाइव ब्लॉग उपलब्ध नहीं है।</div>{% endfor %}
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+<section class="dds-container">
+  <div class="live-list-grid">
+    {% for live in page_obj %}
+      <a class="live-card status-{{ live.status }}" href="{{ live.get_absolute_url }}">
+        {% if live.status == "live" %}
+          <span class="live-badge"><i></i> LIVE{% if live.embed_url %} <i class="bi bi-play-circle-fill"></i>{% endif %}</span>
+        {% elif live.status == "scheduled" %}
+          <span class="live-badge is-scheduled"><i class="bi bi-clock"></i> {{ live.start_time|date:"d M, h:i A" }}</span>
+        {% else %}
+          <span class="live-badge is-ended"><i class="bi bi-check-circle"></i> समाप्त</span>
+        {% endif %}
+        <h2>{{ live.title }}</h2>
+        <p>{{ live.description|truncatewords:26 }}</p>
+      </a>
+    {% empty %}<div class="empty-state">लाइव ब्लॉग उपलब्ध नहीं है।</div>{% endfor %}
+  </div>
+  {% include "includes/ad_slot.html" with placement="in_feed" variant="rectangle" %}
   {% include "includes/pagination.html" %}
 </section>
 {% endblock %}

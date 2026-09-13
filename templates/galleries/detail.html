@@ -3,6 +3,7 @@
 <section class="dds-container archive-hero">
   <div><span>Photo Story</span><h1>{{ gallery.title }}</h1><p>{{ gallery.description }}</p></div>
 </section>
+{% include "includes/ad_slot.html" with placement="article_top" variant="leaderboard" %}
 <section class="dds-container gallery-detail-grid">
   {% for image in gallery.images.all %}
     <figure>
@@ -11,4 +12,5 @@
     </figure>
   {% empty %}<div class="empty-state">इस गैलरी में अभी तस्वीरें उपलब्ध नहीं हैं।</div>{% endfor %}
 </section>
+{% include "includes/ad_slot.html" with placement="article_bottom" variant="sidebar" %}
 {% endblock %}

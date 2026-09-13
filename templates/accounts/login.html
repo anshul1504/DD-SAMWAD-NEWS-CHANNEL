@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<section class="auth-shell">
-  <span class="media-eyebrow">Newsroom Access</span>
-  <h1>लॉगिन</h1>
-  <form method="post" class="premium-form">{% csrf_token %}{{ form.as_p }}<button class="btn-primary">Login</button></form>
-</section>
-{% endblock %}

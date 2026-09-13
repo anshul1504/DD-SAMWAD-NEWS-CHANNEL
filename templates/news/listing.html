@@ -1,17 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dds-container archive-hero">
+<section class="dds-container archive-hero listing-hero">
   <div>
-    <span>News Section</span>
+    <span>{% if category %}Category{% else %}Newsroom{% endif %}</span>
     <h1>{{ page_title }}</h1>
-    {% if category.description %}<p>{{ category.description }}</p>{% elif state.description %}<p>{{ state.description }}</p>{% elif city.description %}<p>{{ city.description }}</p>{% else %}<p>ताजा, विश्वसनीय और व्यवस्थित खबरें एक ही जगह पढ़ें।</p>{% endif %}
+    <p>{{ category.description|default:"ताजा खबरें, स्थानीय अपडेट और संपादकीय प्राथमिकता के आधार पर चुनी गई स्टोरीज़।" }}</p>
   </div>
-  <nav>
-    {% for city in popular_cities|slice:":6" %}<a href="{{ city.get_absolute_url }}">{{ city.name }}</a>{% endfor %}
-  </nav>
+  <div class="listing-count"><strong>{{ page_obj.paginator.count }}</strong><span>खबरें</span></div>
 </section>
-
-<section class="dds-container archive-layout">
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+<section class="dds-container archive-layout news-listing-layout">
   <div class="archive-main">
     <div class="archive-grid js-infinite-grid">
       {% for article in page_obj %}
@@ -20,6 +18,7 @@
         {% else %}
           {% include "includes/news_card.html" with article=article class="horizontal-story" show_summary=True %}
         {% endif %}
+        {% if forloop.counter == 4 %}{% include "includes/ad_slot.html" with placement="in_feed" variant="leaderboard" %}{% endif %}
       {% empty %}
         <div class="empty-state">इस सेक्शन में अभी कोई खबर उपलब्ध नहीं है।</div>
       {% endfor %}
@@ -27,11 +26,20 @@
     {% include "includes/pagination.html" with infinite=True %}
   </div>
   <aside class="sidebar-stack">
-    <div class="side-note">
-      <strong>न्यूजरूम अपडेट</strong>
-      <p>प्रकाशित खबरें समय और संपादकीय प्राथमिकता के आधार पर दिखती हैं।</p>
-    </div>
+    <section class="side-panel">
+      <div class="section-title"><div><span class="eyebrow">Popular</span><h2>Trending</h2></div></div>
+      <div class="rank-list">
+        {% for article in trending_articles %}<a href="{{ article.get_absolute_url }}"><h3>{{ article.short_title|default:article.title }}</h3></a>{% empty %}<div class="empty-state">Trending news उपलब्ध नहीं है।</div>{% endfor %}
+      </div>
+    </section>
+    <section class="side-panel">
+      <div class="section-title"><div><span class="eyebrow">Most Viewed</span><h2>Most Read</h2></div></div>
+      <div class="rank-list">
+        {% for article in most_read %}<a href="{{ article.get_absolute_url }}"><h3>{{ article.short_title|default:article.title }}</h3></a>{% empty %}<div class="empty-state">Most read उपलब्ध नहीं है।</div>{% endfor %}
+      </div>
+    </section>
     {% include "includes/ad_slot.html" with placement="category_page" variant="sidebar" %}
+    {% include "includes/ad_slot.html" with placement="sidebar" variant="sidebar" %}
   </aside>
 </section>
 {% endblock %}

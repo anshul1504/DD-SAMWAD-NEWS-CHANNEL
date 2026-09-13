@@ -1,22 +1,33 @@
-{% for ad in active_ads %}
-  {% if ad.placement == placement %}
-    <aside class="ad-slot ad-slot-{{ placement }} ad-slot-{{ variant|default:'leaderboard' }}">
-      {% if ad.html_code %}
-        {{ ad.html_code|safe }}
-      {% elif ad.image or ad.desktop_image %}
-        <a href="{{ ad.target_url|default:'#' }}" {% if ad.target_url %}target="_blank" rel="noopener"{% endif %}>
-          <picture>
-            {% if ad.mobile_image %}<source media="(max-width: 576px)" srcset="{{ ad.mobile_image.url }}">{% endif %}
-            <img src="{% if ad.desktop_image %}{{ ad.desktop_image.url }}{% elif ad.image %}{{ ad.image.url }}{% endif %}" alt="{{ ad.name }}">
-          </picture>
-        </a>
-      {% else %}
-        <div class="ad-creative ad-creative-fallback">
-          <span>Sponsored</span>
-          <strong>{{ ad.name }}</strong>
-          <small>Campaign managed from CMS</small>
-        </div>
-      {% endif %}
-    </aside>
-  {% endif %}
-{% endfor %}
+{% load ad_extras %}
+{% comment %}
+  An unsold slot renders nothing at all. Showing "Advertisement Space" on a
+  live site reads as an unfinished page; the slot simply collapses until an
+  Advertisement row exists for this placement.
+{% endcomment %}
+{% with slot_ads=active_ads|by_placement:placement %}
+{% if slot_ads %}
+<aside class="ad-slot ad-slot-{{ placement }} ad-slot-{{ variant|default:'leaderboard' }}">
+  {% for ad in slot_ads %}
+    {% if ad.html_code %}
+      {{ ad.html_code|safe }}
+    {% elif ad.image or ad.desktop_image %}
+      <a href="{{ ad.target_url|default:'#' }}" {% if ad.target_url %}target="_blank" rel="noopener"{% endif %}>
+        <picture>
+          {% if ad.mobile_image %}<source media="(max-width: 576px)" srcset="{{ ad.mobile_image.url }}">{% endif %}
+          <img src="{% if ad.desktop_image %}{{ ad.desktop_image.url }}{% elif ad.image %}{{ ad.image.url }}{% endif %}" alt="{{ ad.name }}" loading="lazy" decoding="async">
+        </picture>
+      </a>
+    {% else %}
+      {% comment %}
+        A real, live campaign with no creative uploaded yet: label it honestly
+        rather than rendering an empty box.
+      {% endcomment %}
+      <div class="ad-creative">
+        <span>Sponsored</span>
+        <strong>{{ ad.name }}</strong>
+      </div>
+    {% endif %}
+  {% endfor %}
+</aside>
+{% endif %}
+{% endwith %}

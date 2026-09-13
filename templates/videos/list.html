@@ -1,18 +1,116 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="video-studio video-page">
-  <div class="dds-container">
-    {% include "includes/section_header.html" with title=page_title eyebrow="Watch" %}
-    <div class="video-layout">
-      {% for video in page_obj %}
-        <a href="{{ video.get_absolute_url }}" class="video-card {% if forloop.first %}video-lead{% endif %}">
-          <span class="play-icon">▶</span>
-          {% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>वीडियो</strong></div>{% endif %}
-          <div><small>{{ video.category|default:"वीडियो" }}</small><h3>{{ video.title }}</h3></div>
-        </a>
-      {% empty %}<div class="empty-state dark">वीडियो उपलब्ध नहीं हैं।</div>{% endfor %}
-    </div>
+<section class="dds-container archive-hero listing-hero">
+  <div>
+    <span>{% if active_category %}Category{% elif is_shorts_page %}Shorts{% else %}Watch{% endif %}</span>
+    <h1>{{ page_title }}</h1>
+    <p>{% if is_shorts_page %}Quick video updates, reels aur shorts ek alag swipe-friendly page par.{% else %}Long-form video reports, bulletins aur explainers ek clean watch page par.{% endif %}</p>
+  </div>
+  <div class="listing-count"><strong>{{ total_count }}</strong><span>{% if is_shorts_page %}Shorts{% else %}Videos{% endif %}</span></div>
+</section>
+
+<section class="dds-container webstory-filter-row">
+  <a href="{% url 'videos:list' %}" class="webstory-filter-chip{% if not is_shorts_page %} is-active{% endif %}">Long Videos</a>
+  <a href="{% url 'videos:shorts' %}" class="webstory-filter-chip{% if is_shorts_page %} is-active{% endif %}">Shorts</a>
+  {% for category in filter_categories %}
+    <a href="?category={{ category.slug }}" class="webstory-filter-chip{% if active_category.slug == category.slug %} is-active{% endif %}">{{ category }}</a>
+  {% endfor %}
+</section>
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
+
+<section class="dds-container archive-layout video-listing-layout">
+  <div class="archive-main">
+    <section class="video-studio video-page video-grid-section">
+      <div class="section-title">
+        <div>
+          <span class="eyebrow">{% if is_shorts_page %}Swipe{% else %}Watch{% endif %}</span>
+          <h2>{% if is_shorts_page %}All Shorts{% else %}All Long Videos{% endif %}</h2>
+        </div>
+      </div>
+
+      {% if not is_shorts_page %}
+        <div class="video-inline-player" data-video-player hidden>
+          <button type="button" class="video-inline-close" data-video-player-close aria-label="Close player">&times;</button>
+          <div class="video-inline-frame">
+            <div data-video-player-frame></div>
+          </div>
+          <div class="video-inline-controls" aria-label="Video controls">
+            <button type="button" data-video-player-play aria-label="Play or pause"><i class="bi bi-play-fill"></i></button>
+            <button type="button" data-video-player-back aria-label="Back 10 seconds"><i class="bi bi-rewind-fill"></i><span>10s</span></button>
+            <button type="button" data-video-player-forward aria-label="Forward 10 seconds"><span>10s</span><i class="bi bi-fast-forward-fill"></i></button>
+            <button type="button" data-video-player-restart aria-label="Restart"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <label class="video-inline-volume" aria-label="Volume">
+              <i class="bi bi-volume-up-fill"></i>
+              <input type="range" min="0" max="100" value="80" data-video-player-volume>
+            </label>
+            <button type="button" data-video-player-mute aria-label="Mute or unmute"><i class="bi bi-volume-mute-fill"></i></button>
+          </div>
+          <h3 data-video-player-title></h3>
+        </div>
+      {% endif %}
+
+      <div class="{% if is_shorts_page %}video-shorts-grid{% else %}video-yt-grid{% endif %}">
+        {% for video in page_obj %}
+          {% if is_shorts_page %}
+            <a href="{{ video.get_absolute_url }}" class="video-shorts-card video-shorts-card-grid">
+              <span class="play-icon"><i class="bi bi-play-fill"></i></span>
+              <span class="video-shorts-badge"><i class="bi bi-phone-fill"></i> Shorts</span>
+              {% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Video</strong></div>{% endif %}
+              <strong>{{ video.title }}</strong>
+              <span class="video-shorts-stats">
+                <span><i class="bi bi-eye-fill"></i> {{ video.views }}</span>
+                <span><i class="bi bi-heart-fill"></i> {{ video.likes }}</span>
+                <span><i class="bi bi-chat-fill"></i> {{ video.comment_count }}</span>
+              </span>
+            </a>
+          {% else %}
+            <a href="{{ video.get_absolute_url }}" class="video-yt-card" data-video-inline-card data-embed="{{ video.embed_url }}" data-title="{{ video.title }}">
+              <span class="video-yt-thumb">
+                <span class="play-icon"><i class="bi bi-play-fill"></i></span>
+                {% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">{% else %}<span class="story-fallback"><strong>Video</strong></span>{% endif %}
+              </span>
+              <span class="video-yt-body">
+                <span class="video-yt-avatar">{{ video.category|default:"V"|slice:":1" }}</span>
+                <span class="video-yt-info">
+                  <h3>{{ video.title }}</h3>
+                  <span class="video-yt-channel">{{ video.category|default:"Video" }}</span>
+                  <span class="video-yt-stats">
+                    <span>{{ video.views }} Views</span>
+                    <span>&middot;</span>
+                    <span>{{ video.published_at|timesince }} ago</span>
+                  </span>
+                  <span class="video-yt-actions">
+                    <span><i class="bi bi-heart-fill"></i> {{ video.likes }}</span>
+                    <span><i class="bi bi-chat-fill"></i> {{ video.comment_count }}</span>
+                  </span>
+                </span>
+              </span>
+            </a>
+          {% endif %}
+        {% empty %}
+          <div class="empty-state">{% if is_shorts_page %}Shorts available nahi hain.{% else %}Videos available nahi hain.{% endif %}</div>
+        {% endfor %}
+      </div>
+    </section>
+    {% include "includes/ad_slot.html" with placement="in_feed" variant="rectangle" %}
     {% include "includes/pagination.html" %}
   </div>
+  <aside class="sidebar-stack">
+    <section class="side-panel">
+      <div class="section-title"><div><span class="eyebrow">Editor's Pick</span><h2>Featured</h2></div></div>
+      <div class="rank-list">
+        {% for video in featured_videos %}<a href="{{ video.get_absolute_url }}"><h3>{{ video.title }}</h3></a>{% empty %}<div class="empty-state">Featured items available nahi hain.</div>{% endfor %}
+      </div>
+    </section>
+    <section class="side-panel">
+      <div class="section-title"><div><span class="eyebrow">Most Viewed</span><h2>Most Watched</h2></div></div>
+      <div class="rank-list">
+        {% for video in most_watched %}<a href="{{ video.get_absolute_url }}"><h3>{{ video.title }}</h3></a>{% empty %}<div class="empty-state">Most watched items available nahi hain.</div>{% endfor %}
+      </div>
+    </section>
+    {% include "includes/ad_slot.html" with placement="category_page" variant="sidebar" %}
+    {% include "includes/ad_slot.html" with placement="sidebar" variant="sidebar" %}
+  </aside>
 </section>
 {% endblock %}

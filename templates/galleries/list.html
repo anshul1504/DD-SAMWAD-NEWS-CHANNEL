@@ -3,6 +3,7 @@
 <section class="dds-container archive-hero">
   <div><span>Visual Desk</span><h1>{{ page_title }}</h1><p>तस्वीरों में देखें दिन की बड़ी घटनाएं और स्थानीय झलकियां।</p></div>
 </section>
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
 <section class="dds-container">
   <div class="photo-mosaic archive-photo-grid">
     {% for gallery in page_obj %}
@@ -12,6 +13,7 @@
       </a>
     {% empty %}<div class="empty-state">फोटो गैलरी उपलब्ध नहीं है।</div>{% endfor %}
   </div>
+  {% include "includes/ad_slot.html" with placement="in_feed" variant="rectangle" %}
   {% include "includes/pagination.html" %}
 </section>
 {% endblock %}

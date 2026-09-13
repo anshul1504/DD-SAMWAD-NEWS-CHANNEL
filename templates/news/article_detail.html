@@ -1,43 +1,47 @@
 {% extends "base.html" %}
+{% load news_extras %}
 {% block content %}
 <article class="article-page">
   <div class="dds-container">
-    <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="{% url 'home' %}">होम</a>
-      <span>›</span>
-      <a href="{{ article.category.get_absolute_url }}">{{ article.category }}</a>
-      {% if article.city %}<span>›</span><a href="{{ article.city.get_absolute_url }}">{{ article.city }}</a>{% endif %}
-    </nav>
     <div class="article-grid">
       <aside class="share-rail" aria-label="शेयर करें">
-        <button data-share>Share</button>
-        <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener">WA</a>
-        <button data-copy="{{ request.build_absolute_uri }}">Link</button>
+        <button data-share aria-label="Share"><i class="bi bi-share-fill"></i></button>
+        <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener" aria-label="WhatsApp पर भेजें"><i class="bi bi-whatsapp"></i></a>
+        <button data-copy="{{ request.build_absolute_uri }}" aria-label="लिंक कॉपी करें"><i class="bi bi-link-45deg"></i></button>
       </aside>
-      <main class="article-main">
+      <main class="article-main" style="--cat-color:{{ article.category|category_color }}">
         <div class="story-meta article-meta">
-          <span>{{ article.category }}</span>
+          {% if article.category %}<a href="{{ article.category.get_absolute_url }}" class="article-category-chip">{{ article.category }}</a>{% endif %}
           {% if article.is_breaking %}<span class="breaking-chip">Breaking</span>{% endif %}
-          {% if article.city %}<span>{{ article.city }}</span>{% endif %}
+          {% if article.city %}<span><i class="bi bi-geo-alt"></i> {{ article.city }}</span>{% endif %}
         </div>
         <h1>{{ article.title }}</h1>
         {% if article.summary %}<p class="article-summary">{{ article.summary }}</p>{% endif %}
         <div class="article-byline">
           <span>By {% if article.reporter %}<a href="{{ article.reporter.get_absolute_url }}">{{ article.reporter.display_name }}</a>{% else %}{{ article.author.get_full_name|default:article.author.username }}{% endif %}</span>
-          <span>{{ article.published_at|date:"d F Y, h:i A" }}</span>
+          <span>{{ article.published_at|hindi_date }}</span>
           <span>{{ article.reading_time }} मिनट पढ़ें</span>
           <span>{{ article.views }} Views</span>
         </div>
         <div class="mobile-share-row">
-          <button data-share>Share</button>
-          <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener">WhatsApp</a>
-          <button data-copy="{{ request.build_absolute_uri }}">Copy Link</button>
-          {% if user.is_authenticated %}<a href="{% url 'news:bookmark' article.pk %}">Save</a>{% endif %}
+          <button data-share><i class="bi bi-share-fill"></i> Share</button>
+          <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+          <button data-copy="{{ request.build_absolute_uri }}"><i class="bi bi-link-45deg"></i> Copy Link</button>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'news:bookmark' article.pk %}" class="bookmark-form">
+              {% csrf_token %}
+              <button type="submit"><i class="bi bi-bookmark-fill"></i> Save</button>
+            </form>
+          {% endif %}
         </div>
         {% include "includes/ad_slot.html" with placement="article_top" variant="leaderboard" %}
         <figure class="article-figure">
-          {% if article.featured_image %}
-            <img class="article-image" src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}">
+          {% if article.embed_url %}
+            <div class="ratio ratio-16x9 video-frame article-video">
+              <iframe src="{{ article.embed_url }}" title="{{ article.title }}" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          {% elif article.featured_image %}
+            <img class="article-image" src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy" decoding="async">
           {% else %}
             <div class="article-image story-fallback"><strong>{{ article.category }}</strong><span>देश दर्पण संवाद</span></div>
           {% endif %}
@@ -45,7 +49,9 @@
         </figure>
         <div class="article-body">{{ article.body|safe }}</div>
         {% include "includes/ad_slot.html" with placement="article_middle" variant="leaderboard" %}
-        <div class="tags">{% for tag in article.tags.all %}<a href="{{ tag.get_absolute_url }}">#{{ tag.name }}</a>{% endfor %}</div>
+        {% if article.tags.all %}
+          <div class="tags">{% for tag in article.tags.all %}<a href="{{ tag.get_absolute_url }}">#{{ tag.name }}</a>{% endfor %}</div>
+        {% endif %}
         <section class="related">
           {% include "includes/section_header.html" with title="संबंधित खबरें" %}
           <div class="related-grid">{% for article in related_articles %}{% include "includes/news_card.html" with article=article class="compact-story" %}{% endfor %}</div>
@@ -61,5 +67,9 @@
     </div>
   </div>
 </article>
-{{ article_jsonld|json_script:"article-schema" }}
+{% comment %}
+  json_script emits type="application/json", which search engines ignore for
+  structured data. The schema must be served as application/ld+json to be read.
+{% endcomment %}
+<script type="application/ld+json">{{ article_jsonld_json }}</script>
 {% endblock %}

@@ -1,27 +1,35 @@
-{% load static %}
+{% load static asset_extras news_extras %}
 <!doctype html>
 <html lang="hi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% if seo_title %}{{ seo_title }}{% else %}{{ site_settings.site_name }}{% endif %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{% if seo_title %}{{ seo_title }} - {{ site_settings.site_name|default:"Desh Darpan Samvad" }}{% else %}{{ site_settings.site_name|default:"Desh Darpan Samvad" }}{% endif %}{% endblock %}</title>
   <meta name="description" content="{{ meta_description|default:site_settings.tagline }}">
   <link rel="canonical" href="{{ request.build_absolute_uri }}">
   <meta property="og:title" content="{{ seo_title|default:site_settings.site_name }}">
   <meta property="og:description" content="{{ meta_description|default:site_settings.tagline }}">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="{{ og_type|default:'website' }}">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon-48x48.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
-  <meta property="og:image" content="{% static 'images/dds-final-logo.png' %}">
+  {% comment %}
+    Article pages set og_image to the story's featured image; sharing every page
+    as the site logo suppressed click-through on every WhatsApp/Facebook share.
+    Open Graph requires an absolute URL, so the logo fallback is qualified too.
+  {% endcomment %}
+  <meta property="og:image" content="{% if og_image %}{{ og_image }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/dds-final-logo.png' %}{% endif %}">
+  <meta name="twitter:image" content="{% if og_image %}{{ og_image }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/dds-final-logo.png' %}{% endif %}">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&family=Noto+Sans+Gurmukhi:wght@400;500;600;700;800&family=Noto+Sans+Kannada:wght@400;500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Telugu:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="stylesheet" href="{% static_v 'css/main.css' %}">
   <style>
     :root{
       --dds-red:#e31e28;
@@ -59,10 +67,15 @@
     .dds-topbar{position:fixed;top:0;left:0;right:0;z-index:1045;background:linear-gradient(90deg,#050b18,var(--dds-logo-navy-dark) 48%,#071024);color:#e5e7eb;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.08)}
     .dds-topbar-inner{height:34px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
     .dds-topbar-left,.dds-topbar-right{display:flex;align-items:center;gap:.72rem;min-width:0}
+    .dds-topbar-left>span{display:inline-flex;align-items:center;gap:.5rem}
+    .dds-topbar-left>span i{font-size:.9rem;flex:0 0 auto;margin-right:.1rem}
     .dds-topbar-right{justify-content:flex-end}
     .dds-topbar a{color:#fff;font-weight:600;white-space:nowrap}
     .dds-topbar a:hover{color:#fff}
     .dds-topbar .dot{width:4px;height:4px;border-radius:50%;background:#8993a4;display:inline-block}
+    .dds-weather-chip{display:none;align-items:center;gap:.3rem;color:#e8eef8;white-space:nowrap}
+    .dds-weather-chip.is-visible{display:inline-flex}
+    .dds-weather-chip i{font-size:.9rem;color:#ffb45c}
     .dds-social{display:flex;align-items:center;gap:.35rem}
     .dds-social a{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);border-radius:50%;background:rgba(255,255,255,.06);color:#fff;font-size:.88rem;font-weight:700;transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease}
     .dds-social a:hover{color:#fff;transform:translateY(-1px)}
@@ -96,7 +109,6 @@
     iframe.goog-te-banner-frame,
     iframe.skiptranslate{display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;max-height:0!important;opacity:0!important;pointer-events:none!important}
     html.translated-ltr,html.translated-rtl,body{margin-top:0!important;top:0!important}
-    #google_translate_element{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden}
 
     .site-sticky-header{position:fixed;top:34px;left:0;right:0;z-index:1038;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.08),0 12px 28px rgba(15,23,42,.08)}
     .dds-brand-row{height:66px;display:grid;grid-template-columns:250px minmax(0,1fr) auto;align-items:center;gap:clamp(.8rem,1.6vw,1.8rem);transition:none}
@@ -107,7 +119,7 @@
     .site-sticky-header.is-compact .dds-logo img{width:232px;height:62px}
 
     .dds-search{height:46px;display:flex;align-items:center;background:#fff;border:1px solid var(--dds-line);border-radius:999px;box-shadow:0 10px 26px rgba(15,23,42,.06);overflow:hidden}
-    .dds-brand-row>.dds-search{display:none}
+    .dds-brand-row>.dds-search{display:none!important}
     .dds-search:focus-within{box-shadow:0 16px 40px rgba(15,23,42,.12),0 0 0 4px rgba(227,30,40,.08)}
     .dds-search-icon{width:18px;height:18px;margin-left:18px;border:2px solid #7a8493;border-radius:50%;position:relative;flex:0 0 auto}
     .dds-search-icon:after{content:"";position:absolute;width:8px;height:2px;right:-6px;bottom:-3px;background:#7a8493;transform:rotate(45deg);border-radius:2px}
@@ -115,27 +127,30 @@
     .dds-search button{height:38px;margin-right:4px;border:0;border-radius:999px;background:var(--dds-red);color:#fff;font-weight:700;padding:0 1.25rem}
     .site-sticky-header.is-compact .dds-search{height:46px}
     .site-sticky-header.is-compact .dds-search button{height:38px}
-    .dds-mobile-search-toggle{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--dds-line);border-radius:999px;background:#fff;color:var(--dds-logo-navy);font-size:1rem;box-shadow:0 8px 18px rgba(15,23,42,.07)}
+    .dds-mobile-search-toggle{width:42px;height:42px;min-width:42px;display:grid!important;place-items:center;flex:0 0 auto;border:1px solid var(--dds-line);border-radius:50%;background:#fff;color:var(--dds-logo-navy);font-size:1rem;line-height:1;padding:0;appearance:none;-webkit-appearance:none;box-shadow:0 8px 18px rgba(15,23,42,.07)}
+    .dds-mobile-search-toggle i{display:block;line-height:1;font-size:1.05rem}
     .dds-mobile-search-panel{display:none;position:fixed;left:0;right:0;top:100px;z-index:1040;background:#fff;border-top:1px solid var(--dds-line);border-bottom:1px solid var(--dds-line);box-shadow:0 14px 28px rgba(15,23,42,.12);padding:.65rem 0}
     body.search-open .dds-mobile-search-panel{display:block}
 
     .dds-actions{display:flex;align-items:center;justify-content:flex-end;justify-self:end;gap:.45rem;min-width:0}
     .dds-pill{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:.34rem;border:1px solid var(--dds-line);border-radius:999px;background:#fff;color:var(--dds-ink);font-weight:700;padding:.38rem .74rem;white-space:nowrap}
-    .dds-pill i,.dds-utility-link i,.dds-link-grid a i,.mobile-bottom-nav i,.dds-nav-track a i{font-size:1rem;line-height:1;flex:0 0 auto}
+    .dds-pill i,.dds-utility-link i,.dds-link-grid a i,.mobile-bottom-nav i,.dds-nav-track a i,.dds-nav-dropdown>summary i{font-size:1rem;line-height:1;flex:0 0 auto}
     .dds-pill.live{background:#fff9ee;border-color:#f1dec1;color:#8a4b00}
     .dds-pill.sign{font-weight:700}
     .dds-pill.tip{background:#fff;border-color:#ffd4d7;color:var(--dds-red)}
-    .dds-menu-btn{width:52px;height:52px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:#fff;font-weight:800;padding:0;white-space:nowrap}
-    .dds-menu-btn i{width:18px;display:grid;gap:4px}
-    .dds-menu-btn i span{height:2px;background:#fff;border-radius:999px}
 
     .dds-nav{height:50px;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457);overflow:visible}
     .dds-nav-track{height:50px;display:flex;align-items:center;gap:.12rem;overflow:visible;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent;padding-left:0}
     .dds-nav-track::-webkit-scrollbar{display:none}
-    .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:50px;flex:0 0 auto;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap}
-    .dds-nav-track>a,.dds-nav-dropdown>summary,.dds-nav-menu a,.dds-footer a,.dds-footer h3,.mobile-bottom-nav span{text-transform:capitalize}
+    .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:50px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap}
+    .dds-nav-track>.dds-menu-btn{width:52px;padding:0;border:0;background:var(--dds-logo-navy-dark);box-shadow:12px 0 22px rgba(5,27,69,.4)}
+    .dds-menu-btn i{width:18px;display:grid;gap:4px}
+    .dds-menu-btn i span{height:2px;background:#fff;border-radius:999px}
+    .dds-nav-track>a,.dds-nav-dropdown>summary,.dds-nav-menu a,.mobile-bottom-nav span{text-transform:capitalize}
     .dds-nav-track>a:hover,.dds-nav-track>a.active{background:rgba(255,255,255,.12);color:#fff}
-    .dds-nav-track>.dds-menu-btn{position:sticky;left:0;z-index:5;background:var(--dds-logo-navy-dark);box-shadow:12px 0 22px rgba(5,27,69,.55)}
+
+    .dds-nav .dds-nav-track>a,.dds-nav .dds-nav-dropdown>summary,.dds-nav .dds-menu-btn{color:#fff!important}
+    .dds-nav .dds-nav-track>a *,.dds-nav .dds-nav-dropdown>summary *,.dds-nav .dds-menu-btn *{color:inherit!important}
     .dds-nav-dropdown{height:50px;flex:0 0 auto;position:relative}
     .dds-nav-dropdown>summary{height:50px;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap;list-style:none;cursor:pointer}
     .dds-nav-dropdown>summary::-webkit-details-marker{display:none}
@@ -147,17 +162,15 @@
 
     .dds-breaking{position:fixed;top:150px;left:0;right:0;z-index:1028;border-bottom:1px solid var(--dds-line);background:#fff;box-shadow:0 8px 18px rgba(15,23,42,.035)}
     .dds-breaking-inner{min-height:40px;display:flex;align-items:center;gap:.75rem;overflow:hidden}
-    .dds-breaking-label{flex:0 0 auto;display:inline-flex;align-items:center;gap:.38rem;border-radius:999px;background:var(--dds-red);color:#fff;font-weight:800;padding:.35rem .7rem;font-size:.82rem}
-    .dds-breaking-label:before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.24)}
+    .dds-breaking-label{flex:0 0 auto;display:inline-flex;align-items:center;gap:.34rem;min-height:28px;padding:.35rem .82rem;border-radius:999px;background:var(--dds-red);color:#fff;font-size:.78rem;font-weight:900;line-height:1;white-space:nowrap;box-shadow:0 8px 16px rgba(225,29,46,.22)}
+    .dds-breaking-label:before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.22)}
     .dds-breaking-track{display:flex;align-items:center;gap:1.4rem;min-width:0;overflow:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
     .dds-breaking-track::-webkit-scrollbar{display:none}
     .dds-breaking-track a{flex:0 0 auto;color:#1f2937;font-weight:700;white-space:nowrap}
 
     .dds-mega{width:clamp(320px,86vw,420px);max-width:100vw;background:#061b43;color:#fff;border:0}
-    .dds-mega .offcanvas-header{min-height:68px;padding:.75rem 1rem;border:0;background:#061b43;box-shadow:0 1px 0 rgba(255,255,255,.08);display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:.75rem}
+    .dds-mega .offcanvas-header{min-height:68px;padding:.75rem 1rem;border:0;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.08);display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:.75rem}
     .dds-mega .offcanvas-title{display:none}
-    .dds-mega .btn-close{width:38px;height:38px;margin:0;justify-self:end;align-self:center;border-radius:50%;background-color:rgba(255,255,255,.08);opacity:1;filter:invert(1) grayscale(1);background-size:14px}
-    .dds-mega .btn-close:hover{background-color:rgba(255,255,255,.15)}
     .dds-mega .offcanvas-body{padding:0;max-height:calc(100dvh - 68px);overflow:auto;background:#082b68;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.36) transparent;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch}
     .dds-mega .offcanvas-body::-webkit-scrollbar{width:7px}
     .dds-mega .offcanvas-body::-webkit-scrollbar-track{background:transparent}
@@ -181,18 +194,13 @@
     .dds-link-grid a i{width:20px;text-align:center;color:#dbeafe;font-size:1.02rem}
     .dds-link-grid a:hover{background:rgba(255,255,255,.1);color:#fff}
 
-    .dds-footer{margin-top:2.4rem;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457)!important;color:#d8dee8;position:relative;overflow:hidden}
+    .dds-footer{margin-top:0;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457)!important;color:#d8dee8;position:relative;overflow:hidden}
     .dds-footer:before{display:none}
     .dds-footer .dds-container{position:relative;z-index:1}
-    .dds-footer-top{padding:1rem 0 .95rem;border-bottom:1px solid rgba(255,255,255,.13);display:grid;grid-template-columns:minmax(180px,280px) minmax(280px,520px);gap:1.4rem;align-items:center;justify-content:space-between}
     .dds-footer-brand{display:flex;align-items:center;min-width:0}
-    .dds-footer-brand img{width:220px;max-width:100%;background:transparent;border-radius:0;padding:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.18))}
-    .dds-footer-about p{margin:.25rem 0 0;color:#c7d2e3;line-height:1.45;max-width:360px;font-size:.94rem}
-    .dds-footer-subscribe{display:flex;border:1px solid rgba(255,255,255,.18);border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);box-shadow:none}
-    .dds-footer-subscribe input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;padding:.95rem 1.1rem}
-    .dds-footer-subscribe input::placeholder{color:#aeb8c8}
-    .dds-footer-subscribe button{border:0;background:var(--dds-red);color:#fff;font-weight:800;padding:0 1.35rem}
-    .dds-footer-social{display:flex;align-items:center;gap:.42rem;flex-wrap:wrap;margin-top:.62rem}
+    .dds-footer-brand img{width:min(210px,100%);max-height:170px;object-fit:contain;background:#fff;border-radius:8px;padding:.45rem;filter:drop-shadow(0 8px 14px rgba(0,0,0,.18))}
+    .dds-footer-about p{margin:.65rem 0 0;color:#d5deec;line-height:1.58;max-width:430px;font-size:1rem;font-weight:500;text-transform:none}
+    .dds-footer-social{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.9rem}
     .dds-footer-social a{width:31px;height:31px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;border:0;margin:0;line-height:1;text-decoration:none;transition:transform .18s ease,filter .18s ease,box-shadow .18s ease}
     .dds-footer-social a i{display:block;font-size:.9rem;line-height:1;color:#fff!important}
     .dds-footer-social a:hover{transform:translateY(-2px);color:#fff;border-color:transparent;box-shadow:0 8px 18px rgba(0,0,0,.2)}
@@ -203,16 +211,15 @@
     .dds-footer-social .telegram{background:#229ed9}
     .dds-footer-social .whatsapp{background:#25d366}
     .dds-footer-social a:hover{filter:saturate(1.12) brightness(1.06)}
-    .dds-footer-grid{padding:.9rem 0 1rem;display:grid;grid-template-columns:1fr 1fr 1fr 1fr minmax(136px,.68fr);gap:1.1rem;align-items:start}
-    .dds-footer h3{margin:0 0 .55rem;color:#fff;font-size:.98rem;font-weight:800}
-    .dds-footer a{display:flex;align-items:center;gap:.48rem;color:#cbd5e1;margin:.36rem 0;font-weight:650;line-height:1.3;font-size:.94rem}
+    .dds-footer-grid{padding:1.55rem 0 1.1rem;display:grid;grid-template-columns:minmax(260px,1.3fr) repeat(5,minmax(112px,1fr));gap:1.6rem;align-items:start}
+    .dds-footer h3{margin:0 0 .7rem;color:#fff;font-size:1rem;font-weight:650;text-transform:none}
+    .dds-footer a{display:flex;align-items:center;gap:.48rem;color:#d7dfec;margin:.42rem 0;font-weight:500;line-height:1.35;font-size:.95rem;text-transform:none}
     .dds-footer a i{color:#fff;font-size:.95rem}
     .dds-footer a:hover{color:#fff}
-    .dds-footer-contact p{margin:.3rem 0;color:#cbd5e1;line-height:1.4;font-size:.94rem}
-    .dds-footer-qr{width:112px;background:#fff;color:#071024;border-radius:8px;padding:.45rem;display:grid;gap:.28rem;justify-items:center;box-shadow:0 10px 24px rgba(0,0,0,.14)}
-    .dds-footer-qr img{width:92px;height:92px;object-fit:contain;display:block}
-    .dds-footer-qr strong{font-size:.67rem;color:#071024;line-height:1.1;text-align:center;font-weight:800}
-    .dds-footer-bottom{border-top:1px solid rgba(255,255,255,.13);padding:.68rem 0 .78rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;color:#b9c5d8;text-align:left}
+    .dds-footer-contact p{margin:.42rem 0;color:#d7dfec;line-height:1.45;font-size:.95rem;font-weight:500;display:flex;gap:.5rem;align-items:flex-start;text-transform:none}
+    .dds-footer-contact p i{margin-top:.1rem;color:#fff}
+    .dds-footer-email{font-family:var(--font-latin);text-transform:lowercase!important}
+    .dds-footer-bottom{border-top:1px solid rgba(255,255,255,.13);padding:.78rem 0 .86rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;color:#b9c5d8;text-align:left}
     .dds-footer-copy{display:inline-flex;align-items:center;gap:.38rem;padding:0;background:transparent;box-shadow:none;font-size:.86rem;font-weight:500;color:#b8c4d6}
     .dds-footer-copy i{color:#fff;font-size:.88rem}
     .dds-footer-credit{color:#aeb8c8;text-align:right;font-size:.84rem;font-weight:500}
@@ -231,13 +238,14 @@
       .dds-logo img{width:204px;height:58px}
       .dds-nav-track{padding-left:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
       .dds-nav-track>a,.dds-nav-dropdown>summary{padding-inline:.68rem}
+      .dds-nav-menu{position:fixed;top:150px}
     }
     @media(min-width:992px){
       .dds-mega{width:420px}
       .dds-mega .offcanvas-body{max-height:calc(100dvh - 68px)}
     }
     @media(max-width:991px){
-      body{padding-top:166px}
+      body{padding-top:178px}
       .dds-topbar-left span:nth-child(n+3){display:none}
       .dds-mobile-only{display:inline-flex!important}
       .site-sticky-header{top:30px}
@@ -245,41 +253,36 @@
       .dds-logo{width:144px;min-width:144px;height:48px;margin-bottom:0;padding:0}
       .dds-logo img{width:144px;height:48px}
       .dds-nav-track{padding-left:0}
-      .dds-brand-row>.dds-search{display:none}
-      .dds-mobile-search-toggle{width:36px;height:36px}
+      .dds-brand-row>.dds-search{display:none!important}
       .dds-mobile-search-panel{top:84px}
       .dds-mobile-search-panel .dds-search{display:flex;height:40px;box-shadow:none}
       .dds-mobile-search-panel .dds-search-icon{width:15px;height:15px;margin-left:14px}
       .dds-mobile-search-panel .dds-search input{font-size:.84rem;padding-inline:.65rem}
       .dds-mobile-search-panel .dds-search button{height:34px;padding-inline:.9rem;font-size:.8rem}
-      .dds-nav,.dds-nav-track,.dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:42px}
       .dds-nav-track>a{font-size:.84rem}
-      .dds-menu-btn strong{display:none}
-      .dds-breaking{top:126px}
-      .dds-nav-menu{position:fixed;top:126px}
+      .dds-breaking{top:134px}
+      .dds-nav-menu{position:fixed;top:134px}
       .dds-mega-grid{grid-template-columns:1fr}
-      .dds-footer-top{grid-template-columns:minmax(160px,220px) minmax(260px,1fr);align-items:center}
       .dds-footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem 2rem}
       .dds-footer{margin-top:2rem}
-      .dds-footer-top{gap:1rem}
-      .dds-footer-brand img{width:190px;max-width:58vw}
+      .dds-footer-brand img{width:min(170px,58vw)}
       .dds-footer-about{max-width:440px}
       .dds-footer-contact{justify-self:start}
-      .dds-footer-qr img{width:92px;height:92px}
       .dds-mega-section.primary{grid-row:auto}
       .mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:950;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--dds-line);box-shadow:0 -14px 30px rgba(15,23,42,.12);padding:.18rem .25rem calc(.18rem + env(safe-area-inset-bottom))}
       .mobile-bottom-nav a,.mobile-bottom-nav button{height:56px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#475467;font-weight:700;font-size:.68rem;gap:.18rem;border:0;background:transparent;padding:.24rem .08rem;line-height:1.05;border-radius:8px}
       .mobile-bottom-nav i{font-size:1.14rem;color:var(--dds-logo-navy);line-height:1}
       .mobile-bottom-nav a:hover,.mobile-bottom-nav button:hover{background:#f5f7fb;color:var(--dds-logo-navy)}
-      .mobile-bottom-nav .is-live{color:var(--dds-red)}
-      .mobile-bottom-nav .is-live i{width:24px;height:18px;display:grid;place-items:center;border-radius:4px;background:var(--dds-red);color:#fff;font-size:.78rem}
+      .mobile-bottom-nav a.is-active{color:var(--dds-red)}
+      .mobile-bottom-nav a.is-active i{color:var(--dds-red)}
       .mobile-bottom-nav .mobile-menu-open{color:var(--dds-ink)}
       .mobile-bottom-nav .mobile-menu-open i{color:var(--dds-logo-navy)}
       body{padding-bottom:64px}
+      .scroll-top{bottom:calc(64px + env(safe-area-inset-bottom) + 12px)}
     }
     @media(max-width:560px){
       :root{--dds-container:min(100% - 24px, 1720px)}
-      body{padding-top:160px}
+      body{padding-top:170px}
       .dds-topbar-inner{height:30px;font-size:.76rem}
       .dds-topbar-left{display:flex}
       .dds-topbar-left span:first-child{display:inline}
@@ -287,9 +290,7 @@
       .dds-topbar-left span:nth-child(5){display:inline}
       .dds-topbar-right{width:auto;justify-content:flex-end;gap:.45rem;margin-left:auto}
       .dds-topbar-right>a{display:none}
-      .dds-topbar-right>a.hot,.dds-topbar-right>a.dds-mobile-only{display:inline-flex}
-      .dds-topbar-right>a.hot{font-size:0}
-      .dds-topbar-right>a.hot i{font-size:.9rem}
+      .dds-topbar-right>a.dds-mobile-only{display:inline-flex}
       .dds-mobile-only{font-size:0}
       .dds-mobile-only i{font-size:.9rem}
       .dds-social,.dds-follow-label,.dds-topbar-right>.dot{display:none}
@@ -298,46 +299,42 @@
       .dds-brand-row{height:50px;grid-template-columns:122px 1fr;gap:.65rem}
       .dds-logo{width:116px;min-width:116px;height:42px;margin-bottom:0;border-radius:0}
       .dds-logo img{width:116px;height:42px}
+      .dds-nav,.dds-nav-track{height:42px}
       .dds-nav-track{padding-left:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+      .dds-nav-track>a,.dds-nav-track>.dds-menu-btn,.dds-nav-dropdown,.dds-nav-dropdown>summary{height:42px}
+      .dds-nav-track>a{padding-inline:.58rem;font-size:.8rem}
+      .dds-nav-track>.dds-menu-btn{width:46px}
       .dds-actions{display:flex;justify-content:flex-end;gap:.32rem}
       .dds-pill.live,.dds-pill.tip,.dds-pill.sign{min-width:38px;height:36px;min-height:36px;padding:.35rem .58rem;font-size:.78rem}
       .dds-pill.live,.dds-pill.tip{font-size:0}
       .dds-pill.live i,.dds-pill.tip i{font-size:.95rem}
       .dds-pill.sign{font-size:.78rem}
-      .dds-mobile-search-toggle,.dds-pill.live,.dds-pill.tip{position:relative;width:36px;min-width:36px;height:36px;min-height:36px;border-radius:50%;padding:0;display:block;flex:0 0 36px;background:#fff;border:1px solid #e6eaf0;box-shadow:0 6px 14px rgba(15,23,42,.06);font-size:0;line-height:0;text-decoration:none!important}
-      .dds-mobile-search-toggle i,.dds-pill.live i,.dds-pill.tip i{position:absolute;left:50%;top:50%;width:16px;height:16px;display:block;margin:0;font-size:16px;line-height:16px;transform:translate(-50%,-50%);text-align:center}
-      .dds-mobile-search-toggle i:before,.dds-pill.live i:before,.dds-pill.tip i:before{display:block;width:16px;height:16px;line-height:16px;text-align:center}
-      .dds-mobile-search-toggle{color:var(--dds-logo-navy)}
       .dds-pill.live{color:#9a5b00;border-color:#f2dfbe;background:#fffaf2}
       .dds-pill.tip{color:var(--dds-red);border-color:#ffd7db;background:#fff}
       .dds-pill.sign{gap:.28rem;border-color:#e6eaf0;background:#fff;box-shadow:0 6px 14px rgba(15,23,42,.04)}
-      .dds-nav,.dds-nav-track,.dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:42px}
-      .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{padding:0 .58rem;font-size:.8rem}
-      .dds-menu-btn{width:42px;height:42px}
-      .dds-nav-dropdown,.dds-nav-dropdown>summary{height:42px}
       .dds-nav-dropdown>summary{padding:0 .62rem;font-size:.8rem}
       .dds-mobile-search-panel{top:80px}
-      .dds-breaking{top:120px}
-      .dds-nav-menu{position:fixed;top:120px;left:12px;right:12px;min-width:0;grid-template-columns:1fr 1fr}
+      .dds-breaking{top:122px}
+      .dds-breaking-inner{min-height:44px}
+      .dds-breaking-label{min-height:30px;padding:.38rem .78rem;font-size:.74rem}
+      .dds-breaking-track{gap:1rem}
+      .dds-breaking-track a{font-size:.86rem}
+      .dds-nav-menu{position:fixed;top:122px;left:12px;right:12px;min-width:0;grid-template-columns:1fr 1fr}
       .dds-mega-logo{width:164px;height:48px}
       .dds-mega .offcanvas-header{padding:.7rem .9rem}
       .dds-link-grid{grid-template-columns:1fr}
       .dds-footer{margin-top:1.8rem}
-      .dds-footer-top{grid-template-columns:1fr;gap:.9rem;padding:.95rem 0}
       .dds-footer-brand{justify-content:flex-start}
       .dds-footer-grid{grid-template-columns:1fr;gap:.95rem;padding:.9rem 0}
       .dds-footer h3{margin-bottom:.42rem}
       .dds-footer a{margin:.28rem 0;font-size:.92rem}
-      .dds-footer-about p{max-width:100%;font-size:.92rem}
+      .dds-footer-about p{max-width:100%;font-size:1rem;line-height:1.5}
       .dds-footer-social{gap:.38rem;margin-top:.55rem}
-      .dds-footer-subscribe{border-radius:12px;display:grid}
-      .dds-footer-subscribe button{min-height:42px}
-      .dds-footer-bottom{display:grid;justify-items:center;text-align:center}
+      .dds-footer-bottom{display:grid;justify-items:start;text-align:left;gap:.4rem}
+      .dds-footer-credit{text-align:left}
       .dds-footer-social a{width:31px;height:31px}
-      .dds-footer-qr{width:106px;padding:.4rem}
-      .dds-footer-qr img{width:86px;height:86px}
       .dds-footer-copy{border-radius:0;padding:0}
-      .dds-footer-brand img{width:180px}
+      .dds-footer-brand img{width:min(160px,76vw)}
     }
     @media(max-width:420px){
       .dds-mega{width:100vw}
@@ -358,18 +355,24 @@
 
   <div class="dds-topbar">
     <div class="dds-container dds-topbar-inner">
+      {% comment %}
+        A fixed city name and "मौसम 28C" used to sit here as static text
+        presented as live data. Both were removed rather than faked.
+      {% endcomment %}
       <div class="dds-topbar-left">
-        <span>{{ today|date:"d F Y" }}</span>
-        <span class="dot"></span>
-        <span>इंदौर</span>
-        <span class="dot"></span>
-        <span>मौसम 28°C</span>
+        <span><i class="bi bi-calendar3" aria-hidden="true"></i>{{ today|hindi_date:False }}</span>
+        <span class="dot dds-weather-dot" hidden></span>
+        <span class="dds-weather-chip notranslate" id="ddsWeatherChip" aria-live="polite">
+          <i class="bi bi-cloud-sun" aria-hidden="true"></i>
+          <span id="ddsWeatherText"></span>
+        </span>
       </div>
-      <div class="dds-topbar-right notranslate">
-        <a class="dds-utility-link hot" href="{% url 'news:latest' %}"><i class="bi bi-lightning-charge-fill"></i>ब्रेकिंग न्यूज़</a>
-        <a class="dds-utility-link dds-mobile-only" href="{% url 'liveblog:list' %}" aria-label="लाइव अपडेट"><i class="bi bi-broadcast-pin"></i>लाइव</a>
-        <a class="dds-utility-link" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
-        <label class="dds-language" aria-label="भाषा चुनें">
+      <div class="dds-topbar-right">
+        <a class="dds-utility-link hot" href="{% url 'news:latest' %}" aria-label="ताजा खबरें"><i class="bi bi-lightning-charge-fill"></i>ताजा खबरें</a>
+        <a class="dds-utility-link" href="{% url 'core:epaper' %}" aria-label="ई-पेपर"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        <a class="dds-utility-link dds-mobile-only" href="{% url 'core:epaper' %}" aria-label="ई-पेपर"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        <a class="dds-utility-link dds-mobile-only" href="{% url 'liveblog:list' %}" aria-label="लाइव ब्लॉग"><i class="bi bi-broadcast-pin"></i>लाइव</a>
+        <label class="dds-language notranslate" aria-label="भाषा चुनें" hidden>
           <select id="ddsLanguageSelect">
             <option value="hi">हिन्दी</option>
             <option value="en">English</option>
@@ -392,7 +395,7 @@
             <option value="doi">डोगरी</option>
             <option value="gom">कोंकणी</option>
             <option value="ks">کٲشُر</option>
-            <option value="mni-Mtei">ꯃꯩꯇꯩꯂꯣꯟ</option>
+            <option value="mni-Mtei">ꯃꯤꯇꯩꯂꯣꯟ</option>
           </select>
         </label>
         <span class="dds-follow-label">Follow us</span>
@@ -412,90 +415,80 @@
     <div class="dds-container dds-brand-row">
       <a class="dds-logo" href="{% url 'home' %}" aria-label="Desh Darpan Samvad home">
         {% if site_settings.logo %}
-          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" fetchpriority="high" decoding="async">
         {% else %}
-          <img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad">
+          <img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad" fetchpriority="high" decoding="async">
         {% endif %}
       </a>
       <form class="dds-search" action="{% url 'news:search' %}">
-        <label class="visually-hidden" for="global-search">खबर खोजें</label>
+        <label class="visually-hidden" for="global-search">खोज करें</label>
         <span class="dds-search-icon" aria-hidden="true"></span>
         <input id="global-search" name="q" value="{{ query|default:'' }}" type="search" placeholder="खबर, शहर या विषय खोजें">
         <button type="submit">Search</button>
       </form>
       <div class="dds-actions">
-        <a class="dds-pill live" href="{% url 'news:latest' %}"><i class="bi bi-broadcast"></i>लाइव अपडेट</a>
-        <a class="dds-pill tip" href="{% url 'core:contact' %}"><i class="bi bi-send"></i>न्यूज टिप</a>
-        <button class="dds-mobile-search-toggle" type="button" aria-label="खोज खोलें" aria-expanded="false" aria-controls="ddsMobileSearchPanel"><i class="bi bi-search"></i></button>
+        <a class="dds-pill live" href="{% if active_live_blog %}{{ active_live_blog.get_absolute_url }}{% else %}{% url 'liveblog:list' %}{% endif %}"><i class="bi bi-broadcast"></i>लाइव अपडेट</a>
+        <a class="dds-pill tip" href="{% url 'core:news_tip' %}"><i class="bi bi-send"></i>न्यूज टिप</a>
+        <button class="dds-mobile-search-toggle" type="button" aria-label="खोज करें" aria-expanded="false" aria-controls="ddsMobileSearchPanel"><i class="bi bi-search"></i></button>
         <a class="dds-pill sign" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
       </div>
     </div>
     <div class="dds-mobile-search-panel" id="ddsMobileSearchPanel">
       <form class="dds-container dds-search" action="{% url 'news:search' %}">
-        <label class="visually-hidden" for="mobile-global-search">खबर खोजें</label>
+        <label class="visually-hidden" for="mobile-global-search">खोज करें</label>
         <span class="dds-search-icon" aria-hidden="true"></span>
         <input id="mobile-global-search" name="q" value="{{ query|default:'' }}" type="search" placeholder="खबर, शहर या विषय खोजें">
         <button type="submit">Search</button>
       </form>
     </div>
 
-    <nav class="dds-nav" aria-label="मुख्य समाचार मेनू">
+    <nav class="dds-nav" aria-label="मुख्य नेविगेशन">
       <div class="dds-container dds-nav-track">
-        <button class="dds-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu" aria-label="पूरा मेनू खोलें">
+        <button class="dds-menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu" aria-label="मेनू खोलें">
           <i aria-hidden="true"><span></span><span></span><span></span></i>
         </button>
-        <a href="{% url 'home' %}"><i class="bi bi-house-door"></i>होम</a>
+        <a href="{% url 'home' %}" class="{% if request.resolver_match.view_name == 'home' %}active{% endif %}"><i class="bi bi-house-door"></i>होम</a>
+        <a href="{% url 'core:epaper' %}" class="{% if request.resolver_match.view_name == 'core:epaper' or request.resolver_match.view_name == 'core:epaper_date' %}active{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        {% for category in menu_categories|slice:":6" %}
+          <a href="{{ category.get_absolute_url }}" class="{% if category == category_obj %}active{% endif %}"><i class="bi {{ category|category_icon }}"></i>{{ category }}</a>
+        {% endfor %}
+        {% if popular_cities %}
         <details class="dds-nav-dropdown">
-          <summary>देश</summary>
+          <summary><i class="bi bi-geo-alt"></i>लोकल</summary>
           <div class="dds-nav-menu">
-            <a href="{% url 'news:latest' %}?q=भारत">भारत</a>
-            <a href="{% url 'news:latest' %}?q=सरकार">सरकार</a>
-            <a href="{% url 'news:latest' %}?q=चुनाव">चुनाव</a>
-            <a href="{% url 'news:latest' %}?q=न्यायालय">न्यायालय</a>
+            {% for city in popular_cities|slice:":8" %}
+              <a href="{{ city.get_absolute_url }}"><i class="bi bi-geo-alt"></i>{{ city.name }}</a>
+            {% endfor %}
           </div>
         </details>
+        {% endif %}
         <details class="dds-nav-dropdown">
-          <summary>मध्य प्रदेश</summary>
-          <div class="dds-nav-menu">
-            <a href="{% url 'news:latest' %}?q=इंदौर">इंदौर</a>
-            <a href="{% url 'news:latest' %}?q=भोपाल">भोपाल</a>
-            <a href="{% url 'news:latest' %}?q=उज्जैन">उज्जैन</a>
-            <a href="{% url 'news:latest' %}?q=ग्वालियर">ग्वालियर</a>
-            <a href="{% url 'news:latest' %}?q=जबलपुर">जबलपुर</a>
-          </div>
-        </details>
-        <a href="{% url 'news:latest' %}?q=राजनीति">राजनीति</a>
-        <a href="{% url 'news:latest' %}?q=बिजनेस">बिजनेस</a>
-        <a href="{% url 'news:latest' %}?q=खेल">खेल</a>
-        <a href="{% url 'news:latest' %}?q=मनोरंजन">मनोरंजन</a>
-        <details class="dds-nav-dropdown">
-          <summary>मीडिया</summary>
+          <summary><i class="bi bi-collection-play"></i>मीडिया</summary>
           <div class="dds-nav-menu">
             <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i>वीडियो</a>
-            <a href="{% url 'videos:list' %}"><i class="bi bi-camera-reels"></i>रील्स</a>
-            <a href="{% url 'galleries:list' %}"><i class="bi bi-images"></i>फोटो</a>
+            <a href="{% url 'videos:shorts' %}"><i class="bi bi-phone"></i>Shorts</a>
+            <a href="{% url 'galleries:list' %}"><i class="bi bi-images"></i>फोटो गैलरी</a>
             <a href="{% url 'webstories:list' %}"><i class="bi bi-phone"></i>वेब स्टोरी</a>
+            <a href="{% url 'liveblog:list' %}"><i class="bi bi-broadcast-pin"></i>लाइव ब्लॉग</a>
           </div>
         </details>
+        {% if menu_categories|length > 6 %}
         <details class="dds-nav-dropdown">
-          <summary data-i18n-key="more">अधिक</summary>
+          <summary data-i18n-key="more"><i class="bi bi-grid-3x3-gap"></i>अधिक</summary>
           <div class="dds-nav-menu">
-            <a href="{% url 'news:latest' %}?q=शिक्षा">शिक्षा</a>
-            <a href="{% url 'news:latest' %}?q=टेक्नोलॉजी">टेक्नोलॉजी</a>
-            <a href="{% url 'news:latest' %}?q=लाइफस्टाइल">लाइफस्टाइल</a>
-            <a href="{% url 'news:latest' %}?q=धर्म">धर्म</a>
-            <a href="{% url 'news:latest' %}?q=अपराध">अपराध</a>
-            <a href="{% url 'news:latest' %}?q=कृषि">कृषि</a>
-            <a href="{% url 'news:latest' %}?q=नौकरी">नौकरी</a>
+            {% for category in menu_categories|slice:"6:" %}
+              <a href="{{ category.get_absolute_url }}"><i class="bi {{ category|category_icon }}"></i>{{ category }}</a>
+            {% endfor %}
           </div>
         </details>
+        {% endif %}
       </div>
     </nav>
   </header>
 
-  <div class="dds-breaking" aria-label="ब्रेकिंग न्यूज">
+  <div class="dds-breaking" aria-label="ब्रेकिंग खबरें">
     <div class="dds-container dds-breaking-inner">
-      <span class="dds-breaking-label" data-i18n-key="breaking">ब्रेकिंग न्यूज़</span>
+      <span class="dds-breaking-label" data-i18n-key="breaking">ब्रेकिंग खबरें</span>
       <div class="dds-breaking-track">
         {% for article in breaking_articles %}
           <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
@@ -509,14 +502,14 @@
   <div class="offcanvas offcanvas-start dds-mega" tabindex="-1" id="ddsMegaMenu" aria-labelledby="ddsMegaMenuLabel">
     <div class="offcanvas-header">
       <div>
-        <span class="dds-mega-logo"><img src="{% static 'images/dds-final-logo-light.png' %}" alt="Desh Darpan Samvad"></span>
+        <span class="dds-mega-logo"><img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad" fetchpriority="high" decoding="async"></span>
         <h2 class="offcanvas-title" id="ddsMegaMenuLabel">मेनू</h2>
       </div>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="बंद करें"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="बंद करें"></button>
     </div>
     <div class="offcanvas-body">
       <div class="dds-mega-actions">
-        <a class="dds-mega-action primary" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
+        <a class="dds-mega-action primary" href="{% url 'news:latest' %}"><i class="bi bi-lightning-charge-fill"></i>ताजा खबरें</a>
         <a class="dds-mega-action" href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
       </div>
       <form class="dds-mega-search" action="{% url 'news:search' %}">
@@ -531,7 +524,7 @@
             <a href="{% url 'news:latest' %}"><i class="bi bi-lightning-charge"></i>ताजा खबरें</a>
             <a href="{% url 'news:trending' %}"><i class="bi bi-graph-up-arrow"></i>ट्रेंडिंग</a>
             {% for category in menu_categories %}
-              <a href="{{ category.get_absolute_url }}">{{ category }}</a>
+              <a href="{{ category.get_absolute_url }}"><i class="bi {{ category|category_icon }}"></i>{{ category }}</a>
             {% endfor %}
           </div>
         </section>
@@ -539,7 +532,7 @@
           <h3>Media</h3>
           <div class="dds-link-grid">
             <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i>वीडियो</a>
-            <a href="{% url 'videos:list' %}"><i class="bi bi-camera-reels"></i>रील्स</a>
+            <a href="{% url 'videos:shorts' %}"><i class="bi bi-phone"></i>Shorts</a>
             <a href="{% url 'galleries:list' %}"><i class="bi bi-images"></i>फोटो गैलरी</a>
             <a href="{% url 'webstories:list' %}"><i class="bi bi-phone"></i>वेब स्टोरी</a>
             <a href="{% url 'liveblog:list' %}"><i class="bi bi-broadcast-pin"></i>लाइव ब्लॉग</a>
@@ -549,20 +542,20 @@
           <h3>Local / Regional</h3>
           <div class="dds-link-grid">
             {% for city in popular_cities|slice:":8" %}
-              <a href="{{ city.get_absolute_url }}">{{ city.name }}</a>
+              <a href="{{ city.get_absolute_url }}"><i class="bi bi-geo-alt"></i>{{ city.name }}</a>
             {% empty %}
-              <a href="{% url 'news:search' %}?q=इंदौर">इंदौर</a>
-              <a href="{% url 'news:search' %}?q=भोपाल">भोपाल</a>
-              <a href="{% url 'news:search' %}?q=उज्जैन">उज्जैन</a>
-              <a href="{% url 'news:search' %}?q=ग्वालियर">ग्वालियर</a>
+              <a href="{% url 'news:search' %}?q=इंदौर"><i class="bi bi-geo-alt"></i>इंदौर</a>
+              <a href="{% url 'news:search' %}?q=भोपाल"><i class="bi bi-geo-alt"></i>भोपाल</a>
+              <a href="{% url 'news:search' %}?q=उज्जैन"><i class="bi bi-geo-alt"></i>उज्जैन</a>
+              <a href="{% url 'news:search' %}?q=जबलपुर"><i class="bi bi-geo-alt"></i>जबलपुर</a>
             {% endfor %}
           </div>
         </section>
         <section class="dds-mega-section">
           <h3>Reader Services</h3>
           <div class="dds-link-grid">
-            <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
             <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-person-circle"></i>{% if user.is_authenticated %}CMS Portal{% else %}Sign In{% endif %}</a>
+            <a href="{% url 'core:epaper' %}"><i class="bi bi-newspaper"></i>ई-पेपर</a>
             <a href="{% url 'core:newsletter' %}"><i class="bi bi-envelope-paper"></i>न्यूजलेटर</a>
             <a href="{% url 'core:advertise' %}"><i class="bi bi-megaphone"></i>विज्ञापन दें</a>
             <a href="{% url 'core:contact' %}"><i class="bi bi-headset"></i>संपर्क</a>
@@ -573,8 +566,17 @@
   </div>
 
   {% if messages %}
-    <div class="dds-container mt-3">
-      {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}
+    <div class="dds-container dds-messages" role="status" aria-live="polite">
+      {% for message in messages %}
+        <div class="dds-alert dds-alert-{{ message.tags|default:'info' }}">
+          <i class="bi
+            {% if message.level_tag == 'success' %}bi-check-circle-fill
+            {% elif message.level_tag == 'error' %}bi-exclamation-octagon-fill
+            {% elif message.level_tag == 'warning' %}bi-exclamation-triangle-fill
+            {% else %}bi-info-circle-fill{% endif %}" aria-hidden="true"></i>
+          <span>{{ message }}</span>
+        </div>
+      {% endfor %}
     </div>
   {% endif %}
 
@@ -582,23 +584,15 @@
 
   <footer class="dds-footer">
     <div class="dds-container">
-      <div class="dds-footer-top">
-        <div class="dds-footer-brand">
-          {% if site_settings.logo %}
-            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}">
-          {% else %}
-            <img src="{% static 'images/dds-final-logo-light.png' %}" alt="Desh Darpan Samvad">
-          {% endif %}
-        </div>
-        <form action="{% url 'core:newsletter' %}" method="post" class="dds-footer-subscribe">
-          {% csrf_token %}
-          <input type="email" name="email" placeholder="ईमेल डालें" aria-label="ईमेल">
-          <button type="submit">Subscribe</button>
-        </form>
-      </div>
       <div class="dds-footer-grid">
         <section class="dds-footer-about">
-          <h3>Desh Darpan Samvad</h3>
+          <div class="dds-footer-brand">
+            {% if site_settings.logo %}
+              <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" loading="lazy" decoding="async">
+            {% else %}
+              <img src="{% static 'images/dds-footer-logo.png' %}" alt="Desh Darpan Samvad" loading="lazy" decoding="async">
+            {% endif %}
+          </div>
           <p>विश्वसनीय हिंदी समाचार, स्थानीय अपडेट और डिजिटल मीडिया कवरेज।</p>
           <div class="dds-footer-social" aria-label="Follow Desh Darpan Samvad">
             <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
@@ -610,24 +604,36 @@
           </div>
         </section>
         <section>
+          <h3>Categories</h3>
+          {% for category in menu_categories|slice:":6" %}
+            <a href="{{ category.get_absolute_url }}">{{ category }}</a>
+          {% empty %}
+            <a href="{% url 'news:latest' %}">ताजा खबरें</a>
+          {% endfor %}
+        </section>
+        <section>
           <h3>Media</h3>
           <a href="{% url 'videos:list' %}">वीडियो</a>
-          <a href="{% url 'videos:list' %}">रील्स</a>
+          <a href="{% url 'videos:shorts' %}">Shorts</a>
           <a href="{% url 'galleries:list' %}">फोटो गैलरी</a>
           <a href="{% url 'webstories:list' %}">वेब स्टोरी</a>
           <a href="{% url 'liveblog:list' %}">लाइव ब्लॉग</a>
         </section>
         <section>
           <h3>Reader Services</h3>
-          <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}">ई-पेपर</a>
+          <a href="{% url 'news:latest' %}">ताजा खबरें</a>
+          <a href="{% url 'core:epaper' %}">ई-पेपर</a>
           <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}">{% if user.is_authenticated %}Portal{% else %}Sign In{% endif %}</a>
-          <a href="{% url 'core:newsletter' %}">न्यूजलेटर</a>
           <a href="{% url 'core:advertise' %}">विज्ञापन दें</a>
-          <a href="{% url 'core:contact' %}">न्यूज टिप भेजें</a>
+          <a href="{% url 'core:sponsorship' %}">स्पॉन्सरशिप</a>
+          <a href="{% url 'core:news_tip' %}">न्यूज टिप भेजें</a>
         </section>
         <section>
           <h3>Company</h3>
           <a href="{% url 'core:about' %}">हमारे बारे में</a>
+          <a href="{% url 'accounts:team' %}">हमारी टीम</a>
+          <a href="{% url 'core:careers' %}">करियर</a>
+          <a href="{% url 'core:investors' %}">इन्वेस्टर रिलेशंस</a>
           <a href="{% url 'core:privacy' %}">प्राइवेसी पॉलिसी</a>
           <a href="{% url 'core:terms' %}">नियम और शर्तें</a>
           <a href="{% url 'core:disclaimer' %}">डिस्क्लेमर</a>
@@ -637,12 +643,8 @@
         <section class="dds-footer-contact">
           <h3>Connect</h3>
           <p><i class="bi bi-geo-alt"></i> Indore, Madhya Pradesh</p>
-          <p><i class="bi bi-envelope"></i> news@deshdarpansamvad.in</p>
+          <p><i class="bi bi-envelope"></i> <a class="dds-footer-email notranslate" translate="no" href="mailto:info@ddsamvad.com">info@ddsamvad.com</a></p>
           <p><i class="bi bi-whatsapp"></i> WhatsApp Desk</p>
-          <div class="dds-footer-qr">
-            <img src="{% static 'images/dds-whatsapp-qr.png' %}" alt="Desh Darpan Samvad WhatsApp QR">
-            <strong>Scan For WhatsApp</strong>
-          </div>
         </section>
       </div>
       <div class="dds-footer-bottom">
@@ -653,23 +655,47 @@
   </footer>
 
   <nav class="mobile-bottom-nav" aria-label="मोबाइल नेविगेशन">
-    <a href="{% url 'home' %}"><i class="bi bi-house-door"></i><span>होम</span></a>
-    <a href="{% url 'videos:list' %}"><i class="bi bi-play-circle"></i><span>वीडियो</span></a>
-    <a class="is-live" href="{% url 'liveblog:list' %}"><i class="bi bi-tv"></i><span>लाइव टीवी</span></a>
-    <a href="{% if user.is_authenticated %}{% url 'accounts:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}"><i class="bi bi-newspaper"></i><span>ई-पेपर</span></a>
+    <a href="{% url 'home' %}" class="{% if request.resolver_match.view_name == 'home' %}is-active{% endif %}"><i class="bi bi-house-door"></i><span>होम</span></a>
+    <a href="{% url 'videos:list' %}" class="{% if request.resolver_match.view_name == 'videos:list' %}is-active{% endif %}"><i class="bi bi-play-circle"></i><span>वीडियो</span></a>
+    <a href="{% url 'videos:shorts' %}" class="{% if request.resolver_match.view_name == 'videos:shorts' %}is-active{% endif %}"><i class="bi bi-phone"></i><span>Shorts</span></a>
+    <a href="{% url 'news:latest' %}" class="{% if request.resolver_match.view_name == 'news:latest' %}is-active{% endif %}"><i class="bi bi-lightning-charge-fill"></i><span>ताजा खबरें</span></a>
     <button class="mobile-menu-open" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu">
       <i class="bi bi-list"></i><span>मेनू</span>
     </button>
   </nav>
-  <button class="scroll-top" type="button" aria-label="शीर्ष पर जाएं">↑</button>
+  <button class="scroll-top" type="button" aria-label="Back to top">&#8593;</button>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+
     document.addEventListener("DOMContentLoaded", function(){
       var select = document.getElementById("ddsLanguageSelect");
       var rtlLanguages = ["ur", "sd", "ks"];
       var originalText = new WeakMap();
       var originalAttrs = new WeakMap();
-      var skipSelector = "script,style,noscript,iframe,svg,canvas,select,option,.notranslate,.bi";
+      var skipSelector = "script,style,noscript,iframe,svg,canvas,select,option,.notranslate,.dds-language,.bi";
+      var activeLanguageRequest = 0;
+      var translationCache = Object.create(null);
+      var observerTimer = null;
+      var languageApplying = false;
+
+      function loadTopbarWeather() {
+        var chip = document.getElementById("ddsWeatherChip");
+        var text = document.getElementById("ddsWeatherText");
+        var dot = document.querySelector(".dds-weather-dot");
+        if (!chip || !text) return;
+        var endpoint = "https://api.open-meteo.com/v1/forecast?latitude=22.7196&longitude=75.8577&current=temperature_2m&timezone=Asia%2FKolkata";
+        fetch(endpoint, {cache: "no-store"})
+          .then(function(response){ return response.ok ? response.json() : null; })
+          .then(function(data){
+            if (!data || !data.current || typeof data.current.temperature_2m !== "number") return;
+            text.textContent = "Indore " + Math.round(data.current.temperature_2m) + "°C";
+            chip.classList.add("is-visible");
+            if (dot) dot.hidden = false;
+          })
+          .catch(function(){});
+      }
+
+      loadTopbarWeather();
 
       function getTextNodes(root) {
         var walker = document.createTreeWalker(root || document.body, NodeFilter.SHOW_TEXT, {
@@ -691,22 +717,87 @@
       }
 
       function csrfToken() {
+        var meta = document.querySelector("meta[name='csrf-token']");
+        if (meta && meta.content) return meta.content;
         var input = document.querySelector("input[name='csrfmiddlewaretoken']");
-        return input ? input.value : "";
+        if (input && input.value) return input.value;
+        var match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : "";
       }
 
       async function translateBatch(texts, target) {
+        if (!texts.length) return [];
         var response = await fetch("{% url 'core:translate' %}", {
           method: "POST",
           headers: {"Content-Type": "application/json", "X-CSRFToken": csrfToken()},
+          credentials: "same-origin",
           body: JSON.stringify({target: target, texts: texts})
         });
-        if (!response.ok) return texts;
+        if (!response.ok) throw new Error("translation_failed");
         var data = await response.json();
         return data.translations || texts;
       }
 
+      async function translateAll(texts, target) {
+        var cacheKeyPrefix = target + "::";
+        var unique = [];
+        var seen = Object.create(null);
+        texts.forEach(function(text){
+          var key = cacheKeyPrefix + text;
+          if (translationCache[key] || seen[key]) return;
+          seen[key] = true;
+          unique.push(text);
+        });
+
+        var chunkSize = 80;
+        var chunks = [];
+        for (var index = 0; index < unique.length; index += chunkSize) {
+          chunks.push(unique.slice(index, index + chunkSize));
+        }
+
+        // Chunks run ONE AT A TIME on purpose: the backend paces its own
+        // per-text provider calls to stay under MyMemory/Google's tight
+        // anonymous rate limits, and firing multiple chunk requests in
+        // parallel would just re-create that same burst across threads,
+        // defeating the pacing. A failed chunk (network hiccup, one-off
+        // 429/500) only falls back to the original text for ITS items - it
+        // must never blank out every other chunk that already succeeded,
+        // which is what made a single flaky request undo the whole page.
+        for (var c = 0; c < chunks.length; c++) {
+          var chunk = chunks[c];
+          var translated;
+          try {
+            translated = await translateBatch(chunk, target);
+          } catch (error) {
+            console.warn("Translation chunk failed, keeping original text for it", error);
+            translated = chunk;
+          }
+          chunk.forEach(function(source, itemIndex){
+            translationCache[cacheKeyPrefix + source] = translated[itemIndex] || source;
+          });
+        }
+
+        return texts.map(function(text){
+          return translationCache[cacheKeyPrefix + text] || text;
+        });
+      }
+
+      function sourceForNode(node) {
+        return originalText.get(node) || node.nodeValue;
+      }
+
+      function getAttributeSources(el) {
+        var attrs = originalAttrs.get(el) || {};
+        return {
+          placeholder: attrs.placeholder,
+          ariaLabel: attrs.ariaLabel,
+          title: attrs.title
+        };
+      }
+
       async function applyLanguage(target) {
+        var requestId = ++activeLanguageRequest;
+        languageApplying = true;
         document.documentElement.setAttribute("lang", target);
         document.documentElement.setAttribute("dir", rtlLanguages.indexOf(target) >= 0 ? "rtl" : "ltr");
         document.documentElement.classList.toggle("translated-rtl", rtlLanguages.indexOf(target) >= 0);
@@ -725,7 +816,8 @@
           }
         });
 
-        if (target === "hi") {
+        try {
+          if (target === "hi") {
           nodes.forEach(function(node){ node.nodeValue = originalText.get(node) || node.nodeValue; });
           attrItems.forEach(function(el){
             var attrs = originalAttrs.get(el) || {};
@@ -734,35 +826,70 @@
             if (attrs.title !== null) el.setAttribute("title", attrs.title);
           });
           return;
-        }
+          }
 
-        var textValues = nodes.map(function(node){ return originalText.get(node) || node.nodeValue; });
-        var attrValues = [];
-        attrItems.forEach(function(el){
-          var attrs = originalAttrs.get(el) || {};
-          ["placeholder", "ariaLabel", "title"].forEach(function(key){
-            if (attrs[key]) attrValues.push(attrs[key]);
+          var textValues = nodes.map(sourceForNode);
+          var attrValues = [];
+          attrItems.forEach(function(el){
+            var attrs = getAttributeSources(el);
+            ["placeholder", "ariaLabel", "title"].forEach(function(key){
+              if (attrs[key]) attrValues.push(attrs[key]);
+            });
           });
-        });
-        var translated = await translateBatch(textValues.concat(attrValues), target);
-        nodes.forEach(function(node, index){ if (translated[index]) node.nodeValue = translated[index]; });
-        var offset = textValues.length;
-        attrItems.forEach(function(el){
-          var attrs = originalAttrs.get(el) || {};
-          if (attrs.placeholder) el.setAttribute("placeholder", translated[offset++] || attrs.placeholder);
-          if (attrs.ariaLabel) el.setAttribute("aria-label", translated[offset++] || attrs.ariaLabel);
-          if (attrs.title) el.setAttribute("title", translated[offset++] || attrs.title);
-        });
+          var translated = await translateAll(textValues.concat(attrValues), target);
+          if (requestId !== activeLanguageRequest) return;
+          nodes.forEach(function(node, index){ if (translated[index]) node.nodeValue = translated[index]; });
+          var offset = textValues.length;
+          attrItems.forEach(function(el){
+            var attrs = getAttributeSources(el);
+            if (attrs.placeholder) el.setAttribute("placeholder", translated[offset++] || attrs.placeholder);
+            if (attrs.ariaLabel) el.setAttribute("aria-label", translated[offset++] || attrs.ariaLabel);
+            if (attrs.title) el.setAttribute("title", translated[offset++] || attrs.title);
+          });
+        } catch (error) {
+          console.warn("Language translation failed", error);
+        } finally {
+          if (requestId === activeLanguageRequest) languageApplying = false;
+        }
+      }
+
+      function scheduleLanguageRefresh() {
+        if (!select || select.value === "hi") return;
+        window.clearTimeout(observerTimer);
+        observerTimer = window.setTimeout(function(){
+          applyLanguage(select.value);
+        }, 350);
       }
 
       if (select) {
-        var savedLanguage = localStorage.getItem("dds_language") || "hi";
-        select.value = savedLanguage;
-        applyLanguage(savedLanguage);
+        // Always boot in the source Hindi UI. Older sessions may have cached a
+        // translated state from before the encoding cleanup, which can repaint
+        // clean server HTML with stale mojibake on load.
+        localStorage.setItem("dds_language", "hi");
+        select.value = "hi";
+        applyLanguage("hi");
         select.addEventListener("change", function(){
           localStorage.setItem("dds_language", select.value);
           applyLanguage(select.value);
         });
+      }
+
+      if ("MutationObserver" in window) {
+        // childList only: watches for genuinely new content (e.g. infinite-scroll
+        // cards) to translate. Also observing characterData would catch our own
+        // node.nodeValue writes below, re-triggering applyLanguage on itself in
+        // an endless refresh loop that never settles.
+        var observer = new MutationObserver(function(mutations){
+          if (!select || select.value === "hi") return;
+          if (languageApplying) return;
+          var shouldRefresh = mutations.some(function(mutation){
+            return Array.from(mutation.addedNodes || []).some(function(node){
+              return node.nodeType === 1 || node.nodeType === 3;
+            });
+          });
+          if (shouldRefresh) scheduleLanguageRefresh();
+        });
+        observer.observe(document.body, {childList:true, subtree:true});
       }
 
       document.querySelectorAll(".dds-nav-dropdown").forEach(function(dropdown){
@@ -794,7 +921,7 @@
         });
         document.addEventListener("click", function(event){
           if (!document.body.classList.contains("search-open")) return;
-          if (event.target.closest("#ddsMobileSearchPanel") || event.target.closest(".dds-mobile-search-toggle")) return;
+          if (event.target.closest(".dds-mobile-search-toggle") || event.target.closest("#ddsMobileSearchPanel")) return;
           document.body.classList.remove("search-open");
           mobileSearchToggle.setAttribute("aria-expanded", "false");
         });
@@ -806,7 +933,7 @@
       }
     });
   </script>
-  <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static_v 'js/main.js' %}"></script>
 </body>
 </html>
 

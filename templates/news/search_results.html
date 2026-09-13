@@ -7,14 +7,25 @@
     <input name="q" value="{{ query }}" placeholder="खबर, शहर, विषय या रिपोर्टर खोजें">
     <button>Search</button>
   </form>
-  {% if query %}<p>{{ result_count }} परिणाम मिले</p>{% else %}<p>लोकल खबर, राजनीति, खेल, बिजनेस या किसी शहर का नाम डालकर खोजें।</p>{% endif %}
+  {% if query_too_short %}
+    <p>कृपया कम से कम {{ search_min_length }} अक्षर लिखें।</p>
+  {% elif query %}
+    <p>{{ result_count }} परिणाम मिले</p>
+  {% else %}
+    <p>लोकल खबर, राजनीति, खेल, बिजनेस या किसी शहर का नाम डालकर खोजें।</p>
+  {% endif %}
 </section>
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
 <section class="dds-container archive-main search-results">
   <div class="archive-grid js-infinite-grid">
     {% for article in page_obj %}
       {% include "includes/news_card.html" with article=article class="horizontal-story" show_summary=True %}
     {% empty %}
-      <div class="empty-state">कोई परिणाम नहीं मिला। दूसरा शब्द आजमाएं।</div>
+      {% if query_too_short %}
+        <div class="empty-state">खोजने के लिए कम से कम {{ search_min_length }} अक्षर लिखें।</div>
+      {% else %}
+        <div class="empty-state">कोई परिणाम नहीं मिला। दूसरा शब्द आजमाएं।</div>
+      {% endif %}
     {% endfor %}
   </div>
   {% include "includes/pagination.html" with infinite=True %}

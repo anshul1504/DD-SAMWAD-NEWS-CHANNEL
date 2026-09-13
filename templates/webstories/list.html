@@ -1,18 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dds-container archive-hero">
-  <div><span>Swipe Stories</span><h1>{{ page_title }}</h1><p>कम समय में पढ़ने लायक विजुअल अपडेट।</p></div>
+<section class="dds-container archive-hero listing-hero">
+  <div>
+    <span>Swipe Stories</span>
+    <h1>{{ page_title }}</h1>
+    <p>कम समय में पढ़ने लायक विजुअल अपडेट — स्वाइप करें और पूरी कहानी देखें।</p>
+  </div>
+  <div class="listing-count"><strong>{{ total_count }}</strong><span>स्टोरीज़</span></div>
 </section>
+
+{% if filter_categories %}
+<section class="dds-container webstory-filter-row">
+  <a href="{% url 'webstories:list' %}" class="webstory-filter-chip{% if not active_category %} is-active{% endif %}">सभी</a>
+  {% for category in filter_categories %}
+    <a href="?category={{ category.slug }}" class="webstory-filter-chip{% if active_category.slug == category.slug %} is-active{% endif %}">{{ category }}</a>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
 <section class="dds-container">
-  <div class="webstory-strip webstory-page-grid">
+  <div class="webstory-page-grid">
     {% for story in page_obj %}
       <a href="{{ story.get_absolute_url }}" class="webstory-card">
         {% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Story</strong></div>{% endif %}
-        <span>{{ story.category|default:"DDS" }}</span>
         <strong>{{ story.title }}</strong>
       </a>
-    {% empty %}<div class="empty-state">वेब स्टोरीज उपलब्ध नहीं हैं।</div>{% endfor %}
+    {% empty %}
+      <div class="empty-state">
+        {% if active_category %}"{{ active_category }}" में अभी कोई वेब स्टोरी उपलब्ध नहीं है।{% else %}वेब स्टोरीज उपलब्ध नहीं हैं।{% endif %}
+      </div>
+    {% endfor %}
   </div>
+  {% include "includes/ad_slot.html" with placement="in_feed" variant="rectangle" %}
   {% include "includes/pagination.html" %}
 </section>
 {% endblock %}

@@ -1,14 +1,163 @@
 {% extends "base.html" %}
+{% load news_extras %}
 {% block content %}
+{% if not video.embed_url %}
 <section class="video-studio video-page">
   <div class="dds-container video-detail">
     <div>
       <span class="media-eyebrow">Video News</span>
       <h1>{{ video.title }}</h1>
-      <p>{{ video.published_at|date:"d F Y" }} · {{ video.views }} Views</p>
+      <p>{{ video.published_at|hindi_date:False }} · {{ video.views }} Views</p>
     </div>
-    <div class="ratio ratio-16x9 video-frame"><iframe src="{{ video.youtube_url }}" title="{{ video.title }}" allowfullscreen></iframe></div>
+    <div class="video-frame video-unavailable">
+      <p>यह वीडियो यहां नहीं चलाया जा सकता।</p>
+      {% if video.youtube_url %}
+        <a class="portal-btn primary" href="{{ video.youtube_url }}" target="_blank" rel="noopener">
+          <i class="bi bi-box-arrow-up-right"></i> YouTube पर देखें
+        </a>
+      {% endif %}
+    </div>
     {% if video.description %}<p class="video-description">{{ video.description }}</p>{% endif %}
+    {% include "includes/ad_slot.html" with placement="article_bottom" variant="sidebar" %}
   </div>
 </section>
+{% elif not video.is_short %}
+{{ feed_json|json_script:"reels-feed-data" }}
+<section class="dds-container video-watch-page">
+  <article class="video-watch-main">
+    <div class="video-watch-frame">
+      <iframe src="{{ video.embed_url }}?rel=0"
+              title="{{ video.title }}"
+              loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+    <div class="video-watch-body">
+      <span class="media-eyebrow">Video News</span>
+      <h1>{{ video.title }}</h1>
+      <div class="video-watch-meta">
+        <span><i class="bi bi-eye-fill"></i> {{ video.views }} Views</span>
+        <span>{{ video.published_at|hindi_date:False }}</span>
+        {% if video.category %}<a href="{{ video.category.get_absolute_url }}">{{ video.category }}</a>{% endif %}
+      </div>
+      {% if video.description %}<p>{{ video.description }}</p>{% endif %}
+      <div class="video-watch-actions" data-vw-like-wrap data-start-index="{{ start_index }}">
+        <button type="button" class="is-like-btn" data-vw-like aria-label="Like"><i class="bi bi-heart"></i> <span data-vw-like-count>{{ video.likes }}</span></button>
+        <button type="button" data-share="{{ request.build_absolute_uri }}"><i class="bi bi-send"></i> शेयर</button>
+        <a href="{{ video.youtube_url }}" target="_blank" rel="noopener"><i class="bi bi-youtube"></i> YouTube पर देखें</a>
+      </div>
+    </div>
+  </article>
+  {% include "includes/ad_slot.html" with placement="article_bottom" variant="leaderboard" %}
+
+  <section class="video-watch-comments" data-vw-comments
+            data-comments-url="{% url 'videos:comments' video.slug %}"
+            data-comment-create-url="{% url 'videos:comment_create' video.slug %}">
+    <h2>कमेंट्स (<span data-vw-comment-count>0</span>)</h2>
+    <form class="video-watch-comment-form" data-vw-comment-form>
+      <input type="text" name="name" placeholder="आपका नाम" maxlength="80" required>
+      <input type="text" name="text" placeholder="अपनी प्रतिक्रिया लिखें..." maxlength="500" required>
+      <button type="submit"><i class="bi bi-send"></i></button>
+    </form>
+    <p class="video-watch-comment-error" data-vw-comment-error hidden></p>
+    <div class="video-watch-comments-list" data-vw-comments-list></div>
+  </section>
+</section>
+{% else %}
+<style>
+  body:has(.reels-viewer){padding-top:0;background:#020817}
+  body:has(.reels-viewer) .dds-topbar,
+  body:has(.reels-viewer) .site-sticky-header,
+  body:has(.reels-viewer) .dds-breaking,
+  body:has(.reels-viewer) .dds-footer,
+  body:has(.reels-viewer) .mobile-bottom-nav,
+  body:has(.reels-viewer) .scroll-top{display:none!important}
+  .reels-viewer{min-height:100dvh;background:#000;display:grid;place-items:center;padding:20px;color:#fff;overflow:hidden}
+  .reels-phone{width:min(430px,100%);height:min(840px,calc(100dvh - 40px));min-height:480px;border-radius:18px;background:#0b0f19;position:relative;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.1)}
+  .reels-close{position:absolute;right:14px;top:14px;z-index:9;width:38px;height:38px;border-radius:10px;background:rgba(2,8,23,.55);color:#fff;display:grid;place-items:center;font-size:1.6rem;line-height:1;text-decoration:none;backdrop-filter:blur(12px)}
+  .reels-close:hover{color:#fff;background:rgba(227,30,40,.9)}
+  .reels-counter{position:absolute;left:14px;top:20px;z-index:9;background:rgba(2,8,23,.55);backdrop-filter:blur(12px);color:#fff;font-size:.76rem;font-weight:800;padding:.3rem .65rem;border-radius:999px}
+  .reels-mute{position:absolute;right:14px;bottom:104px;z-index:9;width:38px;height:38px;border-radius:50%;background:rgba(2,8,23,.55);color:#fff;display:grid;place-items:center;font-size:1rem;backdrop-filter:blur(12px);border:0}
+  .reels-mute:hover{background:rgba(2,8,23,.75)}
+  .reels-frame-wrap{position:absolute;inset:0;display:grid;place-items:center;background:#000}
+  .reels-frame-wrap iframe{width:100%;height:100%;border:0}
+  .reels-nav{position:absolute;top:0;bottom:0;left:0;right:0;z-index:5;display:grid;grid-template-rows:1fr 1fr}
+  .reels-nav button{border:0;background:transparent;color:transparent;cursor:pointer}
+  .reels-empty{padding:2rem;text-align:center;color:#dbe4f3}
+  /* Instagram/Shorts-style right action rail: no visible swipe controls,
+     just comment + share (and the mute toggle moves down here too). */
+  .reels-actions{position:absolute;right:10px;bottom:120px;z-index:6;display:grid;gap:1.1rem;justify-items:center}
+  .reels-actions button{border:0;background:transparent;color:#fff;display:grid;justify-items:center;gap:.25rem;font-size:.72rem;font-weight:800;cursor:pointer}
+  .reels-actions button i{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);backdrop-filter:blur(10px);display:grid;place-items:center;font-size:1.15rem;transition:background .18s ease}
+  .reels-actions button:hover i{background:rgba(255,255,255,.26)}
+  .reels-actions .reels-mute-btn.is-unmuted i{color:#fff}
+  .reels-actions .reels-like-btn.is-liked i{background:rgba(227,30,40,.9);color:#fff;animation:reels-like-pop .28s ease}
+  @keyframes reels-like-pop{0%{transform:scale(1)}45%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+  .reels-comments{position:absolute;inset:0;z-index:20;background:rgba(2,8,23,.55);display:none;align-items:flex-end}
+  .reels-comments.is-open{display:flex}
+  .reels-comments-sheet{width:100%;max-height:78%;background:#0b0f19;border-radius:18px 18px 0 0;display:flex;flex-direction:column;box-shadow:0 -20px 50px rgba(0,0,0,.5)}
+  .reels-comments-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;border-bottom:1px solid rgba(255,255,255,.1)}
+  .reels-comments-head strong{color:#fff;font-size:.95rem}
+  .reels-comments-close{border:0;background:transparent;color:#9aa7bd;font-size:1.4rem;line-height:1;cursor:pointer}
+  .reels-comments-list{flex:1;overflow-y:auto;padding:.8rem 1rem;display:grid;gap:.85rem;min-height:120px}
+  .reels-comment-item strong{display:block;color:#fff;font-size:.84rem}
+  .reels-comment-item span{display:block;color:#dbe4f3;font-size:.86rem;line-height:1.45;margin-top:.15rem}
+  .reels-comment-item time{display:block;color:#6b7690;font-size:.72rem;margin-top:.25rem}
+  .reels-comments-empty{color:#6b7690;font-size:.85rem;text-align:center;padding:1.2rem 0}
+  .reels-comment-form{display:flex;gap:.5rem;padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.1)}
+  .reels-comment-form input,.reels-comment-form textarea{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:10px;color:#fff;padding:.55rem .7rem;font:inherit;font-size:.86rem;resize:none}
+  .reels-comment-form input::placeholder,.reels-comment-form textarea::placeholder{color:#7c879e}
+  .reels-comment-form button{border:0;background:var(--dds-red,#d71920);color:#fff;border-radius:10px;padding:0 1rem;font-weight:800}
+  .reels-comment-name{max-width:110px;flex:0 0 auto!important}
+  .reels-comment-error{color:#ff8a8a;font-size:.78rem;padding:0 1rem .5rem}
+  @media(max-width:620px){
+    .reels-viewer{padding:0}
+    .reels-phone{width:100%;height:100dvh;min-height:100dvh;border-radius:0}
+    .reels-actions{bottom:calc(120px + env(safe-area-inset-bottom))}
+  }
+  @media(max-width:390px){
+    .reels-comment-name{max-width:84px}
+    .reels-comment-form{gap:.35rem;padding-inline:.65rem}
+  }
+</style>
+
+<section class="reels-viewer" data-reels data-start-index="{{ start_index }}">
+  {{ feed_json|json_script:"reels-feed-data" }}
+  <div class="reels-phone">
+    <a class="reels-close" href="{% if video.is_short %}{% url 'videos:shorts' %}{% else %}{% url 'videos:list' %}{% endif %}" data-reels-close aria-label="बंद करें">&times;</a>
+    <span class="reels-counter" data-reels-counter></span>
+    <div class="reels-frame-wrap">
+      <div data-reels-frame></div>
+    </div>
+    <div class="reels-actions">
+      <button type="button" class="reels-mute-btn" data-reels-mute aria-label="आवाज बंद या चालू करें"><i class="bi bi-volume-mute-fill"></i></button>
+      <button type="button" class="reels-like-btn" data-reels-like aria-label="लाइक"><i class="bi bi-heart"></i><span data-reels-like-count>0</span></button>
+      <button type="button" data-reels-comment-open aria-label="कमेंट"><i class="bi bi-chat-fill"></i><span data-reels-comment-count>0</span></button>
+      <button type="button" data-share aria-label="शेयर"><i class="bi bi-send-fill"></i>शेयर</button>
+    </div>
+    <div class="reels-nav">
+      <button type="button" data-reels-prev aria-label="पिछला वीडियो"></button>
+      <button type="button" data-reels-next aria-label="अगला वीडियो"></button>
+    </div>
+
+    <div class="reels-comments" data-reels-comments>
+      <div class="reels-comments-sheet">
+        <div class="reels-comments-head">
+          <strong>कमेंट्स</strong>
+          <button type="button" class="reels-comments-close" data-reels-comments-close aria-label="कमेंट बंद करें">&times;</button>
+        </div>
+        <div class="reels-comments-list" data-reels-comments-list></div>
+        <p class="reels-comment-error" data-reels-comment-error hidden></p>
+        <form class="reels-comment-form" data-reels-comment-form>
+          <input class="reels-comment-name" type="text" name="name" placeholder="नाम" maxlength="80" required>
+          <input type="text" name="text" placeholder="कमेंट लिखें..." maxlength="500" required>
+          <button type="submit"><i class="bi bi-send"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

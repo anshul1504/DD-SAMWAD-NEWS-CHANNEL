@@ -1,6 +1,7 @@
-{% load static %}
-<article class="story-card {{ class|default:'' }}">
+{% load static news_extras %}
+<article class="story-card {{ class|default:'' }}" style="--cat-color:{{ article.category|category_color }}">
   <a href="{{ article.get_absolute_url }}" class="story-thumb" aria-label="{{ article.title }}">
+    {% if article.category %}<span class="story-thumb-badge">{{ article.category }}</span>{% endif %}
     {% if article.featured_image %}
       <img src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy">
     {% else %}
@@ -8,10 +9,7 @@
     {% endif %}
   </a>
   <div class="story-content">
-    <div class="story-meta">
-      <span>{{ article.category }}</span>
-      {% if article.city %}<span>{{ article.city }}</span>{% endif %}
-    </div>
+    {% if article.city %}<div class="story-meta"><span>{{ article.city }}</span></div>{% endif %}
     <h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3>
     {% if show_summary and article.summary %}<p>{{ article.summary|truncatewords:28 }}</p>{% endif %}
     <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"d M Y, h:i A" }}</time>

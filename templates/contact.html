@@ -1,14 +1,95 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="dds-container contact-page">
-  <div>
-    <span>Contact</span>
-    <h1>न्यूजरूम से संपर्क करें</h1>
-    <p>समाचार, विज्ञापन, शिकायत या सुझाव के लिए अपना संदेश भेजें।</p>
-  </div>
-  <form method="post" class="premium-form">
-    {% csrf_token %}{{ form.as_p }}
-    <button class="btn-primary">Send Message</button>
-  </form>
+
+<section class="dds-container contact-hero">
+  <span>Contact</span>
+  <h1>न्यूजरूम से संपर्क करें</h1>
+  <p>समाचार, विज्ञापन, शिकायत या सुझाव के लिए अपना संदेश भेजें — हमारी टीम जल्द ही आपसे संपर्क करेगी।</p>
 </section>
+
+<section class="dds-container contact-layout">
+  <aside>
+    <div class="contact-info-card">
+      {% if site_settings.address %}
+      <div class="contact-info-item">
+        <i class="bi bi-geo-alt-fill"></i>
+        <div><strong>ऑफिस</strong><span>{{ site_settings.address }}</span></div>
+      </div>
+      {% endif %}
+      {% if site_settings.primary_phone %}
+      <div class="contact-info-item">
+        <i class="bi bi-telephone-fill"></i>
+        <div><strong>फोन</strong><a href="tel:{{ site_settings.primary_phone }}">{{ site_settings.primary_phone }}</a></div>
+      </div>
+      {% endif %}
+      {% if site_settings.email %}
+      <div class="contact-info-item">
+        <i class="bi bi-envelope-fill"></i>
+        <div><strong>ईमेल</strong><a href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a></div>
+      </div>
+      {% endif %}
+      <div class="contact-info-item">
+        <i class="bi bi-clock-fill"></i>
+        <div><strong>न्यूजरूम समय</strong><span>सोमवार - शनिवार, सुबह 9 बजे से शाम 7 बजे तक</span></div>
+      </div>
+      <div class="contact-social" aria-label="Follow Desh Darpan Samvad">
+        <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+        {% if site_settings.whatsapp_url %}<a class="whatsapp" href="{{ site_settings.whatsapp_url }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
+      </div>
+    </div>
+
+    <div class="contact-quicklinks">
+      <h3>अन्य ज़रूरी लिंक</h3>
+      <a href="{% url 'core:advertise' %}"><i class="bi bi-megaphone-fill"></i> विज्ञापन दें</a>
+      <a href="{% url 'core:grievance' %}"><i class="bi bi-shield-exclamation"></i> शिकायत / Grievance</a>
+      <a href="{% url 'core:editorial_policy' %}"><i class="bi bi-journal-check"></i> एडिटोरियल पॉलिसी</a>
+    </div>
+  </aside>
+
+  <div class="contact-form-card">
+    <h2>अपना संदेश भेजें</h2>
+    <p>फॉर्म भरें, हमारी टीम 24-48 घंटों में जवाब देगी।</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="contact-hp" aria-hidden="true">
+        <label for="{{ form.website.id_for_label }}">{{ form.website.label }}</label>
+        {{ form.website }}
+      </div>
+      <div class="contact-form-grid">
+        <div class="contact-field">
+          <label for="{{ form.name.id_for_label }}">पूरा नाम</label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.email.id_for_label }}">ईमेल</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.phone.id_for_label }}">फोन नंबर</label>
+          {{ form.phone }}
+          {{ form.phone.errors }}
+        </div>
+        <div class="contact-field">
+          <label for="{{ form.subject.id_for_label }}">विषय</label>
+          {{ form.subject }}
+          {{ form.subject.errors }}
+        </div>
+        <div class="contact-field full">
+          <label for="{{ form.message.id_for_label }}">संदेश</label>
+          {{ form.message }}
+          {{ form.message.errors }}
+        </div>
+      </div>
+      <button class="contact-submit" type="submit">Send Message</button>
+    </form>
+  </div>
+</section>
+
+{% include "includes/ad_slot.html" with placement="category_page" variant="leaderboard" %}
 {% endblock %}
