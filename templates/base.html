@@ -182,9 +182,12 @@
     .dds-breaking-inner{min-height:40px;display:flex;align-items:center;gap:.75rem;overflow:hidden}
     .dds-breaking-label{flex:0 0 auto;display:inline-flex;align-items:center;gap:.34rem;min-height:28px;padding:.35rem .82rem;border-radius:999px;background:var(--dds-red);color:#fff;font-size:.78rem;font-weight:900;line-height:1;white-space:nowrap;box-shadow:0 8px 16px rgba(225,29,46,.22)}
     .dds-breaking-label:before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.22)}
-    .dds-breaking-track{display:flex;align-items:center;gap:1.4rem;min-width:0;overflow:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-    .dds-breaking-track::-webkit-scrollbar{display:none}
-    .dds-breaking-track a{flex:0 0 auto;color:#1f2937;font-weight:700;white-space:nowrap}
+    .dds-breaking-track{display:flex;align-items:center;min-width:0;overflow:hidden}
+    .dds-breaking-marquee{display:flex;align-items:center;gap:2.4rem;flex:0 0 auto;padding-right:2.4rem;animation:dds-marquee 38s linear infinite}
+    .dds-breaking-track:hover .dds-breaking-marquee,.dds-breaking-track:focus-within .dds-breaking-marquee{animation-play-state:paused}
+    .dds-breaking-marquee a{flex:0 0 auto;color:#1f2937;font-weight:700;white-space:nowrap}
+    @keyframes dds-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @media (prefers-reduced-motion:reduce){.dds-breaking-marquee{animation:none;flex-wrap:wrap}.dds-breaking-track{overflow-x:auto}}
 
     .dds-mega{width:clamp(320px,86vw,420px);max-width:100vw;background:#061b43;color:#fff;border:0}
     .dds-mega .offcanvas-header{min-height:68px;padding:.75rem 1rem;border:0;background:#fff;box-shadow:0 1px 0 rgba(15,23,42,.08);display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:.75rem}
@@ -508,11 +511,20 @@
     <div class="dds-container dds-breaking-inner">
       <span class="dds-breaking-label" data-i18n-key="breaking">ब्रेकिंग खबरें</span>
       <div class="dds-breaking-track">
-        {% for article in breaking_articles %}
-          <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
-        {% empty %}
-          <a href="{% url 'news:latest' %}">देश-दुनिया की ताजा खबरें पढ़ें</a>
-        {% endfor %}
+        <div class="dds-breaking-marquee" aria-hidden="false">
+          {% for article in breaking_articles %}
+            <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+          {% empty %}
+            <a href="{% url 'news:latest' %}">देश-दुनिया की ताजा खबरें पढ़ें</a>
+          {% endfor %}
+        </div>
+        <div class="dds-breaking-marquee" aria-hidden="true">
+          {% for article in breaking_articles %}
+            <a href="{{ article.get_absolute_url }}" tabindex="-1">{{ article.title }}</a>
+          {% empty %}
+            <a href="{% url 'news:latest' %}" tabindex="-1">देश-दुनिया की ताजा खबरें पढ़ें</a>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
