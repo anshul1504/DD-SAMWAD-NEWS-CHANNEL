@@ -333,7 +333,7 @@ main#main-content>.dds-container:last-child,main.home-page>.dds-container:last-c
 .bookmark-form{display:contents}
 .article-figure{margin:1.1rem 0}
 .article-figure .article-video{border-radius:var(--radius-md);overflow:hidden;background:#000}
-.article-image{width:100%;aspect-ratio:16/9;max-height:420px;object-fit:cover;object-position:top;border-radius:var(--radius-md);background:#eef0f4}
+.article-image{width:100%;aspect-ratio:16/9;max-height:420px;object-fit:contain;object-position:center;border-radius:var(--radius-md);background:#eef0f4}
 .article-figure .article-video{max-height:420px}
 figcaption{color:var(--text-secondary);font-size:.86rem;margin-top:.45rem}
 .article-body{font-size:1.12rem;line-height:1.95;color:#222}

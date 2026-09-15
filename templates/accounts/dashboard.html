@@ -1,4 +1,5 @@
 {% extends "erp/base_portal.html" %}
+{% load news_extras %}
 
 {% block content %}
 <section class="portal-main">
@@ -66,7 +67,7 @@
           <a class="portal-row" href="{% url 'accounts:portal_module' 'articles' %}">
             <span class="portal-status {{ article.status }}">{{ article.get_status_display }}</span>
             <strong>{{ article.title }}</strong>
-            <small>{{ article.updated_at|date:"d M, h:i A" }}</small>
+            <small>{{ article.updated_at|hindi_date }}</small>
           </a>
         {% empty %}
           <div class="portal-empty">No article assigned yet.</div>

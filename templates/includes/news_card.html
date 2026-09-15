@@ -12,6 +12,6 @@
     {% if article.city %}<div class="story-meta"><span>{{ article.city }}</span></div>{% endif %}
     <h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3>
     {% if show_summary and article.summary %}<p>{{ article.summary|truncatewords:28 }}</p>{% endif %}
-    <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"d M Y, h:i A" }}</time>
+    <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|hindi_date }}</time>
   </div>
 </article>

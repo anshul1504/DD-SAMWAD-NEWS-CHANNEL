@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load news_extras %}
 {% block content %}
 <section class="live-page">
   <div class="dds-container live-header">
     {% if liveblog.status == "live" %}
       <span class="live-badge"><i></i> LIVE</span>
     {% elif liveblog.status == "scheduled" %}
-      <span class="live-badge is-scheduled"><i class="bi bi-clock"></i> {{ liveblog.start_time|date:"d M, h:i A" }} से शुरू</span>
+      <span class="live-badge is-scheduled"><i class="bi bi-clock"></i> {{ liveblog.start_time|hindi_date }} से शुरू</span>
     {% else %}
       <span class="live-badge is-ended"><i class="bi bi-check-circle"></i> कवरेज समाप्त</span>
     {% endif %}

@@ -47,7 +47,7 @@
             {% endif %}
             <h1><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h1>
             {% if article.summary %}<p>{{ article.summary|truncatewords:28 }}</p>{% endif %}
-            <time>{{ article.published_at|date:"d M Y, h:i A" }}</time>
+            <time>{{ article.published_at|hindi_date }}</time>
           </div>
         </article>
       {% empty %}
@@ -93,7 +93,7 @@
             {% for article in latest_articles|slice:":6" %}
               <article class="story-row" style="--cat-color:{{ article.category|category_color }}">
                 {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}
-                <div><div class="meta"><span>{{ article.category }}</span>{% if article.city %}<span>{{ article.city }}</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></div>
+                <div><div class="meta"><span>{{ article.category }}</span>{% if article.city %}<span>{{ article.city }}</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|hindi_date:False }}</time></div>
               </article>
             {% empty %}<div class="empty-state">Latest news उपलब्ध नहीं है।</div>{% endfor %}
           </div>
@@ -186,11 +186,11 @@
     <section class="two-col home-reveal">
       <section class="news-panel">
         <div class="section-title"><div><span class="eyebrow">Opinion</span><h2>Opinion / Editorial</h2></div></div>
-        <div class="story-list">{% for article in editor_picks|slice:":3" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></article>{% empty %}<div class="empty-state">Opinion stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
+        <div class="story-list">{% for article in editor_picks|slice:":3" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|hindi_date:False }}</time></article>{% empty %}<div class="empty-state">Opinion stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
       </section>
       <section class="news-panel">
         <div class="section-title"><div><span class="eyebrow">For You</span><h2>Recommended Stories</h2></div></div>
-        <div class="story-list">{% for article in latest_articles|slice:"6:10" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|date:"d M Y" }}</time></article>{% empty %}<div class="empty-state">Recommended stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
+        <div class="story-list">{% for article in latest_articles|slice:"6:10" %}<article class="mini-card"><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|hindi_date:False }}</time></article>{% empty %}<div class="empty-state">Recommended stories उपलब्ध नहीं हैं।</div>{% endfor %}</div>
       </section>
     </section>
   </div>

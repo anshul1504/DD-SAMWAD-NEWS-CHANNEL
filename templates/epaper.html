@@ -63,7 +63,7 @@
             {% if edition.cover_image %}<img src="{{ edition.cover_image.url }}" alt="{{ edition.edition_date }}" loading="lazy">{% else %}<div class="epaper-cover-fallback"><i class="bi bi-newspaper"></i></div>{% endif %}
             {% if edition.edition_date == today %}<span class="epaper-city-today">आज का अंक</span>{% endif %}
             {% if current.pk == edition.pk %}<span class="epaper-date-check"><i class="bi bi-check-circle-fill"></i></span>{% endif %}
-            <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|date:"d-M-Y" }}</span>
+            <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|hindi_date:False }}</span>
           </a>
         </div>
       {% endfor %}
@@ -87,7 +87,7 @@
         </div>
         <a href="{% url 'core:epaper_date' edition.edition_date|date:'Y-m-d' %}?city={{ edition.city.slug }}" class="epaper-city-thumb">
           {% if edition.cover_image %}<img src="{{ edition.cover_image.url }}" alt="{{ edition.city.name }} - {{ edition.edition_date }}" loading="lazy">{% else %}<div class="epaper-cover-fallback"><i class="bi bi-newspaper"></i></div>{% endif %}
-          <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|date:"d-M-Y" }}</span>
+          <span class="epaper-city-date"><i class="bi bi-calendar3"></i> {{ edition.edition_date|hindi_date:False }}</span>
         </a>
       </div>
     {% endfor %}
