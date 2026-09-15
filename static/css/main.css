@@ -2065,7 +2065,8 @@ html.translated-rtl body{
 .webstory-card h3{position:absolute;left:.85rem;right:.85rem;bottom:.8rem;z-index:1;color:#fff;font-size:1rem;line-height:1.25}
 .webstory-grid .webstory-card{min-height:170px;border-radius:10px}
 .webstory-grid .webstory-card h3{left:.6rem;right:.6rem;bottom:.6rem;font-size:.82rem;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:.9rem}
+.two-col .news-panel{padding-top:.65rem}
 .mini-card{background:#fff;border-radius:8px;padding:.85rem;box-shadow:0 12px 30px rgba(15,23,42,.06)}
 
 .home-reveal{opacity:0;transform:translateY(18px);transition:opacity .62s ease,transform .62s ease}
