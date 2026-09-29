@@ -182,9 +182,14 @@ def portal_login(request):
     if request.method == "POST" and form.is_valid():
         email = form.cleaned_data["email"]
         password = form.cleaned_data.get("password")
+        login_method = request.POST.get("login_method", "otp" if not password else "password")
         user = User.objects.filter(email__iexact=email, is_active=True).order_by("id").first()
 
-        if password:
+        if login_method == "password":
+            if not password:
+                context["login_password_attempted"] = True
+                form.add_error("password", "Enter your password or use the one-time code option.")
+                return render(request, "erp/auth/login.html", context)
             context["login_password_attempted"] = True
             ip = _client_ip(request) or "unknown"
             rules = _login_failure_rules(email, ip)

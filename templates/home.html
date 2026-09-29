@@ -15,13 +15,13 @@
         <div class="story-lane-scroll" data-story-track>
           {% for story in day_stories %}
             <a class="story-slat" href="{{ story.get_absolute_url }}" data-story-id="{{ story.pk }}">
-              <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}" loading="lazy" decoding="async">{% endif %}</span>
+              <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<i class="bi bi-newspaper" aria-hidden="true"></i>{% endif %}</span>
               <strong>{{ story.title }}</strong>
             </a>
           {% empty %}
             {% for story in webstories|slice:":8" %}
               <a class="story-slat" href="{{ story.get_absolute_url }}" data-story-id="{{ story.pk }}">
-                <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}" loading="lazy" decoding="async">{% endif %}</span>
+                <span class="story-ring">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<i class="bi bi-newspaper" aria-hidden="true"></i>{% endif %}</span>
                 <strong>{{ story.title }}</strong>
               </a>
             {% empty %}
@@ -37,8 +37,8 @@
 
     <section class="hero-layout home-reveal">
       {% for article in hero_articles|slice:":1" %}
-        <article class="hero-main">
-          {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}
+        <article class="hero-main{% if not article.featured_image %} hero-main--text-only{% endif %}">
+          {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}
           <div class="hero-copy">
             {% if article.is_breaking %}
               <span class="live-pill"><i class="bi bi-lightning-charge-fill"></i> Breaking News</span>
@@ -72,8 +72,8 @@
     {% if hero_articles|slice:"1:4" %}
     <section class="hero-substories home-reveal" aria-label="More top stories">
       {% for article in hero_articles|slice:"1:4" %}
-        <a class="substory-card" href="{{ article.get_absolute_url }}">
-          {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy">{% endif %}
+        <a class="substory-card{% if not article.featured_image %} substory-card--text-only{% endif %}" href="{{ article.get_absolute_url }}">
+          {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy">{% endif %}
           <div>
             {% if article.category %}<span style="--cat-color:{{ article.category|category_color }}">{{ article.category }}</span>{% endif %}
             <h3>{{ article.short_title|default:article.title }}</h3>
@@ -91,8 +91,8 @@
           <div class="section-title"><div><span class="eyebrow">Fresh Updates</span><h2>Latest News</h2></div><a href="{% url 'news:latest' %}">All News →</a></div>
           <div class="story-list">
             {% for article in latest_articles|slice:":6" %}
-              <article class="story-row" style="--cat-color:{{ article.category|category_color }}">
-                {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}
+              <article class="story-row{% if not article.featured_image %} story-row--text-only{% endif %}" style="--cat-color:{{ article.category|category_color }}">
+                {% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}
                 <div><div class="meta"><span>{{ article.category }}</span>{% if article.city %}<span>{{ article.city }}</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3><time>{{ article.published_at|hindi_date:False }}</time></div>
               </article>
             {% empty %}<div class="empty-state">Latest news उपलब्ध नहीं है।</div>{% endfor %}
@@ -103,7 +103,7 @@
           <div class="section-title"><div><span class="eyebrow">Featured Desk</span><h2>Featured News</h2></div></div>
           <div class="feature-grid">
             {% for article in editor_picks|slice:":6" %}
-              <article class="feature-card" style="--cat-color:{{ article.category|category_color }}">{% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}<div><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3></div></article>
+              <article class="feature-card{% if not article.featured_image %} feature-card--text-only{% endif %}" style="--cat-color:{{ article.category|category_color }}">{% if article.featured_image %}<img src="{{ article.featured_image.url }}" alt="{{ article.title }}" loading="lazy" decoding="async">{% endif %}<div><div class="meta"><span>{{ article.category }}</span></div><h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3></div></article>
             {% empty %}<div class="empty-state">Featured news उपलब्ध नहीं है।</div>{% endfor %}
           </div>
         </section>
@@ -157,7 +157,6 @@
     {% include "includes/ad_slot.html" with placement="home_middle" variant="leaderboard" %}
 
     <section class="news-panel home-reveal">
-    <section class="news-panel home-reveal">
       <div class="section-title"><div><span class="eyebrow">Watch</span><h2>Video, Shorts & Photo Gallery</h2></div></div>
       <div class="media-showcase">
         {% for video in videos|slice:":1" %}
@@ -178,7 +177,7 @@
       <div class="section-title"><div><span class="eyebrow">Swipe</span><h2>Web Stories</h2></div><a href="{% url 'webstories:list' %}">All Stories →</a></div>
       <div class="webstory-grid">
         {% for story in webstories|slice:":4" %}
-          <a class="webstory-card" href="{{ story.get_absolute_url }}">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ story.title }}" loading="lazy" decoding="async">{% endif %}<h3>{{ story.title }}</h3></a>
+          <a class="webstory-card" href="{{ story.get_absolute_url }}">{% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy" decoding="async">{% else %}<span class="webstory-text-backdrop" aria-hidden="true"><i class="bi bi-newspaper"></i></span>{% endif %}<h3>{{ story.title }}</h3></a>
         {% empty %}<div class="empty-state">Web stories उपलब्ध नहीं हैं।</div>{% endfor %}
       </div>
     </section>

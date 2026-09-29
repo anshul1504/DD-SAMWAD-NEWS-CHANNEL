@@ -15,21 +15,27 @@
 </head>
 <body class="portal-auth-body">
   <section class="auth-visual">
-    <a class="auth-visual-logo" href="{% url 'home' %}"><img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad" fetchpriority="high" decoding="async"></a>
+    <a class="auth-visual-logo" href="{% url 'home' %}">
+      <img src="{% static 'images/dds-auth-logo.png' %}" alt="Desh Darpan Samvad" fetchpriority="high" decoding="async">
+    </a>
     <div class="auth-visual-copy">
+      <span class="auth-visual-eyebrow">Newsroom Portal</span>
       <h1>One newsroom. Every workflow.</h1>
-      <p>Reporters, editors, media desk, ad managers and admins — manage the entire website from one secure portal.</p>
+      <p>Reporters, editors, media desk, ad managers and admins manage the entire website from one secure desk.</p>
     </div>
-    <div class="auth-quote">
-      <span class="auth-quote-mark">&ldquo;</span>
-      <p>OTP-secured access, role-based permissions and one connected content workflow.</p>
-      <cite>Desh Darpan Samvad Newsroom</cite>
+    <div class="auth-visual-footer">
+      <span>OTP secured</span>
+      <span>Role based</span>
+      <span>Editorial ready</span>
     </div>
   </section>
   <section class="auth-panel-wrap">
     <div class="auth-panel">
+      <a class="auth-panel-logo" href="{% url 'home' %}">
+        <img src="{% static 'images/dds-final-logo.png' %}" alt="Desh Darpan Samvad">
+      </a>
       {% if messages %}
-        <div class="messages">{% for message in messages %}<div>{{ message }}</div>{% endfor %}</div>
+        <div class="messages">{% for message in messages %}<div class="message-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}</div>
       {% endif %}
       {% block auth_content %}{% endblock %}
     </div>

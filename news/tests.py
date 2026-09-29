@@ -1,9 +1,11 @@
+import json
+
 from django.contrib.auth.models import User
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Article, Bookmark, Category
+from .models import Article, ArticleMedia, Bookmark, Category
 
 
 @override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
@@ -52,6 +54,52 @@ class PublicNewsTests(TestCase):
         self.assertEqual(self.client.get(self.category.get_absolute_url()).status_code, 200)
         response = self.client.get(reverse("news:search"), {"q": "Published"})
         self.assertContains(response, "Published story")
+
+    def test_article_without_media_has_no_reserved_media_section(self):
+        response = self.client.get(self.article.get_absolute_url())
+        self.assertNotContains(response, "article-media-gallery")
+
+    def test_internal_admin_username_is_never_a_public_byline(self):
+        self.user.username = "admin"
+        self.user.save(update_fields=["username"])
+        response = self.client.get(self.article.get_absolute_url())
+        self.assertContains(response, "रिपोर्ट: देश दर्पण संवाद डेस्क")
+        self.assertNotContains(response, "By admin")
+        schema = json.loads(str(response.context["article_jsonld_json"]))
+        self.assertEqual(schema["author"], {"@type": "Organization", "name": "देश दर्पण संवाद डेस्क"})
+
+    def test_named_author_is_used_as_public_byline(self):
+        self.user.first_name = "प्रकाश"
+        self.user.last_name = "त्रिपाठी"
+        self.user.save(update_fields=["first_name", "last_name"])
+        response = self.client.get(self.article.get_absolute_url())
+        self.assertContains(response, "रिपोर्ट: प्रकाश त्रिपाठी")
+        schema = json.loads(str(response.context["article_jsonld_json"]))
+        self.assertEqual(schema["author"], {"@type": "Person", "name": "प्रकाश त्रिपाठी"})
+
+    def test_desk_account_is_an_organization_even_with_a_full_name(self):
+        self.user.username = "desk"
+        self.user.first_name = "देश दर्पण संवाद"
+        self.user.save(update_fields=["username", "first_name"])
+        response = self.client.get(self.article.get_absolute_url())
+        self.assertContains(response, "रिपोर्ट: देश दर्पण संवाद डेस्क")
+        schema = json.loads(str(response.context["article_jsonld_json"]))
+        self.assertEqual(schema["author"], {"@type": "Organization", "name": "देश दर्पण संवाद डेस्क"})
+
+    def test_mixed_article_media_renders_together(self):
+        self.article.featured_image = "articles/2026/09/lead.jpg"
+        self.article.youtube_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        self.article.save(update_fields=["featured_image", "youtube_url"])
+        ArticleMedia.objects.create(article=self.article, image="articles/gallery/2026/09/one.jpg")
+        ArticleMedia.objects.create(article=self.article, image="articles/gallery/2026/09/two.jpg", display_order=2)
+        ArticleMedia.objects.create(article=self.article, video="articles/videos/2026/09/clip.mp4", display_order=3)
+
+        response = self.client.get(self.article.get_absolute_url())
+        self.assertContains(response, "lead.jpg")
+        self.assertContains(response, "one.jpg")
+        self.assertContains(response, "two.jpg")
+        self.assertContains(response, "clip.mp4")
+        self.assertContains(response, "youtube-nocookie.com/embed/dQw4w9WgXcQ")
 
 
 @override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
@@ -187,7 +235,10 @@ class BookmarkMethodTests(TestCase):
         self.assertEqual(Bookmark.objects.count(), 0)
 
 
-@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
+@override_settings(
+    SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False,
+    SITE_URL="https://ddsamvad.com",
+)
 class ArticleShareMetadataTests(TestCase):
     """Every share showed the site logo instead of the story image."""
 

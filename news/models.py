@@ -1,6 +1,7 @@
 import nh3
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -77,7 +78,7 @@ class ArticleQuerySet(models.QuerySet):
         return self.published().filter(models.Q(is_trending=True) | models.Q(views__gt=0)).order_by("-is_trending", "-views")
 
     def optimized(self):
-        return self.select_related("category", "state", "district", "city", "author", "reporter__user").prefetch_related("tags")
+        return self.select_related("category", "state", "district", "city", "author", "reporter__user").prefetch_related("tags", "media_items")
 
 
 class Article(models.Model):
@@ -172,6 +173,24 @@ class Article(models.Model):
         return reverse("news:article_detail", args=[self.slug])
 
     @property
+    def public_byline_name(self):
+        """A newsroom-facing byline; never expose an internal admin username."""
+        if self.reporter_id:
+            return self.reporter.display_name
+        if self.author.username.lower() in {"admin", "administrator", "root", "desk"}:
+            return "देश दर्पण संवाद डेस्क"
+        full_name = self.author.get_full_name().strip()
+        if full_name:
+            return full_name
+        return self.author.username
+
+    @property
+    def public_byline_schema_type(self):
+        if self.author.username.lower() in {"admin", "administrator", "root", "desk"} and not self.reporter_id:
+            return "Organization"
+        return "Person"
+
+    @property
     def embed_url(self):
         return youtube_embed_url(self.youtube_url) or youtube_embed_url(self.video_url)
 
@@ -187,5 +206,32 @@ class Bookmark(models.Model):
 
     def __str__(self):
         return f"{self.user} saved {self.article}"
+
+
+class ArticleMedia(models.Model):
+    """Ordered gallery images and uploaded videos for an article."""
+
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="media_items")
+    image = models.ImageField(upload_to="articles/gallery/%Y/%m/", blank=True)
+    video = models.FileField(
+        upload_to="articles/videos/%Y/%m/",
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=["mp4", "webm", "ogg", "mov", "m4v"])],
+    )
+    caption = models.CharField(max_length=220, blank=True)
+    credit = models.CharField(max_length=120, blank=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["display_order", "pk"]
+
+    def clean(self):
+        super().clean()
+        if bool(self.image) == bool(self.video):
+            raise ValidationError("Choose exactly one media file: image or video.")
+
+    def __str__(self):
+        kind = "image" if self.image else "video"
+        return f"{self.article} - {kind} {self.pk or ''}".strip()
 
 # Create your models here.

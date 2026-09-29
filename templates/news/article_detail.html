@@ -18,7 +18,7 @@
         <h1>{{ article.title }}</h1>
         {% if article.summary %}<p class="article-summary">{{ article.summary }}</p>{% endif %}
         <div class="article-byline">
-          <span>By {% if article.reporter %}<a href="{{ article.reporter.get_absolute_url }}">{{ article.reporter.display_name }}</a>{% else %}{{ article.author.get_full_name|default:article.author.username }}{% endif %}</span>
+          <span>रिपोर्ट: {% if article.reporter %}<a href="{{ article.reporter.get_absolute_url }}">{{ article.public_byline_name }}</a>{% else %}{{ article.public_byline_name }}{% endif %}</span>
           <span>{{ article.published_at|hindi_date }}</span>
           <span>{{ article.reading_time }} मिनट पढ़ें</span>
           <span>{{ article.views }} Views</span>
@@ -35,18 +35,42 @@
           {% endif %}
         </div>
         {% include "includes/ad_slot.html" with placement="article_top" variant="leaderboard" %}
-        <figure class="article-figure">
-          {% if article.embed_url %}
-            <div class="ratio ratio-16x9 video-frame article-video">
-              <iframe src="{{ article.embed_url }}" title="{{ article.title }}" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-            </div>
-          {% elif article.featured_image %}
-            <img class="article-image" src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy" decoding="async">
-          {% else %}
-            <div class="article-image story-fallback"><strong>{{ article.category }}</strong><span>देश दर्पण संवाद</span></div>
+        {% with media_items=article.media_items.all %}
+          {% if article.featured_image or media_items or article.embed_url or article.video_url %}
+          <section class="article-media-gallery" aria-label="समाचार मीडिया">
+            {% if article.featured_image %}
+              <figure class="article-figure article-media-featured">
+                <img class="article-image" src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy" decoding="async" data-hide-on-error>
+                {% if article.image_caption or article.image_credit %}<figcaption>{{ article.image_caption }} {% if article.image_credit %}({{ article.image_credit }}){% endif %}</figcaption>{% endif %}
+              </figure>
+            {% endif %}
+            {% for media in media_items %}
+              {% if media.image %}
+                <figure class="article-figure article-media-item">
+                  <img class="article-image" src="{{ media.image.url }}" alt="{{ media.caption|default:article.title }}" loading="lazy" decoding="async" data-hide-on-error>
+                  {% if media.caption or media.credit %}<figcaption>{{ media.caption }} {% if media.credit %}({{ media.credit }}){% endif %}</figcaption>{% endif %}
+                </figure>
+              {% elif media.video %}
+                <figure class="article-figure article-media-video">
+                  <video controls preload="metadata" playsinline data-hide-on-error><source src="{{ media.video.url }}"></video>
+                  {% if media.caption or media.credit %}<figcaption>{{ media.caption }} {% if media.credit %}({{ media.credit }}){% endif %}</figcaption>{% endif %}
+                </figure>
+              {% endif %}
+            {% endfor %}
+            {% if article.embed_url %}
+              <figure class="article-figure article-media-video">
+                <div class="ratio ratio-16x9 video-frame article-video">
+                  <iframe src="{{ article.embed_url }}" title="{{ article.title }}" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                </div>
+              </figure>
+            {% elif article.video_url %}
+              <figure class="article-figure article-media-video">
+                <video controls preload="metadata" playsinline data-hide-on-error><source src="{{ article.video_url }}"></video>
+              </figure>
+            {% endif %}
+          </section>
           {% endif %}
-          {% if article.image_caption or article.image_credit %}<figcaption>{{ article.image_caption }} {% if article.image_credit %}({{ article.image_credit }}){% endif %}</figcaption>{% endif %}
-        </figure>
+        {% endwith %}
         <div class="article-body">{{ article.body|safe }}</div>
         {% include "includes/ad_slot.html" with placement="article_middle" variant="leaderboard" %}
         {% if article.tags.all %}

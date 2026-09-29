@@ -60,6 +60,31 @@ class PortalAuthTests(TestCase):
         self.assertEqual(LoginOTP.objects.count(), 0)
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_explicit_password_login_requires_password_without_sending_otp(self):
+        response = self.client.post(reverse("accounts:login"), {
+            "email": self.user.email, "login_method": "password", "password": "",
+        })
+        self.assertContains(response, "Enter your password or use the one-time code option.")
+        self.assertEqual(LoginOTP.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_explicit_otp_works_with_autofilled_password(self):
+        response = self.client.post(reverse("accounts:login"), {
+            "email": self.user.email, "login_method": "otp", "password": "OldAutofilledPassword",
+        })
+        self.assertRedirects(response, reverse("accounts:verify_otp"))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_explicit_password_login_signs_in_without_sending_otp(self):
+        response = self.client.post(reverse("accounts:login"), {
+            "email": self.user.email, "login_method": "password", "password": "StrongPass123!",
+        })
+        self.assertRedirects(response, reverse("accounts:dashboard"))
+        self.assertEqual(LoginOTP.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_expired_otp_redirects_to_login(self):
         otp = LoginOTP.objects.create(
             email=self.user.email,

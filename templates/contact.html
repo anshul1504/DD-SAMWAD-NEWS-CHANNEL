@@ -33,11 +33,11 @@
         <div><strong>न्यूजरूम समय</strong><span>सोमवार - शनिवार, सुबह 9 बजे से शाम 7 बजे तक</span></div>
       </div>
       <div class="contact-social" aria-label="Follow Desh Darpan Samvad">
-        <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-        <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-        <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
-        <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
+        {% if site_settings.facebook_url %}<a class="facebook" href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+        {% if site_settings.instagram_url %}<a class="instagram" href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+        {% if site_settings.youtube_url %}<a class="youtube" href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
+        {% if site_settings.twitter_url %}<a class="x" href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener" aria-label="X"><i class="bi bi-twitter-x"></i></a>{% endif %}
+        {% if site_settings.telegram_url %}<a class="telegram" href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener" aria-label="Telegram"><i class="bi bi-telegram"></i></a>{% endif %}
         {% if site_settings.whatsapp_url %}<a class="whatsapp" href="{{ site_settings.whatsapp_url }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
       </div>
     </div>

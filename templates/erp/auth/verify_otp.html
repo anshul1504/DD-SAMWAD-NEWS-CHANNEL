@@ -1,8 +1,8 @@
 {% extends "erp/auth/base_auth.html" %}
 {% block auth_content %}
 <span class="auth-kicker">Verification</span>
-<h2>Enter the code</h2>
-<p class="auth-sub">We've sent a 6-digit code to <strong>{{ otp_email }}</strong>. It's valid for 10 minutes.</p>
+<h2>Enter secure code</h2>
+<p class="auth-sub">Use the 6-digit code sent to <strong>{{ otp_email }}</strong>. It stays valid for 10 minutes.</p>
 <div class="auth-otp-meta">
   <i class="bi bi-envelope-check"></i>
   <span>Sent to <strong>{{ otp_email }}</strong></span>

@@ -23,7 +23,7 @@
   <div class="webstory-page-grid">
     {% for story in page_obj %}
       <a href="{{ story.get_absolute_url }}" class="webstory-card">
-        {% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>Story</strong></div>{% endif %}
+        {% if story.cover %}<img src="{{ story.cover.url }}" alt="{{ story.title }}" loading="lazy">{% else %}<div class="story-fallback"><strong>{{ story.category|default:"Web Story" }}</strong></div>{% endif %}
         <strong>{{ story.title }}</strong>
       </a>
     {% empty %}

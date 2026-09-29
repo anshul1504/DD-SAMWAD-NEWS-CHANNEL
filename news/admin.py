@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import Article, Bookmark, Category, Tag
+from .models import Article, ArticleMedia, Bookmark, Category, Tag
+
+
+class ArticleMediaInline(admin.TabularInline):
+    model = ArticleMedia
+    extra = 1
+    fields = ("image", "video", "caption", "credit", "display_order")
 
 
 @admin.register(Category)
@@ -39,6 +45,7 @@ def mark_featured(modeladmin, request, queryset):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
+    inlines = (ArticleMediaInline,)
     list_display = ("title", "category", "author", "city", "status", "published_at", "views", "is_featured", "is_breaking")
     list_filter = ("category", "status", "author", "state", "city", "is_breaking", "is_featured", "published_at")
     search_fields = ("title", "short_title", "slug", "summary", "author__username", "reporter__display_name")

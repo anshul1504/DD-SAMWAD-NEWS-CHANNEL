@@ -86,7 +86,9 @@ def article_detail(request, slug):
     related = Article.objects.optimized().published().filter(
         Q(category=article.category) | Q(city=article.city) | Q(tags__in=article.tags.all())
     ).exclude(pk=article.pk).distinct()[:6]
-    featured_image_url = absolute_site_url(article.featured_image.url) if article.featured_image else ""
+    first_gallery_image = next((item.image for item in article.media_items.all() if item.image), None)
+    share_image = article.featured_image or first_gallery_image
+    featured_image_url = absolute_site_url(share_image.url) if share_image else ""
     canonical_url = article.canonical_url or absolute_site_url(article.get_absolute_url())
     article_jsonld = {
         "@context": "https://schema.org",
@@ -95,7 +97,7 @@ def article_detail(request, slug):
         "description": article.meta_description or article.summary,
         "datePublished": article.published_at.isoformat(),
         "dateModified": article.updated_at.isoformat(),
-        "author": {"@type": "Person", "name": article.reporter.display_name if article.reporter else article.author.get_full_name() or article.author.username},
+        "author": {"@type": article.public_byline_schema_type, "name": article.public_byline_name},
         "publisher": {"@type": "Organization", "name": "Desh Darpan Samvad"},
         "mainEntityOfPage": canonical_url,
         "image": featured_image_url,

@@ -1,13 +1,11 @@
 {% load static news_extras %}
-<article class="story-card {{ class|default:'' }}" style="--cat-color:{{ article.category|category_color }}">
+<article class="story-card {{ class|default:'' }}{% if not article.featured_image %} story-card--text-only{% endif %}" style="--cat-color:{{ article.category|category_color }}">
+  {% if article.featured_image %}
   <a href="{{ article.get_absolute_url }}" class="story-thumb" aria-label="{{ article.title }}">
     {% if article.category %}<span class="story-thumb-badge">{{ article.category }}</span>{% endif %}
-    {% if article.featured_image %}
-      <img src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy">
-    {% else %}
-      <img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ article.title }}" loading="lazy">
-    {% endif %}
+    <img src="{{ article.featured_image.url }}" alt="{{ article.image_caption|default:article.title }}" loading="lazy">
   </a>
+  {% endif %}
   <div class="story-content">
     {% if article.city %}<div class="story-meta"><span>{{ article.city }}</span></div>{% endif %}
     <h3><a href="{{ article.get_absolute_url }}">{{ article.short_title|default:article.title }}</a></h3>

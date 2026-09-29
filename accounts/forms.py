@@ -7,10 +7,10 @@ User = get_user_model()
 
 
 class EmailLoginForm(forms.Form):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Enter your work email", "autocomplete": "email"}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "name@ddsamvad.com", "autocomplete": "email"}))
     password = forms.CharField(
         required=False,
-        widget=forms.PasswordInput(attrs={"placeholder": "Password (optional — leave blank for OTP)", "autocomplete": "current-password"}),
+        widget=forms.PasswordInput(attrs={"placeholder": "Enter your password", "autocomplete": "current-password"}),
     )
 
     def clean_email(self):
@@ -52,10 +52,10 @@ class OTPVerifyForm(forms.Form):
 
 
 class ForgotPasswordForm(forms.Form):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "Enter your registered email"}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": "name@ddsamvad.com", "autocomplete": "email"}))
 
     def clean_email(self):
-        # See EmailLoginForm.clean_email — existence is deliberately not checked.
+        # Account existence is deliberately not checked here.
         return self.cleaned_data["email"].strip().lower()
 
 

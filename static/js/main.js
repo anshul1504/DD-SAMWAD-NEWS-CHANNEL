@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-hide-on-error]").forEach((media) => {
+    media.addEventListener("error", () => {
+      const container = media.closest("figure") || media;
+      container.hidden = true;
+    }, {once: true});
+  });
   const scrollTop = document.querySelector(".scroll-top");
   if (scrollTop) {
     const toggleScrollTop = () => {

@@ -116,10 +116,11 @@ class PublicSiteSmokeTests(TestCase):
         body = self.client.get(reverse("home")).content.decode()
         self.assertIn(self.category.get_absolute_url(), body)
 
-    def test_signup_is_reachable_from_login(self):
-        """Signup worked but nothing linked to it."""
+    def test_team_login_does_not_advertise_public_signup(self):
+        """The newsroom login only offers sign-in and account recovery."""
         body = self.client.get(reverse("accounts:login")).content.decode()
-        self.assertIn(reverse("accounts:signup"), body)
+        self.assertNotIn(reverse("accounts:signup"), body)
+        self.assertIn(reverse("accounts:forgot_password"), body)
 
     def test_article_structured_data_is_ld_json(self):
         """json_script emits application/json, which crawlers ignore."""

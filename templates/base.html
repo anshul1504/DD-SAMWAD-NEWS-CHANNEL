@@ -61,8 +61,8 @@
       --dds-soft:#f6f8fb;
       --dds-container:min(100% - 32px, 1720px);
       --font-indic:"Noto Sans Devanagari","Noto Sans Bengali","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Kannada","Noto Sans Malayalam","Noto Sans Oriya","Noto Sans Tamil","Noto Sans Telugu","Noto Nastaliq Urdu","Noto Sans",Arial,sans-serif;
-      --font-ui:"Poppins",var(--font-indic);
-      --font-headline:"Poppins",var(--font-indic);
+      --font-ui:var(--font-indic);
+      --font-headline:var(--font-indic);
       --font-latin:"Poppins",var(--font-indic);
     }
     html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#082b68 #f2f5fa}
@@ -160,7 +160,7 @@
     .dds-nav{height:50px;background:linear-gradient(90deg,var(--dds-logo-navy-dark),var(--dds-logo-navy) 46%,#062457);overflow:visible}
     .dds-nav-track{height:50px;display:flex;align-items:center;gap:.12rem;overflow:visible;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.28) transparent;padding-left:0}
     .dds-nav-track::-webkit-scrollbar{display:none}
-    .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:50px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap}
+    .dds-nav-track>a,.dds-nav-track>.dds-menu-btn{height:50px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:500;font-size:.87rem;line-height:1;white-space:nowrap}
     .dds-nav-track>.dds-menu-btn{width:52px;padding:0;border:0;background:var(--dds-logo-navy-dark);box-shadow:12px 0 22px rgba(5,27,69,.4)}
     .dds-menu-btn i{width:18px;display:grid;gap:4px}
     .dds-menu-btn i span{height:2px;background:#fff;border-radius:999px}
@@ -170,12 +170,12 @@
     .dds-nav .dds-nav-track>a,.dds-nav .dds-nav-dropdown>summary,.dds-nav .dds-menu-btn{color:#fff!important}
     .dds-nav .dds-nav-track>a *,.dds-nav .dds-nav-dropdown>summary *,.dds-nav .dds-menu-btn *{color:inherit!important}
     .dds-nav-dropdown{height:50px;flex:0 0 auto;position:relative}
-    .dds-nav-dropdown>summary{height:50px;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:700;font-size:.87rem;line-height:1;white-space:nowrap;list-style:none;cursor:pointer}
+    .dds-nav-dropdown>summary{height:50px;display:inline-flex;align-items:center;gap:.42rem;color:#fff;padding:0 clamp(.58rem,.86vw,.82rem);font-weight:500;font-size:.87rem;line-height:1;white-space:nowrap;list-style:none;cursor:pointer}
     .dds-nav-dropdown>summary::-webkit-details-marker{display:none}
     .dds-nav-dropdown>summary:after{content:"";width:7px;height:7px;border-right:2px solid rgba(255,255,255,.9);border-bottom:2px solid rgba(255,255,255,.9);transform:rotate(45deg) translateY(-2px);margin-left:.1rem}
     .dds-nav-dropdown[open]>summary,.dds-nav-dropdown>summary:hover{background:rgba(255,255,255,.12)}
     .dds-nav-menu{position:absolute;top:100%;left:0;z-index:1060;min-width:220px;display:grid;grid-template-columns:repeat(2,minmax(96px,1fr));gap:.18rem;padding:.48rem;background:#fff;color:var(--dds-text);border:1px solid var(--dds-line);border-radius:0 0 10px 10px;box-shadow:0 22px 48px rgba(15,23,42,.18)}
-    .dds-nav-menu a{display:flex;align-items:center;gap:.45rem;min-height:34px;padding:.45rem .62rem;border-radius:7px;color:#1f2937;font-weight:700;font-size:.86rem}
+    .dds-nav-menu a{display:flex;align-items:center;gap:.45rem;min-height:34px;padding:.45rem .62rem;border-radius:7px;color:#1f2937;font-weight:500;font-size:.86rem}
     .dds-nav-menu a:hover{background:#fff1f2;color:var(--dds-red)}
 
     .dds-breaking{position:fixed;top:150px;left:0;right:0;z-index:1028;border-bottom:1px solid var(--dds-line);background:#fff;box-shadow:0 8px 18px rgba(15,23,42,.035)}
@@ -240,6 +240,9 @@
     .dds-footer-contact p{margin:.42rem 0;color:#d7dfec;line-height:1.45;font-size:.95rem;font-weight:500;display:flex;gap:.5rem;align-items:flex-start;text-transform:none}
     .dds-footer-contact p i{margin-top:.1rem;color:#fff}
     .dds-footer-email{font-family:var(--font-latin);text-transform:lowercase!important}
+    .dds-footer-qr{display:grid;grid-template-columns:88px minmax(0,1fr);gap:.7rem;align-items:center;margin-top:.8rem}
+    .dds-footer-qr img{width:88px;height:88px;object-fit:contain;background:#fff;padding:4px;border-radius:6px}
+    .dds-footer-qr span{color:#fff;font-size:.82rem;line-height:1.45;font-weight:600}
     .dds-footer-bottom{border-top:1px solid rgba(255,255,255,.13);padding:.78rem 0 .86rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;color:#b9c5d8;text-align:left}
     .dds-footer-copy{display:inline-flex;align-items:center;gap:.38rem;padding:0;background:transparent;box-shadow:none;font-size:.86rem;font-weight:500;color:#b8c4d6}
     .dds-footer-copy i{color:#fff;font-size:.88rem}
@@ -421,12 +424,12 @@
         </label>
         <span class="dds-follow-label">Follow us</span>
         <div class="dds-social">
-          <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-          <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-          <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-          <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
-          <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-          <a class="whatsapp" href="{{ site_settings.whatsapp_url|default:'#' }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+          {% if site_settings.facebook_url %}<a class="facebook" href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+          {% if site_settings.instagram_url %}<a class="instagram" href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+          {% if site_settings.youtube_url %}<a class="youtube" href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
+          {% if site_settings.twitter_url %}<a class="x" href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener" aria-label="X"><i class="bi bi-twitter-x"></i></a>{% endif %}
+          {% if site_settings.telegram_url %}<a class="telegram" href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener" aria-label="Telegram"><i class="bi bi-telegram"></i></a>{% endif %}
+          {% if site_settings.whatsapp_url %}<a class="whatsapp" href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
         </div>
       </div>
     </div>
@@ -625,12 +628,12 @@
           </div>
           <p>विश्वसनीय हिंदी समाचार, स्थानीय अपडेट और डिजिटल मीडिया कवरेज।</p>
           <div class="dds-footer-social" aria-label="Follow Desh Darpan Samvad">
-            <a class="facebook" href="{{ site_settings.facebook_url|default:'#' }}" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a class="instagram" href="{{ site_settings.instagram_url|default:'#' }}" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-            <a class="youtube" href="{{ site_settings.youtube_url|default:'#' }}" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-            <a class="x" href="{{ site_settings.twitter_url|default:'#' }}" aria-label="X"><i class="bi bi-twitter-x"></i></a>
-            <a class="telegram" href="{{ site_settings.telegram_url|default:'#' }}" aria-label="Telegram"><i class="bi bi-telegram"></i></a>
-            <a class="whatsapp" href="{{ site_settings.whatsapp_url|default:'#' }}" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+            {% if site_settings.facebook_url %}<a class="facebook" href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+            {% if site_settings.instagram_url %}<a class="instagram" href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+            {% if site_settings.youtube_url %}<a class="youtube" href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
+            {% if site_settings.twitter_url %}<a class="x" href="{{ site_settings.twitter_url }}" target="_blank" rel="noopener" aria-label="X"><i class="bi bi-twitter-x"></i></a>{% endif %}
+            {% if site_settings.telegram_url %}<a class="telegram" href="{{ site_settings.telegram_url }}" target="_blank" rel="noopener" aria-label="Telegram"><i class="bi bi-telegram"></i></a>{% endif %}
+            {% if site_settings.whatsapp_url %}<a class="whatsapp" href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
           </div>
         </section>
         <section>
@@ -674,7 +677,10 @@
           <h3>Connect</h3>
           <p><i class="bi bi-geo-alt"></i> Indore, Madhya Pradesh</p>
           <p><i class="bi bi-envelope"></i> <a class="dds-footer-email notranslate" translate="no" href="mailto:info@ddsamvad.com">info@ddsamvad.com</a></p>
-          <p><i class="bi bi-whatsapp"></i> WhatsApp Desk</p>
+          <a class="dds-footer-qr" href="{% url 'core:news_tip' %}" aria-label="लेख या सुझाव भेजें">
+            <img src="{% static 'images/dds-news-tip-qr.jpeg' %}" alt="देश दर्पण संवाद QR कोड" loading="lazy" decoding="async">
+            <span>लेख या सुझाव भेजने के लिए QR स्कैन करें</span>
+          </a>
         </section>
       </div>
       <div class="dds-footer-bottom">
