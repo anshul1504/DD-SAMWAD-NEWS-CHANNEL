@@ -16,3 +16,4 @@ backups/
 # Local visual-regression captures and deployment bundles
 auth-*.png
 *-release.tar
+tmp/
