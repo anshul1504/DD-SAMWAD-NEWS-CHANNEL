@@ -1,5 +1,5 @@
 from django.db.models import Case, IntegerField, When
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from core.utils import paginate
 from .models import LiveBlog
@@ -20,6 +20,13 @@ def live_list(request):
     return render(request, "liveblog/list.html", {"page_obj": page_obj, "page_title": "लाइव", "seo_title": "लाइव अपडेट"})
 
 
-def live_detail(request, slug):
-    liveblog = get_object_or_404(LiveBlog.objects.prefetch_related("updates"), slug=slug, active=True)
+def live_detail(request, pk, slug):
+    liveblog = get_object_or_404(LiveBlog.objects.prefetch_related("updates"), pk=pk, active=True)
+    if slug != liveblog.public_url_slug:
+        return redirect(liveblog.get_absolute_url(), permanent=True)
     return render(request, "liveblog/detail.html", {"liveblog": liveblog, "seo_title": liveblog.title})
+
+
+def legacy_live_detail(request, slug):
+    liveblog = get_object_or_404(LiveBlog, slug=slug, active=True)
+    return redirect(liveblog.get_absolute_url(), permanent=True)

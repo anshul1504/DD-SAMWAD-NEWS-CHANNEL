@@ -42,6 +42,16 @@ class PublicWebStoryTests(TestCase):
         self.assertEqual(self.client.get(future.get_absolute_url()).status_code, 404)
         self.assertEqual(self.client.get(empty.get_absolute_url()).status_code, 404)
 
+    def test_unicode_database_slug_has_clean_url_and_old_link_redirects(self):
+        story = self.story("हिंदी-कहानी")
+
+        self.assertEqual(story.get_absolute_url(), f"/web-stories/{story.pk}/national-story/")
+        self.assertTrue(story.get_absolute_url().isascii())
+        legacy = self.client.get(reverse("webstories:legacy_detail", args=[story.slug]))
+        self.assertRedirects(legacy, story.get_absolute_url(), status_code=301, fetch_redirect_response=False)
+        wrong = self.client.get(reverse("webstories:detail", args=[story.pk, "wrong-label"]))
+        self.assertRedirects(wrong, story.get_absolute_url(), status_code=301, fetch_redirect_response=False)
+
     def test_filtered_story_count_matches_visible_category_results(self):
         other = Category.objects.create(name="Sports", hindi_name="खेल", slug="sports", active=True)
         self.story("national-story")

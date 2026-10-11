@@ -125,6 +125,19 @@ class VideoDetailTests(TestCase):
 
 @override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
 class ShortsEntryTests(TestCase):
+    def test_unicode_database_slug_uses_clean_public_url_and_legacy_redirect(self):
+        video = Video.objects.create(
+            title="हिंदी वीडियो", slug="हिंदी-वीडियो", is_short=True,
+            youtube_url="https://youtu.be/dQw4w9WgXcQ", active=True,
+        )
+
+        self.assertEqual(video.get_absolute_url(), f"/videos/{video.pk}/short/")
+        self.assertTrue(video.get_absolute_url().isascii())
+        legacy = self.client.get(reverse("videos:legacy_detail", args=[video.slug]))
+        self.assertRedirects(legacy, video.get_absolute_url(), status_code=301, fetch_redirect_response=False)
+        wrong = self.client.get(reverse("videos:detail", args=[video.pk, "wrong-label"]))
+        self.assertRedirects(wrong, video.get_absolute_url(), status_code=301, fetch_redirect_response=False)
+
     def test_shorts_entry_redirects_to_newest_playable_short(self):
         older = Video.objects.create(
             title="Older short", slug="older-short", is_short=True,

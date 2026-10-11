@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 from locations.models import City
 from news.models import Category
@@ -35,7 +36,12 @@ class LiveBlog(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("liveblog:detail", args=[self.slug])
+        return reverse("liveblog:detail", args=[self.pk, self.public_url_slug])
+
+    @property
+    def public_url_slug(self):
+        category = slugify(self.category.slug, allow_unicode=False) if self.category_id else ""
+        return f"{category}-live" if category else "live-update"
 
     @property
     def embed_url(self):

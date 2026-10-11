@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from core.utils import paginate
@@ -46,13 +46,23 @@ def story_list(request):
     })
 
 
-def story_detail(request, slug):
+def story_detail(request, pk, slug):
     story = get_object_or_404(
         WebStory.objects.filter(
             active=True,
             published_at__lte=timezone.now(),
             slides__isnull=False,
         ).prefetch_related("slides").distinct(),
+        pk=pk,
+    )
+    if slug != story.public_url_slug:
+        return redirect(story.get_absolute_url(), permanent=True)
+    return render(request, "webstories/detail.html", {"story": story, "seo_title": story.seo_title or story.title})
+
+
+def legacy_story_detail(request, slug):
+    story = get_object_or_404(
+        WebStory.objects.filter(active=True, published_at__lte=timezone.now(), slides__isnull=False).distinct(),
         slug=slug,
     )
-    return render(request, "webstories/detail.html", {"story": story, "seo_title": story.seo_title or story.title})
+    return redirect(story.get_absolute_url(), permanent=True)

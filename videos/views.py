@@ -6,6 +6,7 @@ from django.db.models import Count, F, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.text import slugify
 from django.views.decorators.http import require_GET, require_POST
 
 from core.throttling import check_rate_limit, client_ip
@@ -81,8 +82,10 @@ def shorts_list(request):
         return redirect(latest.get_absolute_url())
     return _video_archive(request, shorts=True)
 
-def video_detail(request, slug):
-    video = get_object_or_404(Video, slug=slug, active=True)
+def video_detail(request, pk, slug):
+    video = get_object_or_404(Video, pk=pk, active=True)
+    if slug != video.public_url_slug:
+        return redirect(video.get_absolute_url(), permanent=True)
     Video.objects.filter(pk=video.pk).update(views=F("views") + 1)
     video.views += 1
 
@@ -95,13 +98,14 @@ def video_detail(request, slug):
         Video.objects.filter(active=True, is_short=video.is_short)
         .annotate(comment_count=Count("comments", filter=Q(comments__approved=True)))
         .order_by("-published_at")
-        .values("slug", "title", "description", "youtube_url", "views", "likes", "comment_count")[:60]
+        .values("pk", "slug", "title", "description", "youtube_url", "views", "likes", "comment_count", "category__slug")[:60]
     )
-    if not any(item["slug"] == slug for item in queue):
+    if not any(item["pk"] == video.pk for item in queue):
         queue.insert(0, {
-            "slug": video.slug, "title": video.title, "description": video.description,
+            "pk": video.pk, "slug": video.slug, "title": video.title, "description": video.description,
             "youtube_url": video.youtube_url, "views": video.views, "likes": video.likes,
             "comment_count": video.comments.filter(approved=True).count(),
+            "category__slug": video.category.slug if video.category_id else "",
         })
 
     visitor_hash = _ip_hash(request)
@@ -116,9 +120,12 @@ def video_detail(request, slug):
         embed = youtube_embed_url(item["youtube_url"])
         if not embed:
             continue
-        if item["slug"] == slug:
+        if item["pk"] == video.pk:
             start_index = len(feed)
             item["views"] = video.views
+        category_slug = slugify(item["category__slug"] or "", allow_unicode=False)
+        kind = "short" if video.is_short else "video"
+        public_slug = f"{category_slug}-{kind}" if category_slug else kind
         feed.append({
             "slug": item["slug"],
             "title": item["title"],
@@ -128,7 +135,7 @@ def video_detail(request, slug):
             "likes": item["likes"],
             "liked": item["slug"] in liked_slugs,
             "comment_count": item["comment_count"],
-            "url": reverse("videos:detail", args=[item["slug"]]),
+            "url": reverse("videos:detail", args=[item["pk"], public_slug]),
             "comments_url": reverse("videos:comments", args=[item["slug"]]),
             "comment_create_url": reverse("videos:comment_create", args=[item["slug"]]),
             "like_url": reverse("videos:like_toggle", args=[item["slug"]]),
@@ -141,6 +148,11 @@ def video_detail(request, slug):
         "feed_json": feed,
         "start_index": start_index,
     })
+
+
+def legacy_video_detail(request, slug):
+    video = get_object_or_404(Video, slug=slug, active=True)
+    return redirect(video.get_absolute_url(), permanent=True)
 
 
 def _serialize_comment(comment):

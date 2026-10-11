@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 from core.youtube import youtube_embed_url
 from locations.models import City
@@ -43,7 +44,13 @@ class Video(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("videos:detail", args=[self.slug])
+        return reverse("videos:detail", args=[self.pk, self.public_url_slug])
+
+    @property
+    def public_url_slug(self):
+        category = slugify(self.category.slug, allow_unicode=False) if self.category_id else ""
+        kind = "short" if self.is_short else "video"
+        return f"{category}-{kind}" if category else kind
 
     @property
     def embed_url(self):

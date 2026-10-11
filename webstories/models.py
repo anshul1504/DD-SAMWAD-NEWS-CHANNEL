@@ -2,6 +2,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 from news.models import Category
 
@@ -24,7 +25,12 @@ class WebStory(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("webstories:detail", args=[self.slug])
+        return reverse("webstories:detail", args=[self.pk, self.public_url_slug])
+
+    @property
+    def public_url_slug(self):
+        category = slugify(self.category.slug, allow_unicode=False) if self.category_id else ""
+        return f"{category}-story" if category else "web-story"
 
 
 class StorySlide(models.Model):
