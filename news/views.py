@@ -48,7 +48,24 @@ def pagination_context(request, queryset, per_page=20):
 def home(request):
     articles = Article.objects.optimized().published()
     story_cutoff = timezone.now() - timezone.timedelta(hours=24)
-    stories = WebStory.objects.filter(active=True).prefetch_related("slides")
+    stories = (
+        WebStory.objects.filter(
+            active=True,
+            published_at__lte=timezone.now(),
+            slides__isnull=False,
+        )
+        .select_related("category")
+        .prefetch_related("slides")
+        .distinct()
+    )
+    day_stories = list(stories.filter(published_at__gte=story_cutoff)[:12])
+    story_lane_stories = day_stories or list(stories[:8])
+    top_stories = list(articles.filter(is_top_story=True)[:6])
+    if not top_stories:
+        top_stories = list(articles[:6])
+    editor_picks = list(articles.filter(is_editor_pick=True)[:6])
+    if not editor_picks:
+        editor_picks = list(articles[:6])
     categories = Category.objects.filter(active=True, show_on_homepage=True).exclude(slug="home")
     home_categories = []
     for cat in categories:
@@ -61,15 +78,16 @@ def home(request):
         "hero_articles": articles.filter(is_homepage_hero=True)[:5] or articles[:5],
         "latest_articles": articles[:12],
         "trending_articles": Article.objects.optimized().trending()[:6],
-        "top_stories": articles.filter(is_top_story=True)[:6],
-        "editor_picks": articles.filter(is_editor_pick=True)[:6],
+        "top_stories": top_stories,
+        "editor_picks": editor_picks,
         "most_read": articles.order_by("-views")[:6],
         "home_categories": home_categories,
         "galleries": Gallery.objects.filter(active=True).prefetch_related("images")[:6],
         "videos": Video.objects.filter(active=True, is_short=False)[:6],
         "shorts": Video.objects.filter(active=True, is_short=True)[:6],
         "webstories": stories[:8],
-        "day_stories": stories.filter(published_at__gte=story_cutoff)[:12],
+        "story_lane_stories": story_lane_stories,
+        "story_lane_is_recent": bool(day_stories),
         "liveblogs": LiveBlog.objects.filter(active=True)[:3],
         "newsletter_form": NewsletterForm(),
         "seo_title": "ताजा हिंदी समाचार, ब्रेकिंग न्यूज़ और लाइव अपडेट",

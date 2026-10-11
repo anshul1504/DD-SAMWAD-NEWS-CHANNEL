@@ -20,7 +20,7 @@ from galleries.models import Gallery
 from liveblog.models import LiveBlog
 from news.models import Article, Category
 from videos.models import Video
-from webstories.models import WebStory
+from webstories.models import StorySlide, WebStory
 
 PUBLIC_ROUTES = [
     "home",
@@ -72,6 +72,7 @@ class PublicSiteSmokeTests(TestCase):
             title="Video", slug="video", youtube_url="https://www.youtube.com/watch?v=abc123", active=True
         )
         cls.story = WebStory.objects.create(title="Story", slug="story", active=True)
+        StorySlide.objects.create(story=cls.story, heading="Story slide", order=1)
         cls.liveblog = LiveBlog.objects.create(title="Live", slug="live", active=True)
 
     def test_every_public_route_renders(self):

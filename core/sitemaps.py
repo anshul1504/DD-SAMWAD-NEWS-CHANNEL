@@ -1,5 +1,6 @@
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
+from django.utils import timezone
 
 from galleries.models import Gallery
 from liveblog.models import LiveBlog
@@ -54,7 +55,11 @@ class WebStorySitemap(Sitemap):
     priority = 0.6
 
     def items(self):
-        return WebStory.objects.filter(active=True)
+        return WebStory.objects.filter(
+            active=True,
+            published_at__lte=timezone.now(),
+            slides__isnull=False,
+        ).distinct()
 
     def lastmod(self, obj):
         return obj.published_at

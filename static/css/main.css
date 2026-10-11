@@ -1990,6 +1990,8 @@ html.translated-rtl body{
 .story-ring{width:82px;height:82px;border-radius:50%;padding:3px;background:linear-gradient(145deg,#e31e28,#f59e0b 45%,#082b68);box-shadow:0 12px 26px rgba(15,23,42,.13);position:relative}
 .story-ring:after{content:"";position:absolute;inset:-3px;border-radius:inherit;border:1px solid rgba(227,30,40,.28);opacity:.75}
 .story-ring img{width:100%;height:100%;border-radius:inherit;object-fit:cover;border:3px solid #fff;display:block;transition:transform .45s ease}
+.story-ring-fallback{position:absolute!important;inset:3px;width:auto!important;height:auto!important;border-radius:50%;z-index:0}
+.story-ring img{position:relative;z-index:1}
 .story-ring>i{width:100%;height:100%;border-radius:inherit;border:3px solid #fff;background:linear-gradient(145deg,#12336b,#071024);color:#fff;display:grid;place-items:center;font-size:1.55rem}
 .story-slat:hover .story-ring img{transform:scale(1.06)}
 .story-slat strong{width:100%;color:#101828;font-size:.78rem;line-height:1.18;font-weight:900;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -2084,6 +2086,10 @@ html.translated-rtl body{
 .webstory-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;opacity:.78}
 .webstory-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(7,16,36,.88))}
 .webstory-card h3{position:absolute;left:.85rem;right:.85rem;bottom:.8rem;z-index:1;color:#fff;font-size:1rem;line-height:1.25}
+.webstory-text-backdrop{position:absolute!important;inset:0;display:grid;place-items:center;background:linear-gradient(145deg,#12336b,#071024 60%,#8f1018);color:rgba(255,255,255,.3);font-size:2.4rem}
+.webstory-page-grid .webstory-card>.story-fallback{position:absolute;inset:0;min-height:0}
+.webstory-page-grid .webstory-card>img{z-index:1}
+.webstory-page-grid .webstory-card>strong{z-index:3}
 .webstory-text-backdrop{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.16),transparent 25%),linear-gradient(145deg,#12336b,#071024 60%,#a3121a);color:rgba(255,255,255,.7);font-size:2.5rem}
 .webstory-grid .webstory-card{min-height:170px;border-radius:10px}
 .webstory-grid .webstory-card h3{left:.6rem;right:.6rem;bottom:.6rem;font-size:.82rem;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

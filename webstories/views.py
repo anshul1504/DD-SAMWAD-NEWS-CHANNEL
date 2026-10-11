@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 
 from core.utils import paginate
 from news.models import Category
@@ -7,8 +8,9 @@ from .models import WebStory
 
 def story_list(request):
     queryset = (
-        WebStory.objects.filter(active=True)
+        WebStory.objects.filter(active=True, published_at__lte=timezone.now(), slides__isnull=False)
         .select_related("category")
+        .distinct()
         .order_by("-published_at")
     )
 
@@ -22,7 +24,12 @@ def story_list(request):
     # Only offer categories that actually have a story right now, so the
     # filter row never dead-ends on an empty result.
     filter_categories = (
-        Category.objects.filter(active=True, webstory__active=True)
+        Category.objects.filter(
+            active=True,
+            webstory__active=True,
+            webstory__published_at__lte=timezone.now(),
+            webstory__slides__isnull=False,
+        )
         .distinct()
         .order_by("display_order", "name")
     )
@@ -35,10 +42,17 @@ def story_list(request):
         "seo_title": seo_title,
         "filter_categories": filter_categories,
         "active_category": active_category,
-        "total_count": WebStory.objects.filter(active=True).count(),
+        "total_count": queryset.count(),
     })
 
 
 def story_detail(request, slug):
-    story = get_object_or_404(WebStory.objects.prefetch_related("slides"), slug=slug, active=True)
+    story = get_object_or_404(
+        WebStory.objects.filter(
+            active=True,
+            published_at__lte=timezone.now(),
+            slides__isnull=False,
+        ).prefetch_related("slides").distinct(),
+        slug=slug,
+    )
     return render(request, "webstories/detail.html", {"story": story, "seo_title": story.seo_title or story.title})
