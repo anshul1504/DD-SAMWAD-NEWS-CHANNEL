@@ -90,4 +90,25 @@ class PublicWebStoryTests(TestCase):
         self.assertIn(article, response.context["top_stories"])
         self.assertIn(article, response.context["editor_picks"])
 
+    @override_settings(SITE_URL="https://ddsamvad.com")
+    def test_legacy_article_cta_is_saved_as_clean_canonical_url(self):
+        author = User.objects.create_user(username="cta-writer")
+        article = Article.objects.create(
+            title="CTA article",
+            slug="हिंदी-लेख",
+            body="<p>Body</p>",
+            category=self.category,
+            author=author,
+            status=Article.Status.PUBLISHED,
+        )
+        story = self.story("cta-story", slides=0)
+
+        slide = StorySlide.objects.create(
+            story=story,
+            heading="Read article",
+            cta_url="https://ddsamvad.com/news/%E0%A4%B9%E0%A4%BF%E0%A4%82%E0%A4%A6%E0%A5%80-%E0%A4%B2%E0%A5%87%E0%A4%96/",
+        )
+
+        self.assertEqual(slide.cta_url, f"https://ddsamvad.com{article.get_absolute_url()}")
+
 # Create your tests here.

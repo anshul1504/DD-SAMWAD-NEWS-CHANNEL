@@ -1,3 +1,6 @@
+from urllib.parse import unquote, urlsplit
+
+from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.urls import reverse
@@ -53,5 +56,34 @@ class StorySlide(models.Model):
 
     def __str__(self):
         return self.heading
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if self.cta_url and (update_fields is None or "cta_url" in update_fields):
+            self.cta_url = canonicalize_internal_article_url(self.cta_url)
+        super().save(*args, **kwargs)
+
+
+def canonicalize_internal_article_url(url):
+    """Convert this site's legacy /news/<unicode-slug>/ links to canonical URLs.
+
+    External links are intentionally untouched. Keeping this at the model edge
+    also protects future stories created manually in admin or by import scripts.
+    """
+    parsed = urlsplit(url)
+    site = urlsplit(settings.SITE_URL)
+    if parsed.netloc and parsed.netloc.lower() != site.netloc.lower():
+        return url
+    decoded_path = unquote(parsed.path)
+    parts = decoded_path.strip("/").split("/")
+    if len(parts) != 2 or parts[0] != "news":
+        return url
+
+    from news.models import Article
+
+    article = Article.objects.filter(slug=parts[1]).first()
+    if not article:
+        return url
+    return f"{settings.SITE_URL.rstrip('/')}{article.get_absolute_url()}"
 
 # Create your models here.
