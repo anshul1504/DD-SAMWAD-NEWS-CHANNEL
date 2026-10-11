@@ -126,7 +126,7 @@
 <section class="reels-viewer" data-reels data-start-index="{{ start_index }}">
   {{ feed_json|json_script:"reels-feed-data" }}
   <div class="reels-phone">
-    <a class="reels-close" href="{% if video.is_short %}{% url 'videos:shorts' %}{% else %}{% url 'videos:list' %}{% endif %}" data-reels-close aria-label="बंद करें">&times;</a>
+    <a class="reels-close" href="{% if video.is_short %}{% url 'home' %}{% else %}{% url 'videos:list' %}{% endif %}" data-reels-close aria-label="बंद करें">&times;</a>
     <span class="reels-counter" data-reels-counter></span>
     <div class="reels-frame-wrap">
       <div data-reels-frame></div>

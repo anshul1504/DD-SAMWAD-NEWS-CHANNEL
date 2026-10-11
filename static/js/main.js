@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (closeLink) {
       try {
         const referrer = document.referrer ? new URL(document.referrer) : null;
-        if (referrer && referrer.origin === window.location.origin && referrer.href !== window.location.href) {
+        if (referrer && referrer.origin === window.location.origin && referrer.href !== window.location.href && referrer.pathname !== "/shorts/") {
           closeLink.href = referrer.href;
         }
       } catch (error) {

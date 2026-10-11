@@ -1,7 +1,9 @@
 import json
+from datetime import timedelta
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import Video, VideoComment, VideoLike, youtube_embed_url
 
@@ -119,6 +121,66 @@ class VideoDetailTests(TestCase):
         self.client.get(video.get_absolute_url())
         video.refresh_from_db()
         self.assertEqual(video.views, 1)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, SESSION_COOKIE_SECURE=False, CSRF_COOKIE_SECURE=False)
+class ShortsEntryTests(TestCase):
+    def test_shorts_entry_redirects_to_newest_playable_short(self):
+        older = Video.objects.create(
+            title="Older short", slug="older-short", is_short=True,
+            youtube_url="https://youtu.be/dQw4w9WgXcQ", active=True,
+            published_at=timezone.now() - timedelta(days=1),
+        )
+        latest = Video.objects.create(
+            title="Latest short", slug="latest-short", is_short=True,
+            youtube_url="https://youtu.be/9bZkp7q19f0", active=True,
+            published_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("videos:shorts"))
+
+        self.assertRedirects(response, latest.get_absolute_url(), fetch_redirect_response=False)
+        self.assertNotEqual(response["Location"], older.get_absolute_url())
+
+    def test_unplayable_newest_short_is_skipped(self):
+        playable = Video.objects.create(
+            title="Playable", slug="playable-short", is_short=True,
+            youtube_url="https://youtu.be/dQw4w9WgXcQ", active=True,
+            published_at=timezone.now() - timedelta(minutes=1),
+        )
+        Video.objects.create(
+            title="Broken", slug="broken-short", is_short=True,
+            youtube_url="https://example.com/not-youtube", active=True,
+            published_at=timezone.now(),
+        )
+
+        response = self.client.get(reverse("videos:shorts"))
+
+        self.assertRedirects(response, playable.get_absolute_url(), fetch_redirect_response=False)
+
+    def test_shorts_entry_keeps_honest_empty_state_when_none_exist(self):
+        response = self.client.get(reverse("videos:shorts"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Shorts available nahi hain.")
+
+    def test_short_player_feed_runs_from_newest_to_older_videos(self):
+        older = Video.objects.create(
+            title="Older short", slug="feed-older-short", is_short=True,
+            youtube_url="https://youtu.be/dQw4w9WgXcQ", active=True,
+            published_at=timezone.now() - timedelta(days=1),
+        )
+        latest = Video.objects.create(
+            title="Latest short", slug="feed-latest-short", is_short=True,
+            youtube_url="https://youtu.be/9bZkp7q19f0", active=True,
+            published_at=timezone.now(),
+        )
+
+        response = self.client.get(latest.get_absolute_url())
+
+        feed = response.context["feed_json"]
+        self.assertEqual([item["slug"] for item in feed], [latest.slug, older.slug])
+        self.assertEqual(response.context["start_index"], 0)
 
     def test_feed_includes_comment_urls_for_reels_js(self):
         video = Video.objects.create(

@@ -693,7 +693,7 @@
   <nav class="mobile-bottom-nav" aria-label="मोबाइल नेविगेशन">
     <a href="{% url 'home' %}" class="{% if request.resolver_match.view_name == 'home' %}is-active{% endif %}"><i class="bi bi-house-door"></i><span>होम</span></a>
     <a href="{% url 'videos:list' %}" class="{% if request.resolver_match.view_name == 'videos:list' %}is-active{% endif %}"><i class="bi bi-play-circle"></i><span>वीडियो</span></a>
-    <a href="{% url 'videos:shorts' %}" class="{% if request.resolver_match.view_name == 'videos:shorts' %}is-active{% endif %}"><i class="bi bi-phone"></i><span>Shorts</span></a>
+    <a href="{% url 'videos:shorts' %}" class="{% if request.resolver_match.view_name == 'videos:shorts' or video.is_short %}is-active{% endif %}"><i class="bi bi-phone"></i><span>Shorts</span></a>
     <a href="{% url 'news:latest' %}" class="{% if request.resolver_match.view_name == 'news:latest' %}is-active{% endif %}"><i class="bi bi-lightning-charge-fill"></i><span>ताजा खबरें</span></a>
     <button class="mobile-menu-open" type="button" data-bs-toggle="offcanvas" data-bs-target="#ddsMegaMenu" aria-controls="ddsMegaMenu">
       <i class="bi bi-list"></i><span>मेनू</span>

@@ -4,7 +4,7 @@ import json
 from django.conf import settings
 from django.db.models import Count, F, Q
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 
@@ -71,6 +71,14 @@ def video_list(request):
 
 
 def shorts_list(request):
+    # Shorts is a playback destination, not an archive grid: opening it from
+    # mobile navigation should immediately start the newest playable short.
+    # This is intentionally a temporary redirect because the target changes
+    # whenever the newsroom publishes a newer short.
+    shorts = Video.objects.filter(active=True, is_short=True).order_by("-published_at")
+    latest = next((item for item in shorts if item.embed_url), None)
+    if latest:
+        return redirect(latest.get_absolute_url())
     return _video_archive(request, shorts=True)
 
 def video_detail(request, slug):
