@@ -32,7 +32,7 @@ from core.sitemaps import (
     VideoSitemap,
     WebStorySitemap,
 )
-from core.views import healthz, robots_txt
+from core.views import healthz, news_sitemap, robots_txt
 from news.views import home
 
 sitemaps = {
@@ -64,6 +64,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("", include("core.urls")),
     path("sitemap.xml", public_sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    path("news-sitemap.xml", news_sitemap, name="news_sitemap"),
     path("robots.txt", robots_txt, name="robots_txt"),
     # Kept at the project root (not under core/) so monitoring has a stable URL
     # that does not move if app routing changes.

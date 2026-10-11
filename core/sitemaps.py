@@ -34,6 +34,9 @@ class GallerySitemap(Sitemap):
     def items(self):
         return Gallery.objects.filter(active=True)
 
+    def lastmod(self, obj):
+        return obj.published_at
+
 
 class VideoSitemap(Sitemap):
     changefreq = "daily"
@@ -41,6 +44,9 @@ class VideoSitemap(Sitemap):
 
     def items(self):
         return Video.objects.filter(active=True)
+
+    def lastmod(self, obj):
+        return obj.published_at
 
 
 class WebStorySitemap(Sitemap):
@@ -50,6 +56,9 @@ class WebStorySitemap(Sitemap):
     def items(self):
         return WebStory.objects.filter(active=True)
 
+    def lastmod(self, obj):
+        return obj.published_at
+
 
 class LiveBlogSitemap(Sitemap):
     changefreq = "hourly"
@@ -57,6 +66,10 @@ class LiveBlogSitemap(Sitemap):
 
     def items(self):
         return LiveBlog.objects.filter(active=True)
+
+    def lastmod(self, obj):
+        latest_update = obj.updates.order_by("-timestamp").values_list("timestamp", flat=True).first()
+        return latest_update or obj.end_time or obj.start_time
 
 
 class StaticSitemap(Sitemap):
@@ -70,7 +83,6 @@ class StaticSitemap(Sitemap):
             "news:trending",
             "galleries:list",
             "videos:list",
-            "videos:shorts",
             "webstories:list",
             "liveblog:list",
             "core:epaper",

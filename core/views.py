@@ -5,6 +5,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -12,7 +14,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import connections
 from django.db.models import Max
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 from django.template.loader import render_to_string
@@ -20,6 +22,8 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+
+from news.models import Article
 
 from .forms import CareerApplicationForm, ContactForm, NewsletterForm
 from .models import EPaperEdition, JobOpening, NewsletterSubscriber, SiteSettings
@@ -548,6 +552,57 @@ def translate_text(request):
 
 def robots_txt(request):
     return render(request, "robots.txt", content_type="text/plain")
+
+
+def news_sitemap(request):
+    """Google News sitemap containing only eligible articles from the last 48 hours.
+
+    Published stories enter this feed automatically. Older stories remain in the
+    regular sitemap, while scheduled, draft and archived stories never leak into
+    either search feed.
+    """
+    sitemap_ns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    news_ns = "http://www.google.com/schemas/sitemap-news/0.9"
+    image_ns = "http://www.google.com/schemas/sitemap-image/1.1"
+    ET.register_namespace("", sitemap_ns)
+    ET.register_namespace("news", news_ns)
+    ET.register_namespace("image", image_ns)
+
+    publication_name = (
+        SiteSettings.objects.filter(pk=1).values_list("site_name", flat=True).first()
+        or "Desh Darpan Samvad"
+    )
+    cutoff = timezone.now() - timedelta(days=2)
+    articles = (
+        Article.objects.published()
+        .filter(published_at__gte=cutoff)
+        .select_related("category")
+        .order_by("-published_at")[:1000]
+    )
+
+    root = ET.Element(ET.QName(sitemap_ns, "urlset"))
+    site_root = settings.SITE_URL.rstrip("/") + "/"
+    for article in articles:
+        entry = ET.SubElement(root, ET.QName(sitemap_ns, "url"))
+        ET.SubElement(entry, ET.QName(sitemap_ns, "loc")).text = urllib.parse.urljoin(
+            site_root, article.get_absolute_url().lstrip("/")
+        )
+        news = ET.SubElement(entry, ET.QName(news_ns, "news"))
+        publication = ET.SubElement(news, ET.QName(news_ns, "publication"))
+        ET.SubElement(publication, ET.QName(news_ns, "name")).text = publication_name
+        ET.SubElement(publication, ET.QName(news_ns, "language")).text = "hi"
+        ET.SubElement(news, ET.QName(news_ns, "publication_date")).text = article.published_at.isoformat()
+        ET.SubElement(news, ET.QName(news_ns, "title")).text = article.title
+        if article.featured_image:
+            image = ET.SubElement(entry, ET.QName(image_ns, "image"))
+            ET.SubElement(image, ET.QName(image_ns, "loc")).text = urllib.parse.urljoin(
+                site_root, article.featured_image.url.lstrip("/")
+            )
+
+    xml = ET.tostring(root, encoding="utf-8", xml_declaration=True)
+    response = HttpResponse(xml, content_type="application/xml; charset=utf-8")
+    response["Cache-Control"] = "public, max-age=300"
+    return response
 
 
 @never_cache

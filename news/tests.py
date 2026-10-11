@@ -303,3 +303,16 @@ class ArticleShareMetadataTests(TestCase):
         content = response.content.decode()
         self.assertIn("articles/2026/09/story.jpg", content)
         self.assertIn('property="og:image" content="https://ddsamvad.com/media/', content)
+
+    def test_article_without_summary_gets_body_excerpt_meta_description(self):
+        self.article.summary = ""
+        self.article.meta_description = ""
+        self.article.body = "<p>यह खबर का वास्तविक विवरण है जो सर्च परिणाम में दिखाई देना चाहिए।</p>"
+        self.article.save()
+
+        content = self.client.get(self.article.get_absolute_url()).content.decode()
+
+        self.assertIn(
+            '<meta name="description" content="यह खबर का वास्तविक विवरण है जो सर्च परिणाम में दिखाई देना चाहिए।">',
+            content,
+        )

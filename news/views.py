@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
+from django.utils.text import Truncator
 from django.views.decorators.http import require_POST
 
 # Same escapes Django's json_script applies: prevents a "</script>" sequence in
@@ -92,18 +94,20 @@ def article_detail(request, pk, slug):
     share_image = article.featured_image or first_gallery_image
     featured_image_url = absolute_site_url(share_image.url) if share_image else ""
     canonical_url = article.canonical_url or absolute_site_url(article.get_absolute_url())
+    meta_description = article.meta_description or article.summary or Truncator(strip_tags(article.body)).chars(160)
     article_jsonld = {
         "@context": "https://schema.org",
         "@type": "NewsArticle",
         "headline": article.title,
-        "description": article.meta_description or article.summary,
+        "description": meta_description,
         "datePublished": article.published_at.isoformat(),
         "dateModified": article.updated_at.isoformat(),
         "author": {"@type": article.public_byline_schema_type, "name": article.public_byline_name},
         "publisher": {"@type": "Organization", "name": "Desh Darpan Samvad"},
         "mainEntityOfPage": canonical_url,
-        "image": featured_image_url,
     }
+    if featured_image_url:
+        article_jsonld["image"] = featured_image_url
     context = {
         "article": article,
         "canonical_url": canonical_url,
@@ -117,7 +121,7 @@ def article_detail(request, pk, slug):
         "latest_articles": Article.objects.optimized().published().exclude(pk=article.pk)[:6],
         "most_read": Article.objects.optimized().published().exclude(pk=article.pk).order_by("-views")[:6],
         "seo_title": article.seo_title or article.title,
-        "meta_description": article.meta_description or article.summary,
+        "meta_description": meta_description,
     }
     return render(request, "news/article_detail.html", context)
 

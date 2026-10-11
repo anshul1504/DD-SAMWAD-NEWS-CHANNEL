@@ -4,3 +4,4 @@ Disallow: /admin/
 Disallow: /accounts/
 Allow: /accounts/login/
 Sitemap: {{ site_url }}{% url 'django.contrib.sitemaps.views.sitemap' %}
+Sitemap: {{ site_url }}{% url 'news_sitemap' %}
