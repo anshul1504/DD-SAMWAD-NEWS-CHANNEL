@@ -46,6 +46,32 @@ class PublicNewsTests(TestCase):
         self.article.refresh_from_db()
         self.assertEqual(self.article.views, 1)
 
+    def test_public_article_url_is_short_ascii_and_copy_friendly(self):
+        self.article.title = "भारत की बड़ी खबर"
+        self.article.slug = "भारत-की-बड़ी-खबर"
+        self.article.save(update_fields=["title", "slug"])
+
+        self.assertEqual(
+            self.article.get_absolute_url(),
+            f"/news/{self.article.pk}/national-news/",
+        )
+        self.assertTrue(self.article.get_absolute_url().isascii())
+
+    def test_legacy_slug_permanently_redirects_to_clean_public_url(self):
+        legacy_url = reverse("news:legacy_article_detail", args=[self.article.slug])
+        response = self.client.get(legacy_url)
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], self.article.get_absolute_url())
+
+    def test_wrong_public_label_redirects_to_canonical_url(self):
+        response = self.client.get(
+            reverse("news:article_detail", args=[self.article.pk, "wrong-news"])
+        )
+
+        self.assertEqual(response.status_code, 301)
+        self.assertEqual(response["Location"], self.article.get_absolute_url())
+
     def test_draft_article_is_not_public(self):
         response = self.client.get(self.draft.get_absolute_url())
         self.assertEqual(response.status_code, 404)

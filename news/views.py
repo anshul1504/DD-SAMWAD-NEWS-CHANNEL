@@ -76,8 +76,10 @@ def home(request):
     return render(request, "home.html", context)
 
 
-def article_detail(request, slug):
-    article = get_object_or_404(Article.objects.optimized().published(), slug=slug)
+def article_detail(request, pk, slug):
+    article = get_object_or_404(Article.objects.optimized().published(), pk=pk)
+    if slug != article.public_url_slug:
+        return redirect(article.get_absolute_url(), permanent=True)
     viewed_key = f"viewed_article_{article.pk}"
     if not request.session.get(viewed_key):
         Article.objects.filter(pk=article.pk).update(views=F("views") + 1)
@@ -118,6 +120,12 @@ def article_detail(request, slug):
         "meta_description": article.meta_description or article.summary,
     }
     return render(request, "news/article_detail.html", context)
+
+
+def legacy_article_detail(request, slug):
+    """Keep every previously shared Unicode/legacy article URL working."""
+    article = get_object_or_404(Article.objects.published(), slug=slug)
+    return redirect(article.get_absolute_url(), permanent=True)
 
 
 def category_detail(request, slug):

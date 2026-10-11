@@ -170,7 +170,18 @@ class Article(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("news:article_detail", args=[self.slug])
+        return reverse("news:article_detail", args=[self.pk, self.public_url_slug])
+
+    @property
+    def public_url_slug(self):
+        """Return a short ASCII label for copy-friendly public news URLs.
+
+        The primary key is the stable article identifier, so this label can
+        stay deliberately short.  Existing Hindi slugs remain in the database
+        solely so historic links can be redirected without breaking.
+        """
+        category_slug = slugify(self.category.slug, allow_unicode=False)
+        return f"{category_slug or 'latest'}-news"
 
     @property
     def public_byline_name(self):

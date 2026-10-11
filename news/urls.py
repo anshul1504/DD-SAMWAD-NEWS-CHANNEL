@@ -10,6 +10,7 @@ urlpatterns = [
     path("search/", views.search, name="search"),
     path("category/<str:slug>/", views.category_detail, name="category"),
     path("tag/<str:slug>/", views.tag_detail, name="tag"),
-    path("news/<str:slug>/", views.article_detail, name="article_detail"),
+    path("news/<int:pk>/<slug:slug>/", views.article_detail, name="article_detail"),
+    path("news/<str:slug>/", views.legacy_article_detail, name="legacy_article_detail"),
     path("bookmark/<int:pk>/", views.bookmark_article, name="bookmark"),
 ]
