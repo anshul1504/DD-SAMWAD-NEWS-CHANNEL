@@ -74,8 +74,13 @@ def home(request):
             home_categories.append((cat, cat_articles))
         if len(home_categories) == 7:
             break
+    image_articles = articles.exclude(featured_image="")
+    hero_articles = image_articles.filter(is_homepage_hero=True)[:5] or image_articles[:5]
     context = {
-        "hero_articles": articles.filter(is_homepage_hero=True)[:5] or articles[:5],
+        # A hero without a real image creates an empty dark panel.  Text-only
+        # reports remain in Latest News, while this visual slot uses only a
+        # published article that actually has a newsroom image.
+        "hero_articles": hero_articles,
         "latest_articles": articles[:12],
         "trending_articles": Article.objects.optimized().trending()[:6],
         "top_stories": top_stories,
