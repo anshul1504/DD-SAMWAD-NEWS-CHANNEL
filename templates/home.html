@@ -150,23 +150,6 @@
     {% include "includes/ad_slot.html" with placement="home_middle" variant="leaderboard" %}
 
     <section class="news-panel home-reveal">
-      <div class="section-title"><div><span class="eyebrow">Watch</span><h2>Video, Shorts & Photo Gallery</h2></div></div>
-      <div class="media-showcase">
-        {% for video in videos|slice:":1" %}
-          <a class="media-card" href="{{ video.get_absolute_url }}">{% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ video.title }}" loading="lazy" decoding="async">{% endif %}<div><span class="live-pill"><i class="bi bi-play-fill"></i> Long Video</span><h3>{{ video.title }}</h3></div></a>
-        {% empty %}<div class="empty-state">Long videos available nahi hain.</div>{% endfor %}
-        {% for video in shorts|slice:":1" %}
-          <a class="media-card" href="{{ video.get_absolute_url }}">{% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ video.title }}" loading="lazy" decoding="async">{% endif %}<div><span class="live-pill"><i class="bi bi-phone"></i> Shorts</span><h3>{{ video.title }}</h3></div></a>
-        {% empty %}<div class="empty-state">Shorts available nahi hain.</div>{% endfor %}
-        {% for gallery in galleries|slice:":1" %}
-          <a class="media-card" href="{{ gallery.get_absolute_url }}">{% if gallery.cover_image %}<img src="{{ gallery.cover_image.url }}" alt="{{ gallery.title }}" loading="lazy" decoding="async">{% else %}<img src="{% static 'images/generated/news-hero-collage.png' %}" alt="{{ gallery.title }}" loading="lazy" decoding="async">{% endif %}<div><span class="live-pill"><i class="bi bi-images"></i> Gallery</span><h3>{{ gallery.title }}</h3></div></a>
-        {% empty %}<div class="empty-state">Photo gallery available nahi hai.</div>{% endfor %}
-      </div>
-    </section>
-
-    {% include "includes/ad_slot.html" with placement="home_video_bottom" variant="rectangle" %}
-
-    <section class="news-panel home-reveal">
       <div class="section-title"><div><span class="eyebrow">Swipe</span><h2>Web Stories</h2></div><a href="{% url 'webstories:list' %}">All Stories →</a></div>
       <div class="webstory-grid">
         {% for story in webstories|slice:":4" %}
