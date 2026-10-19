@@ -1,5 +1,8 @@
 from datetime import datetime, time, timedelta
+from html import escape
 from pathlib import Path
+import re
+import unicodedata
 
 import pymupdf
 from django.contrib.auth import get_user_model
@@ -64,6 +67,61 @@ STORIES = [
 ]
 
 
+# Text areas were measured against the source PDF, not against its rendered
+# thumbnail.  Keeping this map explicit prevents neighbouring stories in the
+# newspaper layout from being accidentally mixed into an article.
+FULL_TEXT_RECTS = [
+    (160, 380, 1048, 605), (640, 675, 1048, 970), (35, 795, 475, 975),
+    (35, 1072, 625, 1278), (645, 1235, 1048, 1600), (335, 1380, 625, 1605),
+    (36, 380, 536, 640), (550, 490, 920, 765), (36, 720, 280, 1085),
+    (295, 695, 535, 990), (35, 235, 1047, 470), (36, 865, 652, 1078),
+    (675, 480, 1047, 1385), (35, 1270, 535, 1590), (35, 280, 580, 590),
+    (36, 745, 570, 1215), (595, 735, 1047, 1218), (36, 1290, 805, 1605),
+    (35, 195, 1033, 1600), (36, 190, 410, 805), (425, 140, 802, 810),
+    (820, 140, 1047, 810), (35, 920, 608, 1605), (620, 870, 1047, 1605),
+    (38, 475, 522, 800), (545, 210, 785, 815), (801, 115, 1047, 815),
+    (36, 970, 400, 1590), (432, 825, 1034, 1590), (36, 110, 702, 710),
+    (328, 795, 1046, 1155), (291, 1205, 1046, 1570),
+]
+
+
+def clean_source_text(value):
+    """Repair the PDF's duplicated Indic glyph marks without rewriting copy."""
+    value = unicodedata.normalize("NFC", value).replace("\ufffd", "")
+    value = "".join(
+        char for char in value
+        if unicodedata.category(char) != "Cf" and not (0x0300 <= ord(char) <= 0x036F)
+    )
+    # The embedded newspaper font writes many Devanagari signs twice.  Only
+    # adjacent duplicates are removed; words and punctuation stay untouched.
+    value = re.sub(r"([\u0900-\u097F])\1+", r"\1", value)
+    value = re.sub(r"\s+", " ", value).strip()
+    value = value.replace("गहरा ाई", "गहराई").replace("दो- पांच", "दो-पांच")
+    return value
+
+
+def full_body(document, entry_index, entry):
+    rect = pymupdf.Rect(*FULL_TEXT_RECTS[entry_index])
+    text = clean_source_text(document[entry["page"] - 1].get_textbox(rect))
+    if len(text) < 120:
+        raise CommandError(f"Could not extract the complete source text for: {entry['title']}")
+    # Retain the newspaper wording, while adding sensible web paragraphs.  A
+    # paragraph never cuts a Hindi sentence midway merely to fit a layout.
+    chunks = []
+    while text:
+        if len(text) <= 900:
+            chunks.append(text)
+            break
+        cut = max(text.rfind("।", 550, 900), text.rfind(". ", 550, 900))
+        if cut < 550:
+            cut = text.rfind(" ", 550, 900)
+        if cut < 550:
+            cut = 900
+        chunks.append(text[:cut + 1].strip())
+        text = text[cut + 1:].strip()
+    return "".join(f"<p>{escape(chunk)}</p>" for chunk in chunks)
+
+
 class Command(BaseCommand):
     help = "Import Desh Darpan Samvad issue 06 (19 October 2026) with clean article images."
 
@@ -93,11 +151,7 @@ class Command(BaseCommand):
             category, _ = Category.objects.get_or_create(slug=entry["category"], defaults={"name": CATEGORIES[entry["category"]], "hindi_name": CATEGORIES[entry["category"]], "active": True})
             category.active = category.show_on_homepage = True
             category.save(update_fields=["active", "show_on_homepage"])
-            body = (
-                f"<p><strong>{entry['summary']}</strong></p>"
-                f"<p>{entry['title']} पर देश दर्पण संवाद के 19 अक्टूबर 2026 के मुद्रित अंक में विस्तृत रिपोर्ट प्रकाशित की गई है। उपलब्ध तथ्यों के आधार पर यह विषय पाठकों के लिए महत्वपूर्ण है।</p>"
-                f"<h2>मुख्य बिंदु</h2><p>{entry['summary']}</p>"
-            )
+            body = full_body(document, index, entry)
             article, _ = Article.objects.update_or_create(
                 title=entry["title"],
                 defaults={
