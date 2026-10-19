@@ -72,3 +72,8 @@ class NewsSitemapTests(TestCase):
         body = self.client.get(reverse("django.contrib.sitemaps.views.sitemap")).content.decode()
 
         self.assertNotIn("https://ddsamvad.com/shorts/", body)
+
+    def test_canonical_ignores_tracking_query_parameters(self):
+        response = self.client.get("/?utm_source=campaign")
+
+        self.assertEqual(response.context["canonical_url"], "https://ddsamvad.com/")

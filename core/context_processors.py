@@ -24,11 +24,11 @@ def _site_url(path="/"):
 
 
 def _canonical_url(request):
-    path = request.path
-    query = request.GET.urlencode()
-    if query:
-        path = f"{path}?{query}"
-    return _site_url(path)
+    # Filters, tracking parameters and pagination query strings are useful to
+    # visitors but are not separate editorial documents.  Keeping them out of
+    # the canonical prevents search engines from indexing duplicate versions
+    # of the same page (for example ?utm_source=... or ?page=2).
+    return _site_url(request.path)
 
 
 def _jsonld(data):

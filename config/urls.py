@@ -49,6 +49,10 @@ sitemaps = {
 def public_sitemap(request, *args, **kwargs):
     response = sitemap(request, *args, **kwargs)
     response.headers.pop("X-Robots-Tag", None)
+    # The queryset is evaluated per request, so newly published articles are
+    # automatically included.  A short cache window keeps crawler traffic
+    # efficient without leaving today's news stale for long.
+    response["Cache-Control"] = "public, max-age=300"
     return response
 
 
