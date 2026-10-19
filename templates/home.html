@@ -5,7 +5,8 @@
 
 <main class="home-page">
   <div class="dds-container home-stack">
-    <section class="story-lane home-reveal" aria-labelledby="storiesTitle">
+    {% comment %} Web Stories are intentionally not shown on the homepage. {% endcomment %}
+    {% comment %}<section class="story-lane home-reveal" aria-labelledby="storiesTitle">
       <div class="story-lane-title">
         <span class="eyebrow">{% if story_lane_is_recent %}24hr Stories{% else %}Top Stories{% endif %}</span>
         <strong id="storiesTitle">{% if story_lane_is_recent %}आज की तेज झलकियां{% else %}प्रमुख वेब स्टोरीज{% endif %}</strong>
@@ -24,9 +25,28 @@
         </div>
         <button class="story-carousel-btn next" type="button" data-story-next aria-label="Next stories"><i class="bi bi-chevron-right"></i></button>
       </div>
-    </section>
+    </section>{% endcomment %}
 
     {% include "includes/ad_slot.html" with placement="home_top" variant="leaderboard" %}
+
+    {% if shorts %}
+    <section class="news-panel video-shorts-section home-reveal" aria-labelledby="shortsHeading">
+      <div class="section-title"><div><span class="eyebrow">WATCH</span><h2 id="shortsHeading">नए शॉर्ट्स</h2></div><a href="{% url 'videos:shorts' %}">सभी शॉर्ट्स →</a></div>
+      <div class="story-carousel video-shorts-carousel" data-story-carousel>
+        <button class="story-carousel-btn prev" type="button" data-story-prev aria-label="Previous shorts"><i class="bi bi-chevron-left"></i></button>
+        <div class="story-lane-scroll" data-story-track>
+          {% for video in shorts|slice:":8" %}
+          <a class="video-shorts-card" href="{{ video.get_absolute_url }}" aria-label="{{ video.title }}">
+            {% if video.thumbnail %}<img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy" decoding="async" data-hide-on-error>{% else %}<span class="story-fallback"><i class="bi bi-play-btn"></i></span>{% endif %}
+            <span class="play-icon"><i class="bi bi-play-fill"></i></span><span class="video-shorts-badge"><i class="bi bi-phone"></i> Shorts</span>
+            <strong>{{ video.title }}</strong><span class="video-shorts-stats"><span><i class="bi bi-eye"></i>{{ video.views }}</span></span>
+          </a>
+          {% endfor %}
+        </div>
+        <button class="story-carousel-btn next" type="button" data-story-next aria-label="Next shorts"><i class="bi bi-chevron-right"></i></button>
+      </div>
+    </section>
+    {% endif %}
 
     <section class="hero-layout home-reveal">
       {% for article in hero_articles|slice:":1" %}
@@ -149,6 +169,7 @@
 
     {% include "includes/ad_slot.html" with placement="home_middle" variant="leaderboard" %}
 
+    {% if False %}
     <section class="news-panel home-reveal">
       <div class="section-title"><div><span class="eyebrow">Swipe</span><h2>Web Stories</h2></div><a href="{% url 'webstories:list' %}">All Stories →</a></div>
       <div class="webstory-grid">
@@ -158,6 +179,7 @@
       </div>
     </section>
 
+    {% endif %}
     <section class="two-col home-reveal">
       <section class="news-panel">
         <div class="section-title"><div><span class="eyebrow">Opinion</span><h2>Opinion / Editorial</h2></div></div>
